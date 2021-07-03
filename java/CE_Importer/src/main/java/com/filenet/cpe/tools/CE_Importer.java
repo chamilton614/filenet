@@ -40,8 +40,6 @@ import java.util.Iterator;
 import java.util.Vector;
 import javax.security.auth.Subject;
 
-import org.eclipse.osgi.framework.debug.Debug;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.text.DateFormat;

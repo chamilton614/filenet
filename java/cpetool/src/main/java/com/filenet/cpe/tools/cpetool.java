@@ -1,6 +1,6 @@
 package com.filenet.cpe.tools;
 
-//Import.
+//Import
 import com.filenet.api.constants.*;
 import com.filenet.api.core.*;
 import com.filenet.api.exception.*;
@@ -37,9 +37,11 @@ import java.io.PrintWriter;
 //import java.util.Properties;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 import javax.security.auth.Subject;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.text.DateFormat;
@@ -187,7 +189,7 @@ public class cpetool {
 		//Password for Connecting
 		static String password = "";
 		//P8Domain for Connecting
-		//static String p8Domain = "";
+		static String p8Domain = "";
 		//ObjectStore for Folders and Documents
 		static String objectstore = "";
 		//Use ObjectStore Folder or Folders File
@@ -214,11 +216,11 @@ public class cpetool {
 		static String filesPerBatchCount = "";
 		//Files per Batch Total
 		static String filesPerBatchTotal = "";
-		//Doc Class Default Name - ceimporter.docclass.default.name
+		//Doc Class Default Name - cpetool.docclass.default.name
 		static String docClassDefaultName = "";
-		//Use Doc Class Name from Properties File - ceimporter.docclass.name.from.properties.file
+		//Use Doc Class Name from Properties File - cpetool.docclass.name.from.properties.file
 		static String useDocClassNameFromPropsFile = "";
-		//Doc Class Name from Properties File position - ceimporter.docclass.name.by.properties.file.position
+		//Doc Class Name from Properties File position - cpetool.docclass.name.by.properties.file.position
 		static String docClassNameFromPropsFilePosition = "";
 		//Doc Class Properties Count
 		static String docClassPropCount = "";
@@ -228,9 +230,9 @@ public class cpetool {
 		static String docClassPropFile = "";
 		//Doc Class Properties Index File
 		static String docClassPropIndexFile = "";
-		//Doc Class Properties Index Values Rearrange - ceimporter.docclass.properties.index.values.rearrange
+		//Doc Class Properties Index Values Rearrange - cpetool.docclass.properties.index.values.rearrange
 		static String useDocClassPropIndexValuesRearrange = "";
-		//Doc Class Properties Index Values Rearrange Order - ceimporter.docclass.properties.index.values.rearrange.order
+		//Doc Class Properties Index Values Rearrange Order - cpetool.docclass.properties.index.values.rearrange.order
 		static String docClassPropIndexValuesRearrangeOrder = "";
 		//Store Batch_Name Property for Record Keeping
 		static String batchNameSave = "";
@@ -290,7 +292,7 @@ public class cpetool {
 			java.util.Properties properties= new java.util.Properties();
 			
 			//Reader for Properties file
-			BufferedReader propsFile = getReader("resources/cpetool.properties");
+			BufferedReader propsFile = getReader("src/main/resources/cpetool.properties");
 			
 	    	try {
 	    		//Load the propsFile object into properties
@@ -306,113 +308,113 @@ public class cpetool {
 	    	}
 		    	
 	    	//Connection Type EJB or WSI
-	    	ConfigInfo.connType = properties.getProperty("ceimporter.connection.type");
+	    	ConfigInfo.connType = properties.getProperty("cpetool.connection.type");
 
 	    	//URI
 	    	if (ConfigInfo.connType.equals("EJB")==true) //EJB Connection
 	    	{
-	    		ConfigInfo.uri = "iiop://" + properties.getProperty("ceimporter.server") + ":" + properties.getProperty("ceimporter.server.port") + "/FileNet/Engine";
+	    		ConfigInfo.uri = "iiop://" + properties.getProperty("cpetool.server") + ":" + properties.getProperty("cpetool.server.port") + "/FileNet/Engine";
 	    	}
 	    	else //WSI Connection
 	    	{
-	    		ConfigInfo.uri = "http://" + properties.getProperty("ceimporter.server") + ":" + properties.getProperty("ceimporter.server.port") + "/wsi/FNCEWS40MTOM/";
+	    		ConfigInfo.uri = "http://" + properties.getProperty("cpetool.server") + ":" + properties.getProperty("cpetool.server.port") + "/wsi/FNCEWS40MTOM/";
 	    	}
 
 	    	//P8Stanza for JAAS Connection
-	    	ConfigInfo.p8Stanza = properties.getProperty("ceimporter.stanza");
+	    	ConfigInfo.p8Stanza = properties.getProperty("cpetool.stanza");
 	    	//Username
-	    	ConfigInfo.username = properties.getProperty("ceimporter.username");
+	    	ConfigInfo.username = properties.getProperty("cpetool.username");
 	    	//Password
-	    	ConfigInfo.password = properties.getProperty("ceimporter.username.password");
+	    	ConfigInfo.password = properties.getProperty("cpetool.username.password");
 	    	//P8Domain
-	    	//p8Domain = properties.getProperty("ceimporter.p8domain");
+	    	ConfigInfo.p8Domain = properties.getProperty("cpetool.p8domain");
 	    	//Object Store
-	    	ConfigInfo.objectstore = properties.getProperty("ceimporter.objectstore");
+	    	ConfigInfo.objectstore = properties.getProperty("cpetool.objectstore");
 	    	//Use Object Store Folder or Folders File
-	    	ConfigInfo.useObjectStoreFolder = properties.getProperty("ceimporter.objectstore.usefolder");
+	    	ConfigInfo.useObjectStoreFolder = properties.getProperty("cpetool.objectstore.usefolder");
 	    	//Object Store Folder
-	    	ConfigInfo.osFolder = properties.getProperty("ceimporter.objectstore.folder");
+	    	ConfigInfo.osFolder = properties.getProperty("cpetool.objectstore.folder");
 	    	//ObjectStore Folders File
-	    	ConfigInfo.osFoldersFile = properties.getProperty("ceimporter.objectstore.folders.file");
+	    	ConfigInfo.osFoldersFile = properties.getProperty("cpetool.objectstore.folders.file");
 	    	//Import Path
-	    	ConfigInfo.importPath = properties.getProperty("ceimporter.import.batches.path");
+	    	ConfigInfo.importPath = properties.getProperty("cpetool.import.batches.path");
 	    	//Use Import Batches by File
-	    	ConfigInfo.useImportBatchesByFile = properties.getProperty("ceimporter.import.batches.by.file");
+	    	ConfigInfo.useImportBatchesByFile = properties.getProperty("cpetool.import.batches.by.file");
 	    	//Import File
-	    	ConfigInfo.importBatchesFile = properties.getProperty("ceimporter.import.batches.file");
+	    	ConfigInfo.importBatchesFile = properties.getProperty("cpetool.import.batches.file");
 	    	//Batches Per Connection
-			ConfigInfo.batchesPerConnection = properties.getProperty("ceimporter.import.batches.per.connection");
+			ConfigInfo.batchesPerConnection = properties.getProperty("cpetool.import.batches.per.connection");
 	    	//Batch Name Prefix
-			ConfigInfo.batchNamePrefix = properties.getProperty("ceimporter.import.batches.name.prefix");
+			ConfigInfo.batchNamePrefix = properties.getProperty("cpetool.import.batches.name.prefix");
 			//Batches Start Number
-			ConfigInfo.batchesStartNumber = properties.getProperty("ceimporter.import.batches.start.number");
+			ConfigInfo.batchesStartNumber = properties.getProperty("cpetool.import.batches.start.number");
 			//Batches Count
-			ConfigInfo.batchesCount = properties.getProperty("ceimporter.import.batches.count");
+			ConfigInfo.batchesCount = properties.getProperty("cpetool.import.batches.count");
 			//Files per Batch Count
-			ConfigInfo.filesPerBatchCount = properties.getProperty("ceimporter.import.batches.files.per.batch.count");
+			ConfigInfo.filesPerBatchCount = properties.getProperty("cpetool.import.batches.files.per.batch.count");
 			//Files per Batch Total
-			ConfigInfo.filesPerBatchTotal = properties.getProperty("ceimporter.import.batches.files.per.batch.total");
-			//Doc Class Default Name - ceimporter.docclass.default.name
-			ConfigInfo.docClassDefaultName = properties.getProperty("ceimporter.docclass.default.name");
-			//Use Doc Class Name from Properties File - ceimporter.docclass.name.from.properties.file
-			ConfigInfo.useDocClassNameFromPropsFile = properties.getProperty("ceimporter.docclass.name.from.properties.file");
-			//Doc Class Name from Properties File position - ceimporter.docclass.name.by.properties.file.position
-			ConfigInfo.docClassNameFromPropsFilePosition = properties.getProperty("ceimporter.docclass.name.by.properties.file.position");
+			ConfigInfo.filesPerBatchTotal = properties.getProperty("cpetool.import.batches.files.per.batch.total");
+			//Doc Class Default Name - cpetool.docclass.default.name
+			ConfigInfo.docClassDefaultName = properties.getProperty("cpetool.docclass.default.name");
+			//Use Doc Class Name from Properties File - cpetool.docclass.name.from.properties.file
+			ConfigInfo.useDocClassNameFromPropsFile = properties.getProperty("cpetool.docclass.name.from.properties.file");
+			//Doc Class Name from Properties File position - cpetool.docclass.name.by.properties.file.position
+			ConfigInfo.docClassNameFromPropsFilePosition = properties.getProperty("cpetool.docclass.name.by.properties.file.position");
 			//Doc Class Properties Count
-			ConfigInfo.docClassPropCount = properties.getProperty("ceimporter.docclass.properties.count");
+			ConfigInfo.docClassPropCount = properties.getProperty("cpetool.docclass.properties.count");
 			//Doc Class Properties Skip Count
-			ConfigInfo.docClassPropSkipCount = properties.getProperty("ceimporter.docclass.properties.skip.count");
+			ConfigInfo.docClassPropSkipCount = properties.getProperty("cpetool.docclass.properties.skip.count");
 			//Doc Class Properties File
-			ConfigInfo.docClassPropFile = properties.getProperty("ceimporter.docclass.properties.file");
+			ConfigInfo.docClassPropFile = properties.getProperty("cpetool.docclass.properties.file");
 			//Doc Class Properties Index File
-			ConfigInfo.docClassPropIndexFile = properties.getProperty("ceimporter.docclass.properties.index.file");
-			//Doc Class Properties Index Values Rearrange - ceimporter.docclass.properties.index.values.rearrange
-			ConfigInfo.useDocClassPropIndexValuesRearrange = properties.getProperty("ceimporter.docclass.properties.index.values.rearrange");
-			//Doc Class Properties Index Values Rearrange Order - ceimporter.docclass.properties.index.values.rearrange.order
-			ConfigInfo.docClassPropIndexValuesRearrangeOrder = properties.getProperty("ceimporter.docclass.properties.index.values.rearrange.order");
+			ConfigInfo.docClassPropIndexFile = properties.getProperty("cpetool.docclass.properties.index.file");
+			//Doc Class Properties Index Values Rearrange - cpetool.docclass.properties.index.values.rearrange
+			ConfigInfo.useDocClassPropIndexValuesRearrange = properties.getProperty("cpetool.docclass.properties.index.values.rearrange");
+			//Doc Class Properties Index Values Rearrange Order - cpetool.docclass.properties.index.values.rearrange.order
+			ConfigInfo.docClassPropIndexValuesRearrangeOrder = properties.getProperty("cpetool.docclass.properties.index.values.rearrange.order");
 			//Store Batch_Name Property for Record Keeping
-			ConfigInfo.batchNameSave = properties.getProperty("ceimporter.docclass.property.batchname.save");
+			ConfigInfo.batchNameSave = properties.getProperty("cpetool.docclass.property.batchname.save");
 			//CE Importer Log File
-			ConfigInfo.CEImportLog = properties.getProperty("ceimporter.log.file");
+			ConfigInfo.CEImportLog = properties.getProperty("cpetool.log.file");
 			//Doc Property Folder Naming
-			//ceimporter.objectstore.folder.naming.by.property
-			ConfigInfo.useFolderNamingByDocProperty = properties.getProperty("ceimporter.objectstore.folder.naming.by.docproperty");
-			//ceimporter.objectstore.folder.naming.by.property.count
-			ConfigInfo.folderNamingByDocPropertyCount = properties.getProperty("ceimporter.objectstore.folder.naming.by.docproperty.count");
-			//ceimporter.docclass.properties.folder.naming
-			ConfigInfo.docClassPropsFolderNaming = properties.getProperty("ceimporter.docclass.properties.folder.naming");
+			//cpetool.objectstore.folder.naming.by.property
+			ConfigInfo.useFolderNamingByDocProperty = properties.getProperty("cpetool.objectstore.folder.naming.by.docproperty");
+			//cpetool.objectstore.folder.naming.by.property.count
+			ConfigInfo.folderNamingByDocPropertyCount = properties.getProperty("cpetool.objectstore.folder.naming.by.docproperty.count");
+			//cpetool.docclass.properties.folder.naming
+			ConfigInfo.docClassPropsFolderNaming = properties.getProperty("cpetool.docclass.properties.folder.naming");
 			//Use Folder Naming by Doc Property by Julian Date
-			ConfigInfo.useFolderNamingByDocPropertyByJulianDate = properties.getProperty("ceimporter.docclass.properties.folder.naming.julian");
+			ConfigInfo.useFolderNamingByDocPropertyByJulianDate = properties.getProperty("cpetool.docclass.properties.folder.naming.julian");
 			//Doc Class Property for Folder Naming by Julian Date
-			ConfigInfo.docClassPropFolderNamingByJulianDate = properties.getProperty("ceimporter.docclass.properties.folder.naming.julian.property");
+			ConfigInfo.docClassPropFolderNamingByJulianDate = properties.getProperty("cpetool.docclass.properties.folder.naming.julian.property");
 			//Doc Class Property for Folder Naming Split
-			ConfigInfo.useFolderNamingByDocPropertySplit = properties.getProperty("ceimporter.docclass.properties.folder.naming.split");
+			ConfigInfo.useFolderNamingByDocPropertySplit = properties.getProperty("cpetool.docclass.properties.folder.naming.split");
 			//Doc Class Property for Folder Naming Split Types
-			ConfigInfo.folderNamingByDocPropertySplitTypes = properties.getProperty("ceimporter.docclass.properties.folder.naming.split.types");
+			ConfigInfo.folderNamingByDocPropertySplitTypes = properties.getProperty("cpetool.docclass.properties.folder.naming.split.types");
 			//Used to turn ON or OFF Debugging Log
-			ConfigInfo.useDebugLog = properties.getProperty("ceimporter.import.debugging");
+			ConfigInfo.useDebugLog = properties.getProperty("cpetool.debugging");
 			//Debug Log
-			ConfigInfo.debugLog = properties.getProperty("ceimporter.import.debug.log.file");
+			ConfigInfo.debugLog = properties.getProperty("cpetool.import.debug.log.file");
 			//Delete Docs by Doc List
-			ConfigInfo.deleteDocsByList = properties.getProperty("ceimporter.delete.docs.by.list");
+			ConfigInfo.deleteDocsByList = properties.getProperty("cpetool.delete.docs.by.list");
 			//Delete Docs by Doc List File
-			ConfigInfo.deleteDocsByListFile = properties.getProperty("ceimporter.delete.docs.by.list.file");
+			ConfigInfo.deleteDocsByListFile = properties.getProperty("cpetool.delete.docs.by.list.file");
 			//Delete Folders
-			ConfigInfo.deleteFolders = properties.getProperty("ceimporter.delete.folders");
+			ConfigInfo.deleteFolders = properties.getProperty("cpetool.delete.folders");
 			//Catalog Docs in a Folder Structure
-			ConfigInfo.catalogDocsInFolders = properties.getProperty("ceimporter.catalog.docs.in.folders");
+			ConfigInfo.catalogDocsInFolders = properties.getProperty("cpetool.catalog.docs.in.folders");
 			//Delete Pending Docs
-			ConfigInfo.deletePendingDocs = properties.getProperty("ceimporter.delete.pending.docs");
+			ConfigInfo.deletePendingDocs = properties.getProperty("cpetool.delete.pending.docs");
 			//Process Batches - main application
-			ConfigInfo.processBatches = properties.getProperty("ceimporter.process.batches");
+			ConfigInfo.processBatches = properties.getProperty("cpetool.process.batches");
 			//Use Update Doc Security - default value is 1. Use 0 to turn Off
-			ConfigInfo.useUpdateDocSecurity = properties.getProperty("ceimporter.update.doc.security");
+			ConfigInfo.useUpdateDocSecurity = properties.getProperty("cpetool.update.doc.security");
 			//Update Doc Security Option - Add or Remove
-			ConfigInfo.updateDocSecurityPerms = properties.getProperty("ceimporter.update.doc.security.perms");
+			ConfigInfo.updateDocSecurityPerms = properties.getProperty("cpetool.update.doc.security.perms");
 			//Update Doc Security Principals to use for updating each Doc
-			ConfigInfo.updateDocSecurityPrincipals = properties.getProperty("ceimporter.update.doc.security.principals");
+			ConfigInfo.updateDocSecurityPrincipals = properties.getProperty("cpetool.update.doc.security.principals");
 			//Use Get Doc Security - default value is 1. Use 0 to turn Off
-			ConfigInfo.useGetDocSecurity = properties.getProperty("ceimporter.get.doc.security");
+			ConfigInfo.useGetDocSecurity = properties.getProperty("cpetool.get.doc.security");
 			
 			//Close Reader
 			propsFile.close();
@@ -556,7 +558,7 @@ public class cpetool {
 	    	
 			//Start the Import
 			System.out.println("================");
-			System.out.println("CE Importer");
+			System.out.println("CPE Tool");
 			System.out.println("================");
 			System.out.println(getDateTime());
 			
@@ -566,8 +568,9 @@ public class cpetool {
 	    	System.out.println("URI: " + ConfigInfo.uri);
 	    	System.out.println("P8Stanza: " + ConfigInfo.p8Stanza);
 			System.out.println("Username: " + ConfigInfo.username);
-			System.out.println("Password: " + ConfigInfo.password);
-			//System.out.println("P8Domain:				" + ConfigInfo.p8Domain);
+			//System.out.println("Password: " + ConfigInfo.password);
+			System.out.println("Password: <SECRET>");
+			System.out.println("P8Domain: " + ConfigInfo.p8Domain);
 			System.out.println("ObjectStore: " + ConfigInfo.objectstore);
 			System.out.println("Object Store Folder: " + ConfigInfo.osFolder);
 			System.out.println("Import Path: " + ConfigInfo.importPath);
@@ -612,49 +615,33 @@ public class cpetool {
 			Debugger.debug.println("Entered the run Method");
 		}*/
 		
-		int useDeleteFolders = Integer.parseInt(ConfigInfo.deleteFolders);
-		int useDeleteDocsByList = Integer.parseInt(ConfigInfo.deleteDocsByList);
-		int useCatalogDocsInFolders = Integer.parseInt(ConfigInfo.catalogDocsInFolders);
-		int useDeletePendingDocs = Integer.parseInt(ConfigInfo.deletePendingDocs);
-		int useProcessBatches = Integer.parseInt(ConfigInfo.processBatches);
-		int useImportBatchesByFile = Integer.parseInt(ConfigInfo.useImportBatchesByFile);
-		int useUpdateDocSecurity = Integer.parseInt(ConfigInfo.useUpdateDocSecurity);
-		int useGetDocSecurity = Integer.parseInt(ConfigInfo.useGetDocSecurity);
-		//P8 Domain
-		//Domain p8Dom = null;
+		int useDeleteFolders = 0;
+		//int useDeleteFolders = Integer.parseInt(ConfigInfo.deleteFolders);
 		
-		//P8 Object Store
-		//ObjectStore p8OS = null;
+		int useDeleteDocsByList = 0;
+		//int useDeleteDocsByList = Integer.parseInt(ConfigInfo.deleteDocsByList);
 		
-		//Folders
-		//String[] OSFolders = null;
+		int useCatalogDocsInFolders = 0;
+		//int useCatalogDocsInFolders = Integer.parseInt(ConfigInfo.catalogDocsInFolders);
 		
-		//Use Debug Log
-		//Check if Debugging is turned ON
-		/*if (Integer.parseInt(ConfigInfo.useDebugLog) >= 1)
-		{
-			//Initialize the Debug Log
-			Debugger.debug = null;
-			Debugger.debug = getDebugLog("Connection");
-		}*/
+		int useDeletePendingDocs = 0;
+		//int useDeletePendingDocs = Integer.parseInt(ConfigInfo.deletePendingDocs);
 		
-		//Get the P8 Domain
-		//p8Dom = getDomain(conn, null);
-		//setP8Domain(p8Dom);
+		int useProcessBatches = 0;
+		//int useProcessBatches = Integer.parseInt(ConfigInfo.processBatches);
 		
-		//Get the Object Store
-		//p8OS = getObjectStore(p8Dom, ConfigInfo.objectstore);
-		//setP8ObjectStore(p8OS);
+		int useImportBatchesByFile = 0;
+		//int useImportBatchesByFile = Integer.parseInt(ConfigInfo.useImportBatchesByFile);
 		
-		//Check if Debugging is turned OFF
-		/*if (Integer.parseInt(ConfigInfo.useDebugLog) >= 1)
-		{
-			//Close the Debug Log
-			Debugger.debug.close();
-			//Debugger.debug = null;
-		}*/
+		int useUpdateDocSecurity = 0;
+		//int useUpdateDocSecurity = Integer.parseInt(ConfigInfo.useUpdateDocSecurity);
 		
-		//System.out.println("Object store: " + p8ObjectStore.get_Name());
+		int useGetDocSecurity = 0;
+		//int useGetDocSecurity = Integer.parseInt(ConfigInfo.useGetDocSecurity);
+		
+		//Check CPE Connection
+		checkCPEConnection();
+		
 		
 		//Check if Delete Docs By List is Turned On
 		if (useDeleteDocsByList == 3695)
@@ -5199,7 +5186,164 @@ public class cpetool {
 			return "";
 		}
 	}
+
+	public static void checkCPEConnection() {
 		
+		try {
+
+			if (Integer.parseInt(ConfigInfo.useDebugLog) >= 1)
+			{
+				Debugger.debug.println("====================================");
+				Debugger.debug.println("Entered checkCPEConnection Method");
+			}
+
+			//CE Connection
+			Connection p8Connection = null;
+
+			//Get the Connection
+			p8Connection = CEConnection(ConfigInfo.username, ConfigInfo.password, ConfigInfo.p8Stanza, ConfigInfo.uri);
+
+			if (p8Connection != null)
+			{
+				System.out.println("=============================================================");
+				System.out.println(getDateTime() + " checkCPEConnection");
+				System.out.println(getDateTime() + " Connection to Content Engine successful");
+
+				//Get the P8 Domain
+				p8Dom = getDomain(p8Connection, null);
+				if (p8Dom != null)
+				{
+					System.out.println(getDateTime() + " Connection to the Domain successful");
+
+					//Get the Object Store
+					p8OS = getObjectStore(p8Dom, ConfigInfo.objectstore);
+					if (p8OS != null)
+					{
+						System.out.println(getDateTime() + " Connection to the Object Store successful");
+						System.out.println("=============================================================");							
+					}
+				}
+			}
+
+			//Release the Connection
+			p8Connection = null;
+			p8Dom = null;
+			p8OS = null;
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	public static List<String> getChoiceListValues(String choiceListName) {
+		
+		List<String> choiceListResults = new ArrayList<String>();
+		
+		try {
+			
+			if (Integer.parseInt(ConfigInfo.useDebugLog) >= 1)
+			{
+				Debugger.debug.println("====================================");
+				Debugger.debug.println("Entered deletePendingDocuments Method");
+				//Debugger.debug.println("Object Store: " + p8ObjectStore.get_DisplayName());
+			}
+
+			//CE Connection
+			Connection p8Connection = null;
+
+			//Get the Connection
+			p8Connection = CEConnection(ConfigInfo.username, ConfigInfo.password, ConfigInfo.p8Stanza, ConfigInfo.uri);
+
+			if (p8Connection != null)
+			{
+				System.out.println("=============================================================");
+				System.out.println(getDateTime() + " deletePendingDocuments");
+				System.out.println(getDateTime() + " Connection to Content Engine successful");
+				
+				//Get the P8 Domain
+				p8Dom = getDomain(p8Connection, null);
+				if (p8Dom != null)
+				{
+					System.out.println(getDateTime() + " Connection to the Domain successful");
+
+					//Get the Object Store
+					p8OS = getObjectStore(p8Dom, ConfigInfo.objectstore);
+					if (p8OS != null)
+					{
+						System.out.println(getDateTime() + " Connection to the Object Store successful");
+						System.out.println("=============================================================");
+						
+						//SearchScope
+						SearchScope searchScope = new SearchScope(p8OS);
+						//SearchSQL
+						SearchSQL searchSQL = new SearchSQL();
+						//Build the SQL Statement
+						String sql = "select d.this from Document d " + "where VersionStatus = 3";
+						//Set Max Records to Process to 500
+						//searchSQL.setMaxRecords(500);
+						//Set the SQL query
+						searchSQL.setQueryString(sql);
+						//Independent Object Set
+						IndependentObjectSet objectSet = searchScope.fetchObjects(searchSQL, null, null, null);
+						int i = 0;
+						Iterator iter = objectSet.iterator();
+						int docsToDeletePerBatch = 2000;
+						while (iter.hasNext() == true)
+						{
+							UpdatingBatch updatingBatch = UpdatingBatch.createUpdatingBatchInstance(p8Dom, RefreshMode.NO_REFRESH);
+							boolean executeBatch = false;
+
+							for (int x = 0; x < docsToDeletePerBatch; x++)
+							{
+								Document document = (Document) iter.next();
+								document.refresh();
+								if (document.get_VersionStatus() == VersionStatus.RESERVATION)
+								{
+									document.setUpdateSequenceNumber(null);
+									document.delete();
+									updatingBatch.add(document, null);
+									executeBatch = true;
+									i++;
+								}
+								if (!iter.hasNext())
+								{
+									break;
+								}
+							}
+							if (executeBatch)
+							{
+								updatingBatch.updateBatch();
+							}
+							System.out.println(getDateTime() + " Number of documents deleted: " + i);
+							if (Integer.parseInt(ConfigInfo.useDebugLog) >= 1)
+							{
+								Debugger.debug.println(getDateTime() + " Number of documents deleted: " + i);
+							}
+						}							
+					}
+				}
+			}
+			
+			//Release the Connection
+			p8Connection = null;
+			p8Dom = null;
+			p8OS = null;
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+				
+		return choiceListResults;
+	}
+	
+	
+	/**
+	 * PRIVATE METHODS
+	 * 
+	 */
+	
 	private static FileInputStream openLocalFile(String name)
 	{
 		try
