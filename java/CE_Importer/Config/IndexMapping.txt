@@ -1,0 +1,6 @@
+--BWF1 Object Store
+Old GUID,Document Class,Folder,Filename,Create Date,Size,Mime Type,Document Title,Agency Center,Project Name,Project ID,Document Type,Subsystem,Screen Name,Screen Topic
+   0          1            2      3          4        5      6           7              8             9           10          11          12         13          14
+--IMG1 Object Store
+Old GUID,Document Class,Folder,Filename,Create Date,Size,Mime Type,Document Title,Document Name,Document Type,ICN,Book Of Business,Book Of Business,Invoice Number,Manufacturer,Manufacturer,ICN,Sequence Number
+   0          1            2      3          4        5      6           7              8             9        10        11               12              13            14          15        16        17

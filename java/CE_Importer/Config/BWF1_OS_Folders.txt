@@ -1,0 +1,13 @@
+/RI_DHS_Projects
+/RI_DHS_Projects/COBA
+/RI_DHS_Projects/DHS_DCYF_FS_for_Childrens_Behaviorial
+/RI_DHS_Projects/National_Board_of_Pharmacy_Number_Maintenance-TPBP
+/RI_DHS_Projects/NPI_Implementation
+/RI_DHS_Projects/NPI_Implementation/Artifacts
+/RI_DHS_Projects/NPI_Implementation/Sign-Offs
+/RI_DHS_Projects/NPI_Implementation/Test_Plans
+/RI_DHS_Projects/NPI_Implementation/User_Acceptance
+/RI_DHS_Projects/PERM
+/RI_DHS_Projects/Qualidigm
+/RI_DHS_Projects/Respite_Home_and_Community_Based_Waiver_Programs
+/RI_PB_Screen_Component_Files

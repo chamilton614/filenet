@@ -1,0 +1,15 @@
+Old_GUID
+Doc_Class
+Folder
+Filename
+Create_Date
+Content_Size
+Mime_Type
+DocumentTitle
+Agency_Center
+Project_Name
+Project_ID
+Document_Type
+Subsystem1
+Screen_Name
+Screen_Topic
