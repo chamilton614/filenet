@@ -1,4 +1,4 @@
-package p8.ce.importer;
+package com.filenet.cpe.tools;
 
 //Import.
 import com.filenet.api.constants.*;
@@ -40,15 +40,13 @@ import java.util.Iterator;
 import java.util.Vector;
 import javax.security.auth.Subject;
 
-import org.eclipse.osgi.framework.debug.Debug;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
 
-public class CE_Importer {
+public class cpetool {
 
 	/**
 	 * @param args
@@ -288,11 +286,11 @@ public class CE_Importer {
 	{
 		try
 		{
-			//CE_Importer Properties Object
+			//cpetool Properties Object
 			java.util.Properties properties= new java.util.Properties();
 			
 			//Reader for Properties file
-			BufferedReader propsFile = getReader("CE_Importer.properties");
+			BufferedReader propsFile = getReader("resources/cpetool.properties");
 			
 	    	try {
 	    		//Load the propsFile object into properties
@@ -491,7 +489,7 @@ public class CE_Importer {
 		return debug1;
 	}
 	
-	public CE_Importer()
+	public cpetool()
 	{
 		/*this.folderNamingPath = "";
 		this.DocContainerName = "";
@@ -519,8 +517,8 @@ public class CE_Importer {
 	
 	public static void main(String[] args)
 	{
-	    //Create an instance of CE_Importer
-		CE_Importer ceimport = new CE_Importer();
+	    //Create an instance of cpetool
+		cpetool ceimport = new cpetool();
 		
 		//Batches Per Connection
 		//int batchesPerConnectionCount = Integer.parseInt(ConfigInfo.batchesPerConnection);
@@ -541,8 +539,8 @@ public class CE_Importer {
 	    {
 	       	//Set System Properties
 	    	//System.setProperty("java.naming.factory.initial","com.ibm.websphere.naming.WsnInitialContextFactory"); 
-	    	//System.setProperty("com.ibm.CORBA.ConfigURL","C:\\Files\\CE_Importer\\Config\\sas.client.props"); 
-	    	//System.setProperty("java.security.auth.login.config","C:\\Files\\CE_Importer\\Config\\jaas.conf.WebSphere"); 
+	    	//System.setProperty("com.ibm.CORBA.ConfigURL","C:\\Files\\cpetool\\Config\\sas.client.props"); 
+	    	//System.setProperty("java.security.auth.login.config","C:\\Files\\cpetool\\Config\\jaas.conf.WebSphere"); 
 	    	
 	    	//Check to see if the Object Store Folder was populated in the properties file
 	    	//if (ConfigInfo.osFolder.equals("")==true)
@@ -590,11 +588,11 @@ public class CE_Importer {
 					//Debugger.debug = null;
 				}
 				
-				//Start the CE_Importer
+				//Start the cpetool
 				ceimport.run(p8Connection);
 			}*/	
 			
-			//Start the CE_Importer
+			//Start the cpetool
 		    //ceimport.run(p8Connection);
 		    ceimport.run();
 	    }
