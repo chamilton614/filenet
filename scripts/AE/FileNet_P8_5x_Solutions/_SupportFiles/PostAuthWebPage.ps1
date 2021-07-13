@@ -1,0 +1,65 @@
+param(
+	[Parameter(Mandatory=$True)][string]$username,
+	[Parameter(Mandatory=$True)][string]$password,
+	[Parameter(Mandatory=$True)] [string]$WebSiteUrl
+)
+
+# Build an extended CSharp WebClient class and expose the timeout setting
+$Source = @"
+	using System.Net;
+ 
+	public class ExtendedWebClient : WebClient {
+		public int Timeout;
+ 
+		protected override WebRequest GetWebRequest(System.Uri address) {
+			WebRequest request = base.GetWebRequest(address);
+			if (request != null) {
+				request.Timeout = Timeout;
+			}
+			return request;
+		}
+ 
+		public ExtendedWebClient() {
+			Timeout = 100000; // the standard HTTP Request Timeout default
+		}
+	}
+"@;
+
+#Add the above WebClient class to this script
+Add-Type -TypeDefinition $Source -Language CSharp  
+
+#Create the Basic Authentication Header
+$auth = 'Basic ' + [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($username+":"+$password ))
+
+#Define the Web Client
+$web = New-Object ExtendedWebClient
+
+#3 minute time out
+$web.Timeout = 180000
+#Add the Content Type Header
+$web.Headers.Add('Content-Type', 'application/xml')
+#Add the Accept Type Header
+$web.Headers.Add('Accept', 'application/xml')
+#Add the Basic Authentication Header
+$web.Headers.Add('Authorization', $auth )
+
+#Ignore any SSL trust issues
+[Net.ServicePointManager]::ServerCertificateValidationCallback = {$true} 
+
+$result = ""
+"Getting website " + $WebSiteURL + " started ... Elapsed Time: "
+$sw = [Diagnostics.Stopwatch]::StartNew()
+try {
+	$result = $web.DownloadString($WebSiteURL)
+	$sw.stop()
+	$sw.Elapsed
+	if ($result.tolower().contains('successful')) {
+		exit 0
+	} else {
+		$result
+		exit 2
+	}
+} catch {
+	$error[0].Exception
+	exit 1
+}
