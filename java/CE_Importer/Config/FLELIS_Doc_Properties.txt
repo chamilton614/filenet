@@ -1,5 +1,0 @@
-Chad_OldDocID
-Doc_Class
-Chad_CreateDate
-Chad_DocType
-Chad_ICN
