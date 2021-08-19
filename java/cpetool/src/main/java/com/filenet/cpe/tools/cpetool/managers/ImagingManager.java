@@ -8392,8 +8392,8 @@ public class ImagingManager {
 //		return dirCopied;
 //	}
 //	
-//	private boolean deleteFile(File resource, WIISCLog wiiscLog) throws IOException
-//	{
+	private void deleteFile(File resource) throws IOException
+	{
 //		if (resource.isDirectory())
 //		{
 //			File[] childFiles = resource.listFiles();
@@ -8403,7 +8403,14 @@ public class ImagingManager {
 //			}
 //		}
 //		return resource.delete();
-//	}
+	}
+	
+	private String getDateTime()
+	{
+		DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd-HHmmssSSS");
+	    Date date = new Date();
+	    return dateFormat.format(date);
+	}
 
 }
 

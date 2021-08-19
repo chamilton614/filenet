@@ -1,5 +1,7 @@
 package com.filenet.cpe.tools.cpetool.configuration;
 
+import java.util.List;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -7,6 +9,12 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "app")
 public class AppConfiguration {
 
+	//Global
+	private String RootDirectory;
+	private String ConfigFileDirectory;
+	private String LogFileDirectory;
+	private String TempFileDir;
+	
 	//CPE
 	private String cpeServerName;
 	private String cpeConnectionURI;
@@ -15,10 +23,47 @@ public class AppConfiguration {
 	private String stanzaName;
 	private String cpeUsername;
 	private String cpePassword;
+	
+	//Workflow
 	private String peConnectionPoint;
 	private String peWorkflowRegion;
+	private String workflowSearchLimit;
+	private String enableWorkflowOutput;
+	private String workflowOutputPath;
+	private String workflowSearchUserField;
+	private String workflowDBSearchEnabled;
+	private String workflowDBServerName;
+	private String workflowDBServerPort;
+	private String workflowDBName;
+	private String workflowDBUser;
+	private String workflowDBUserPassword;
+	private List<String> workflowDataFields;
 	
 	
+	public String getRootDirectory() {
+		return RootDirectory;
+	}
+	public void setRootDirectory(String rootDirectory) {
+		RootDirectory = rootDirectory;
+	}
+	public String getConfigFileDirectory() {
+		return ConfigFileDirectory;
+	}
+	public void setConfigFileDirectory(String configFileDirectory) {
+		ConfigFileDirectory = configFileDirectory;
+	}
+	public String getLogFileDirectory() {
+		return LogFileDirectory;
+	}
+	public void setLogFileDirectory(String logFileDirectory) {
+		LogFileDirectory = logFileDirectory;
+	}
+	public String getTempFileDir() {
+		return TempFileDir;
+	}
+	public void setTempFileDir(String tempFileDir) {
+		TempFileDir = tempFileDir;
+	}
 	public String getCpeServerName() {
 		return cpeServerName;
 	}
@@ -73,7 +118,72 @@ public class AppConfiguration {
 	public void setPeWorkflowRegion(String peWorkflowRegion) {
 		this.peWorkflowRegion = peWorkflowRegion;
 	}
-	
-	
+	public String getWorkflowSearchLimit() {
+		return workflowSearchLimit;
+	}
+	public void setWorkflowSearchLimit(String workflowSearchLimit) {
+		this.workflowSearchLimit = workflowSearchLimit;
+	}
+	public String getEnableWorkflowOutput() {
+		return enableWorkflowOutput;
+	}
+	public void setEnableWorkflowOutput(String enableWorkflowOutput) {
+		this.enableWorkflowOutput = enableWorkflowOutput;
+	}
+	public String getWorkflowOutputPath() {
+		return workflowOutputPath;
+	}
+	public void setWorkflowOutputPath(String workflowOutputPath) {
+		this.workflowOutputPath = workflowOutputPath;
+	}
+	public String getWorkflowSearchUserField() {
+		return workflowSearchUserField;
+	}
+	public void setWorkflowSearchUserField(String workflowSearchUserField) {
+		this.workflowSearchUserField = workflowSearchUserField;
+	}
+	public String getWorkflowDBSearchEnabled() {
+		return workflowDBSearchEnabled;
+	}
+	public void setWorkflowDBSearchEnabled(String workflowDBSearchEnabled) {
+		this.workflowDBSearchEnabled = workflowDBSearchEnabled;
+	}
+	public String getWorkflowDBServerName() {
+		return workflowDBServerName;
+	}
+	public void setWorkflowDBServerName(String workflowDBServerName) {
+		this.workflowDBServerName = workflowDBServerName;
+	}
+	public String getWorkflowDBServerPort() {
+		return workflowDBServerPort;
+	}
+	public void setWorkflowDBServerPort(String workflowDBServerPort) {
+		this.workflowDBServerPort = workflowDBServerPort;
+	}
+	public String getWorkflowDBName() {
+		return workflowDBName;
+	}
+	public void setWorkflowDBName(String workflowDBName) {
+		this.workflowDBName = workflowDBName;
+	}
+	public String getWorkflowDBUser() {
+		return workflowDBUser;
+	}
+	public void setWorkflowDBUser(String workflowDBUser) {
+		this.workflowDBUser = workflowDBUser;
+	}
+	public String getWorkflowDBUserPassword() {
+		return workflowDBUserPassword;
+	}
+	public void setWorkflowDBUserPassword(String workflowDBUserPassword) {
+		this.workflowDBUserPassword = workflowDBUserPassword;
+	}
+	public List<String> getWorkflowDataFields() {
+		return workflowDataFields;
+	}
+	public void setWorkflowDataFields(List<String> workflowDataFields) {
+		this.workflowDataFields = workflowDataFields;
+	}
+		
 	
 }

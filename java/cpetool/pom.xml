@@ -15,6 +15,7 @@
 	<description>FileNet CPE Tool for Imaging and Workflow</description>
 	<properties>
 		<java.version>1.8</java.version>
+		<basedir>/home/chamilton/development/FileNet-P8-Jars/5.2.1.2</basedir>
 	</properties>
 	<dependencies>
 		<!-- <dependency>
@@ -37,6 +38,13 @@
 			<artifactId>mssql-jdbc</artifactId>
 			<scope>runtime</scope>
 		</dependency> -->
+		<!-- https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc -->
+		<dependency>
+			<groupId>com.microsoft.sqlserver</groupId>
+			<artifactId>mssql-jdbc</artifactId>
+			<version>9.4.0.jre8</version>
+		</dependency>
+		
 		<!-- <dependency>
 			<groupId>com.oracle.database.jdbc</groupId>
 			<artifactId>ojdbc8</artifactId>
@@ -52,6 +60,8 @@
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
+		
+		
 	</dependencies>
 
 	<build>
@@ -59,6 +69,9 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<includeSystemScope>true</includeSystemScope>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

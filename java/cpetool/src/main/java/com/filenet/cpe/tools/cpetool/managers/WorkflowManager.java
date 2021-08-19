@@ -16,19 +16,24 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 
 import com.filenet.cpe.tools.cpetool.configuration.AppConfiguration;
+import com.filenet.cpe.tools.cpetool.model.FnBase;
+import com.filenet.cpe.tools.cpetool.model.FnWorkflow;
+import com.filenet.cpe.tools.cpetool.model.FnWorkflowList;
+import com.filenet.cpe.tools.cpetool.model.FnWorkflowProperty;
+import com.filenet.cpe.tools.cpetool.model.FnWorkflowPropertyList;
 
 //import org.apache.commons.codec.binary.Base64;
 
-import com.filenet.wcm.api.ObjectFactory;
-import com.filenet.wcm.api.Session;
+import com.microsoft.sqlserver.jdbc.SQLServerConnection;
+import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -172,15 +177,15 @@ public class WorkflowManager {
 	
 	
 	//Export the Workflow Configuration XML
-//	public FnWorkflow exportConfigXML(WIISCLog wiiscLog)
-//	{
+	public void exportConfigXML()
+	{
 //		FnWorkflow fnWorkflow = new FnWorkflow();
 //		//Get a VWSession Object
 //		VWSession vwSession = new VWSession();
 //		
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> exportConfigXML()");
+//			log.info("Entered WorkflowManager -> exportConfigXML()");
 //
 //			//Login to the Workflow Server
 //			vwSession = loginWorkflow(wiiscLog);
@@ -223,38 +228,38 @@ public class WorkflowManager {
 //					sysConfig = null;
 //					
 //					//System.out.println("Imported Workflow Config XML Successfully with Merge Option");
-//					wiiscLog.log(wiiscLog.INFO, "Exported Workflow Config XML Successfully");
+//					log.info("Exported Workflow Config XML Successfully");
 //					//Update the Workflow Status
 //					fnWorkflow.setFnWorkflowStatus("Export Workflow Configuration XML SUCCESSFUL");
 //				}
 //				else
 //				{
 //					//workflowConfigXMLPath is empty
-//					wiiscLog.log(wiiscLog.INFO, "The Workflow Config XML Export Path was empty.");
+//					log.info("The Workflow Config XML Export Path was empty.");
 //				}
 //								
 //				//Logoff the Workflow Server
-//				wiiscLog.log(wiiscLog.INFO, "Logging off the Workflow Server");
+//				log.info("Logging off the Workflow Server");
 //				vwSession.logoff();
 //				//Release the VWSession
 //				vwSession = null;
-//				wiiscLog.log(wiiscLog.INFO, "Logged off");
+//				log.info("Logged off");
 //			}
 //			else
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Workflow Login FAILED, Workflow Server may be unavailable.");
+//				log.info("Workflow Login FAILED, Workflow Server may be unavailable.");
 //				//Update the FnWorkflow Object
 //				fnWorkflow.setErrorFlag(1);
 //				fnWorkflow.setErrorMessage("Workflow Login FAILED, Workflow Server may be unavailable.");
 //				fnWorkflow.setFnWorkflowStatus("Workflow Login FAILED, Workflow Server may be unavailable.");
 //				//Release the VWSession
 //				vwSession = null;
-//				wiiscLog.log(wiiscLog.INFO, "Logged off");
+//				log.info("Logged off");
 //			}
 //		}
 //		catch(VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			if (vwSession != null)
 //			{
 //				//Set vwSession to null to kill any connections
@@ -267,7 +272,7 @@ public class WorkflowManager {
 //		}
 //		catch (Exception ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			if (vwSession != null)
 //			{
 //				//Set vwSession to null to kill any connections
@@ -278,14 +283,14 @@ public class WorkflowManager {
 //			//Update the ErrorMessage
 //			fnWorkflow.setErrorMessage(ex.getMessage());
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> exportConfigXML()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> exportConfigXML()");
+//		log.info("===========================================================");
 //		return fnWorkflow;
-//	}
-//	
-//	//Import the Workflow Configuration XML
-//	public FnWorkflow importConfigXML(WIISCLog wiiscLog)
-//	{
+	}
+	
+	//Import the Workflow Configuration XML
+	public void importConfigXML()
+	{
 //		FnWorkflow fnWorkflow = new FnWorkflow();
 //		//Get a VWSession Object
 //		VWSession vwSession = new VWSession();
@@ -293,7 +298,7 @@ public class WorkflowManager {
 //
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> importConfigXML()");
+//			log.info("Entered WorkflowManager -> importConfigXML()");
 //
 //			//Login to the Workflow Server
 //			vwSession = loginWorkflow(wiiscLog);
@@ -320,7 +325,7 @@ public class WorkflowManager {
 //					if (regionInitialized)
 //					{
 //						//Region already initialized
-//						wiiscLog.log(wiiscLog.INFO, "Region has already been initialized");
+//						log.info("Region has already been initialized");
 //						//Check the Import Option
 //						importOption = globalConfig.getString("workflowConfigXMLImportOption");
 //						if (importOption.length() > 0)
@@ -354,41 +359,41 @@ public class WorkflowManager {
 //					//Output the Import info to the Log
 //					for (String w : configOutputData)
 //					{
-//						wiiscLog.log(wiiscLog.INFO, w);
+//						log.info(w);
 //					}
 //					//System.out.println("Imported Workflow Config XML Successfully with Merge Option");
-//					wiiscLog.log(wiiscLog.INFO, "Imported Workflow Config XML Successfully with " + importOption + " Option");
+//					log.info("Imported Workflow Config XML Successfully with " + importOption + " Option");
 //					//Update the Workflow Status
 //					fnWorkflow.setFnWorkflowStatus("Import Workflow Configuration XML SUCCESSFUL");
 //				}
 //				else
 //				{
 //					//workflowConfigXMLPath is empty
-//					wiiscLog.log(wiiscLog.INFO, "The Workflow Config XML Path was empty.");
+//					log.info("The Workflow Config XML Path was empty.");
 //				}
 //								
 //				//Logoff the Workflow Server
-//				wiiscLog.log(wiiscLog.INFO, "Logging off the Workflow Server");
+//				log.info("Logging off the Workflow Server");
 //				vwSession.logoff();
 //				//Release the VWSession
 //				vwSession = null;
-//				wiiscLog.log(wiiscLog.INFO, "Logged off");
+//				log.info("Logged off");
 //			}
 //			else
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Workflow Login FAILED, Workflow Server may be unavailable.");
+//				log.info("Workflow Login FAILED, Workflow Server may be unavailable.");
 //				//Update the FnWorkflow Object
 //				fnWorkflow.setErrorFlag(1);
 //				fnWorkflow.setErrorMessage("Workflow Login FAILED, Workflow Server may be unavailable.");
 //				fnWorkflow.setFnWorkflowStatus("Workflow Login FAILED, Workflow Server may be unavailable.");
 //				//Release the VWSession
 //				vwSession = null;
-//				wiiscLog.log(wiiscLog.INFO, "Logged off");
+//				log.info("Logged off");
 //			}
 //		}
 //		catch(VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			if (vwSession != null)
 //			{
 //				//Set vwSession to null to kill any connections
@@ -401,7 +406,7 @@ public class WorkflowManager {
 //		}
 //		catch (Exception ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			if (vwSession != null)
 //			{
 //				//Set vwSession to null to kill any connections
@@ -412,14 +417,14 @@ public class WorkflowManager {
 //			//Update the ErrorMessage
 //			fnWorkflow.setErrorMessage(ex.getMessage());
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> importConfigXML()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> importConfigXML()");
+//		log.info("===========================================================");
 //		return fnWorkflow;
-//	}
-//	
-//	//Load the Workflow Maps from a defined directory in the Global Config Properties
-//	public FnWorkflow loadMaps(WIISCLog wiiscLog)
-//	{
+	}
+	
+	//Load the Workflow Maps from a defined directory in the Global Config Properties
+	public void loadMaps()
+	{
 //		FnWorkflow fnWorkflow = new FnWorkflow();
 //		//Get a VWSession Object
 //		VWSession vwSession = new VWSession();
@@ -427,7 +432,7 @@ public class WorkflowManager {
 //
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> loadMaps()");
+//			log.info("Entered WorkflowManager -> loadMaps()");
 //
 //			//Login to the Workflow Server
 //			vwSession = loginWorkflow(wiiscLog);
@@ -449,7 +454,7 @@ public class WorkflowManager {
 //					if (regionInitialized)
 //					{
 //						//Region already initialized
-//						wiiscLog.log(wiiscLog.INFO, "Region has already been initialized");
+//						log.info("Region has already been initialized");
 //						//Region Initialized - Workflow Maps will be loaded
 //						File mapsDir = new File(workflowMapsPath);
 //						if (mapsDir.isDirectory())
@@ -479,25 +484,25 @@ public class WorkflowManager {
 //										//Check the Transfer Result
 //										if (transferResult.success())
 //										{
-//											wiiscLog.log(wiiscLog.INFO, mapFile.getName() + " Transferred Successfully");
+//											log.info(mapFile.getName() + " Transferred Successfully");
 //											//Update the Processed PEP File Count
 //											pepFileProcessedCount++;
 //										}
 //										else
 //										{
 //											String[] errors = transferResult.getErrors();
-//											wiiscLog.log(wiiscLog.INFO, "ERRORS Transferring Workflow Map " + mapFile.getName());
-//											//wiiscLog.log(wiiscLog.INFO, errors.toString());
+//											log.info("ERRORS Transferring Workflow Map " + mapFile.getName());
+//											//log.info(errors.toString());
 //											for (String oneError : errors)
 //											{
-//												wiiscLog.log(wiiscLog.INFO, oneError);
+//												log.info(oneError);
 //											}
 //										}
 //									}
 //								}
 //							}
-//							wiiscLog.log(wiiscLog.INFO, "===========================================================");
-//							wiiscLog.log(wiiscLog.INFO, "Transferred " + pepFileProcessedCount + " out of " + pepFileCount + " Workflow Maps");
+//							log.info("===========================================================");
+//							log.info("Transferred " + pepFileProcessedCount + " out of " + pepFileCount + " Workflow Maps");
 //							
 //							//Update the Workflow Status
 //							fnWorkflow.setFnWorkflowStatus("Loading of the Workflow Maps was SUCCESSFUL");
@@ -505,43 +510,43 @@ public class WorkflowManager {
 //						else
 //						{
 //							//Workflow Maps Path is not a valid directory
-//							wiiscLog.log(wiiscLog.INFO, "Workflow Maps Path is not a valid directory");
+//							log.info("Workflow Maps Path is not a valid directory");
 //						}
 //					}
 //					else
 //					{
 //						//Region Not Initialized - Workflow Maps cannot be loaded
-//						wiiscLog.log(wiiscLog.INFO, "Workflow Region has not been initialized");
+//						log.info("Workflow Region has not been initialized");
 //					}
 //				}
 //				else
 //				{
 //					//workflowMapsPath is empty
-//					wiiscLog.log(wiiscLog.INFO, "The Workflow Maps Path was empty.");
+//					log.info("The Workflow Maps Path was empty.");
 //				}
 //
 //				//Logoff the Workflow Server
-//				wiiscLog.log(wiiscLog.INFO, "Logging off the Workflow Server");
+//				log.info("Logging off the Workflow Server");
 //				vwSession.logoff();
 //				//Release the VWSession
 //				vwSession = null;
-//				wiiscLog.log(wiiscLog.INFO, "Logged off");
+//				log.info("Logged off");
 //			}
 //			else
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Workflow Login FAILED, Workflow Server may be unavailable.");
+//				log.info("Workflow Login FAILED, Workflow Server may be unavailable.");
 //				//Update the FnWorkflow Object
 //				fnWorkflow.setErrorFlag(1);
 //				fnWorkflow.setErrorMessage("Workflow Login FAILED, Workflow Server may be unavailable.");
 //				fnWorkflow.setFnWorkflowStatus("Workflow Login FAILED, Workflow Server may be unavailable.");
 //				//Release the VWSession
 //				vwSession = null;
-//				wiiscLog.log(wiiscLog.INFO, "Logged off");
+//				log.info("Logged off");
 //			}
 //		}
 //		catch(VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			if (vwSession != null)
 //			{
 //				//Set vwSession to null to kill any connections
@@ -554,7 +559,7 @@ public class WorkflowManager {
 //		}
 //		catch (IOException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			if (vwSession != null)
 //			{
 //				//Set vwSession to null to kill any connections
@@ -567,7 +572,7 @@ public class WorkflowManager {
 //		}
 //		catch (Exception ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			if (vwSession != null)
 //			{
 //				//Set vwSession to null to kill any connections
@@ -578,21 +583,21 @@ public class WorkflowManager {
 //			//Update ErrorMessage
 //			fnWorkflow.setErrorMessage(ex.getMessage());
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> loadMaps()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> loadMaps()");
+//		log.info("===========================================================");
 //		return fnWorkflow;
-//	}
-//	
-//	//Initialize the Workflow Region
-//	public FnWorkflow initializeRegion(WIISCLog wiiscLog)
-//	{
+	}
+	
+	//Initialize the Workflow Region
+	public void initializeRegion()
+	{
 //		FnWorkflow fnWorkflow = new FnWorkflow();
 //		//Get a VWSession Object
 //		VWSession vwSession = new VWSession();
 //		
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> initializeRegion()");
+//			log.info("Entered WorkflowManager -> initializeRegion()");
 //
 //			//Login to the Workflow Server
 //			vwSession = loginWorkflow(wiiscLog);
@@ -607,33 +612,33 @@ public class WorkflowManager {
 //				vwsysadmin = vwSession.fetchSystemAdministration();
 //				vwsysadmin.initializeRegion();
 //				vwsysadmin.commit();
-//				wiiscLog.log(wiiscLog.INFO, "Workflow Region Initialized Successfully");
+//				log.info("Workflow Region Initialized Successfully");
 //				
 //				//Update the Workflow Status
 //				fnWorkflow.setFnWorkflowStatus("Initializing of the Workflow Region SUCCESSFUL");
 //
 //				//Logoff the Workflow Server
-//				wiiscLog.log(wiiscLog.INFO, "Logging off the Workflow Server");
+//				log.info("Logging off the Workflow Server");
 //				vwSession.logoff();
 //				//Release the VWSession
 //				vwSession = null;
-//				wiiscLog.log(wiiscLog.INFO, "Logged off");
+//				log.info("Logged off");
 //			}
 //			else
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Workflow Login FAILED, Workflow Server may be unavailable.");
+//				log.info("Workflow Login FAILED, Workflow Server may be unavailable.");
 //				//Update the FnWorkflow Object
 //				fnWorkflow.setErrorFlag(1);
 //				fnWorkflow.setErrorMessage("Workflow Login FAILED, Workflow Server may be unavailable.");
 //				fnWorkflow.setFnWorkflowStatus("Workflow Login FAILED, Workflow Server may be unavailable.");
 //				//Release the VWSession
 //				vwSession = null;
-//				wiiscLog.log(wiiscLog.INFO, "Logged off");
+//				log.info("Logged off");
 //			}
 //		}
 //		catch(VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			if (vwSession != null)
 //			{
 //				//Set vwSession to null to kill any connections
@@ -646,7 +651,7 @@ public class WorkflowManager {
 //		}
 //		catch (Exception ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			if (vwSession != null)
 //			{
 //				//Set vwSession to null to kill any connections
@@ -657,14 +662,14 @@ public class WorkflowManager {
 //			//Update ErrorMessage
 //			fnWorkflow.setErrorMessage(ex.getMessage());
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> initializeRegion()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> initializeRegion()");
+//		log.info("===========================================================");
 //		return fnWorkflow;
-//	}
-//		
-//	//Initiate PE Workflow with FnWorkflow Object from an XML Request
-//	public FnWorkflow initiateWorkflow(FnWorkflow fnWorkflow, WIISCLog wiiscLog)
-//	{
+	}
+		
+	//Initiate PE Workflow with FnWorkflow Object from an XML Request
+	public void initiateWorkflow()
+	{
 //		//Create the FnWorkflow Object to Return
 //		FnWorkflow fnWorkflowResult = new FnWorkflow();
 //
@@ -673,7 +678,7 @@ public class WorkflowManager {
 //
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> initiateWorkflow()");
+//			log.info("Entered WorkflowManager -> initiateWorkflow()");
 //
 //			//Get the Workflow Fields
 //			String process = fnWorkflow.getFnWorkflowProcess();
@@ -684,7 +689,7 @@ public class WorkflowManager {
 //
 //			if (vwSession != null)
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Logged in successfully to the Workflow Server");
+//				log.info("Logged in successfully to the Workflow Server");
 //				//ResourceBundle globalConfig = ResourceBundle.getBundle(ConstantsUtil.GLOBAL_CONFIG);
 //				//Update the FnWorkflow Object
 //				//fnWorkflowResult.setErrorFlag(0);
@@ -716,8 +721,8 @@ public class WorkflowManager {
 //				if (validProcess)
 //				{
 //					//Valid Process, so we Launch the Workflow
-//					wiiscLog.log(wiiscLog.INFO, "===========================================");
-//					wiiscLog.log(wiiscLog.INFO, "Workflow Process " + process + " is valid");
+//					log.info("===========================================");
+//					log.info("Workflow Process " + process + " is valid");
 //					//Create the Workflow
 //					VWStepElement stepElement = vwSession.createWorkflow(process);
 //
@@ -725,10 +730,10 @@ public class WorkflowManager {
 //					if (stepElement != null)
 //					{
 //						//Initial Workflow Launch Step Properties
-//						wiiscLog.log(wiiscLog.INFO, "Workflow Process " + process + " has launched");
+//						log.info("Workflow Process " + process + " has launched");
 //
-//						wiiscLog.log(wiiscLog.INFO, "===========================================");
-//						wiiscLog.log(wiiscLog.INFO, "Setting the Workflow Data Fields");
+//						log.info("===========================================");
+//						log.info("Setting the Workflow Data Fields");
 //
 //						//Create the FnWorkflowPropertyList Object
 //						FnWorkflowPropertyList fnWorkflowPropertyListResult = new FnWorkflowPropertyList();
@@ -747,7 +752,7 @@ public class WorkflowManager {
 //								//Check FnWorkflow
 //								if (fnWorkflow != null)
 //								{
-//									wiiscLog.log(wiiscLog.INFO, "Updating Workflow Data Field: " + vwParam.getName());
+//									log.info("Updating Workflow Data Field: " + vwParam.getName());
 //									FnWorkflowProperty fnWorkflowPropertyResult = new FnWorkflowProperty();
 //									//Call DoStepElementDataField
 //									fnWorkflowPropertyResult = doStepElementDataField(stepElement, vwParam, fnWorkflow, wiiscLog);
@@ -760,7 +765,7 @@ public class WorkflowManager {
 //							}
 //						}
 //
-//						wiiscLog.log(wiiscLog.INFO, "===========================================");
+//						log.info("===========================================");
 //
 //						//Update the FnWorkflowResult
 //						fnWorkflowResult = updateFnWorkflowInfo(stepElement, "New", wiiscLog);
@@ -773,15 +778,15 @@ public class WorkflowManager {
 //							for (int j = 0; j < stepResponses.length; j++)
 //							{
 //								String stepResponse = stepResponses[j];
-//								wiiscLog.log(wiiscLog.INFO, "Step Response: " + stepResponse);
+//								log.info("Step Response: " + stepResponse);
 //							}
 //							String responseValue = "Ok";
-//							wiiscLog.log(wiiscLog.INFO, "Applying Step Response: " + responseValue);
+//							log.info("Applying Step Response: " + responseValue);
 //							stepElement.setSelectedResponse(responseValue);
 //						}
 //						else
 //						{
-//							wiiscLog.log(wiiscLog.INFO, "No Step Responses - Possible Launch Step");
+//							log.info("No Step Responses - Possible Launch Step");
 //						}
 //
 //						//DoStepElementAction - Dispatch the Workflow
@@ -791,8 +796,8 @@ public class WorkflowManager {
 //						//More to add later
 //
 //						//Dispatch the Workflow Launch Step
-//						wiiscLog.log(wiiscLog.INFO, "===========================================");
-//						wiiscLog.log(wiiscLog.INFO, "Workflow Process " + process + " has initiated");
+//						log.info("===========================================");
+//						log.info("Workflow Process " + process + " has initiated");
 //						//Update FnWorkflow
 //						fnWorkflowResult.setErrorFlag(0);
 //						fnWorkflowResult.setErrorMessage("");
@@ -804,7 +809,7 @@ public class WorkflowManager {
 //					}
 //					else
 //					{
-//						wiiscLog.log(wiiscLog.INFO, "Workflow Process " + process + " failed to launch");
+//						log.info("Workflow Process " + process + " failed to launch");
 //						//Update FnWorkflow
 //						fnWorkflowResult.setErrorFlag(1);
 //						fnWorkflowResult.setErrorMessage("Process " + process + " FAILED to launch");
@@ -814,7 +819,7 @@ public class WorkflowManager {
 //				else
 //				{
 //					//Missing Parameters
-//					wiiscLog.log(wiiscLog.INFO, "The Workflow Process " + process + " is Invalid or does not exist");
+//					log.info("The Workflow Process " + process + " is Invalid or does not exist");
 //					//Update FnWorkflow
 //					fnWorkflowResult.setErrorFlag(1);
 //					fnWorkflowResult.setErrorMessage("Process " + process + " is Invalid");
@@ -822,15 +827,15 @@ public class WorkflowManager {
 //				}
 //
 //				//Logoff the Workflow Server
-//				wiiscLog.log(wiiscLog.INFO, "Logging off the Workflow Server");
+//				log.info("Logging off the Workflow Server");
 //				vwSession.logoff();
 //				//Release the VWSession
 //				vwSession = null;
-//				wiiscLog.log(wiiscLog.INFO, "Logged off");
+//				log.info("Logged off");
 //			}
 //			else
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Workflow Login FAILED, Workflow Server may be unavailable.");
+//				log.info("Workflow Login FAILED, Workflow Server may be unavailable.");
 //				//Update the FnWorkflow Object
 //				fnWorkflowResult.setErrorFlag(1);
 //				fnWorkflowResult.setErrorMessage("Workflow Login FAILED, Workflow Server may be unavailable.");
@@ -841,7 +846,7 @@ public class WorkflowManager {
 //		}
 //		catch(VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			if (vwSession != null)
 //			{
 //				//Set vwSession to null to kill any connections
@@ -853,14 +858,14 @@ public class WorkflowManager {
 //			fnWorkflowResult.setErrorMessage(ex.getMessage());
 //			fnWorkflowResult.setFnWorkflowStatus("Workflow Login FAILED");
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> initiateWorkflow()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> initiateWorkflow()");
+//		log.info("===========================================================");
 //		return fnWorkflowResult;
-//	}
-//
-//	//Initiate PE Workflow with Document using the FnWorkflow Object from an XML Request
-//	public FnWorkflow initiateWorkflowWithDocument(FnWorkflow fnWorkflow, WIISCLog wiiscLog)
-//	{
+	}
+
+	//Initiate PE Workflow with Document using the FnWorkflow Object from an XML Request
+	public void initiateWorkflowWithDocument()
+	{
 //		//Create the FnWorkflow Object to Return
 //		FnWorkflow fnWorkflowResult = new FnWorkflow();
 //
@@ -869,7 +874,7 @@ public class WorkflowManager {
 //
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> initiateWorkflowWithDocument()");
+//			log.info("Entered WorkflowManager -> initiateWorkflowWithDocument()");
 //
 //			//Get the Workflow Fields
 //			String rosterName = fnWorkflow.getFnWorkflowRoster();
@@ -883,7 +888,7 @@ public class WorkflowManager {
 //
 //			if (vwSession != null)
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Logged in successfully to the Workflow Server");
+//				log.info("Logged in successfully to the Workflow Server");
 //				
 //				//Boolean to Validate the Requested Process
 //				boolean validProcess = false;
@@ -912,8 +917,8 @@ public class WorkflowManager {
 //				if (validProcess)
 //				{
 //					//Valid Process, so we Launch the Workflow
-//					wiiscLog.log(wiiscLog.INFO, "===========================================");
-//					wiiscLog.log(wiiscLog.INFO, "Workflow Process " + process_sys_code + " is valid");
+//					log.info("===========================================");
+//					log.info("Workflow Process " + process_sys_code + " is valid");
 //					//Create the Workflow
 //					VWStepElement stepElement = vwSession.createWorkflow(process_sys_code);
 //
@@ -921,10 +926,10 @@ public class WorkflowManager {
 //					if (stepElement != null)
 //					{
 //						//Initial Workflow Launch Step Properties
-//						wiiscLog.log(wiiscLog.INFO, "Workflow Process " + process_sys_code + " has launched");
+//						log.info("Workflow Process " + process_sys_code + " has launched");
 //
-//						wiiscLog.log(wiiscLog.INFO, "===========================================");
-//						wiiscLog.log(wiiscLog.INFO, "Setting the Workflow Data Fields");
+//						log.info("===========================================");
+//						log.info("Setting the Workflow Data Fields");
 //
 //						//Create the FnWorkflowPropertyList Object
 //						FnWorkflowPropertyList fnWorkflowPropertyListResult = new FnWorkflowPropertyList();
@@ -943,7 +948,7 @@ public class WorkflowManager {
 //								//Check FnWorkflow
 //								if (fnWorkflow != null)
 //								{
-//									wiiscLog.log(wiiscLog.INFO, "Updating Workflow Data Field: " + vwParam.getName());
+//									log.info("Updating Workflow Data Field: " + vwParam.getName());
 //									FnWorkflowProperty fnWorkflowPropertyResult = new FnWorkflowProperty();
 //									//Call DoStepElementDataField
 //									fnWorkflowPropertyResult = doStepElementDataField(stepElement, vwParam, fnWorkflow, wiiscLog);
@@ -959,7 +964,7 @@ public class WorkflowManager {
 //								//Check FnWorkflow
 //								if (fnWorkflow != null)
 //								{
-//									wiiscLog.log(wiiscLog.INFO, "Updating Workflow Attachment: " + vwParam.getName());
+//									log.info("Updating Workflow Attachment: " + vwParam.getName());
 //									FnDocument fnDocument = new FnDocument();
 //									//Setup GlobalConfig for imagingManager
 //									imagingManager.setGlobalConfig(getGlobalConfig());
@@ -975,7 +980,7 @@ public class WorkflowManager {
 //							}
 //						}
 //
-//						wiiscLog.log(wiiscLog.INFO, "===========================================");
+//						log.info("===========================================");
 //
 //						//Update the FnWorkflowResult
 //						fnWorkflowResult = updateFnWorkflowInfo(stepElement, "New", wiiscLog);
@@ -989,15 +994,15 @@ public class WorkflowManager {
 //							for (int j = 0; j < stepResponses.length; j++)
 //							{
 //								String stepResponse = stepResponses[j];
-//								wiiscLog.log(wiiscLog.INFO, "Step Response: " + stepResponse);
+//								log.info("Step Response: " + stepResponse);
 //							}
 //							String responseValue = "Ok";
-//							wiiscLog.log(wiiscLog.INFO, "Applying Step Response: " + responseValue);
+//							log.info("Applying Step Response: " + responseValue);
 //							stepElement.setSelectedResponse(responseValue);
 //						}
 //						else
 //						{
-//							wiiscLog.log(wiiscLog.INFO, "No Step Responses - Possible Launch Step");
+//							log.info("No Step Responses - Possible Launch Step");
 //						}
 //
 //						//DoStepElementAction - Dispatch the Workflow
@@ -1007,8 +1012,8 @@ public class WorkflowManager {
 //						//More to add later
 //
 //						//Dispatch the Workflow Launch Step
-//						wiiscLog.log(wiiscLog.INFO, "===========================================");
-//						wiiscLog.log(wiiscLog.INFO, "Workflow Process " + process_sys_code + " has initiated");
+//						log.info("===========================================");
+//						log.info("Workflow Process " + process_sys_code + " has initiated");
 //						//Update FnWorkflow
 //						fnWorkflowResult.setErrorFlag(0);
 //						fnWorkflowResult.setErrorMessage("");
@@ -1020,7 +1025,7 @@ public class WorkflowManager {
 //					}
 //					else
 //					{
-//						wiiscLog.log(wiiscLog.INFO, "Workflow Process " + process_sys_code + " failed to launch");
+//						log.info("Workflow Process " + process_sys_code + " failed to launch");
 //						//Update FnWorkflow
 //						fnWorkflowResult.setErrorFlag(1);
 //						fnWorkflowResult.setErrorMessage("Process " + process_sys_code + " FAILED to launch");
@@ -1030,7 +1035,7 @@ public class WorkflowManager {
 //				else
 //				{
 //					//Missing Parameters
-//					wiiscLog.log(wiiscLog.INFO, "The Workflow Process " + process_sys_code + " is Invalid or does not exist");
+//					log.info("The Workflow Process " + process_sys_code + " is Invalid or does not exist");
 //					//Update FnWorkflow
 //					fnWorkflowResult.setErrorFlag(1);
 //					fnWorkflowResult.setErrorMessage("Process " + process_sys_code + " is Invalid");
@@ -1038,15 +1043,15 @@ public class WorkflowManager {
 //				}
 //
 //				//Logoff the Workflow Server
-//				wiiscLog.log(wiiscLog.INFO, "Logging off the Workflow Server");
+//				log.info("Logging off the Workflow Server");
 //				vwSession.logoff();
 //				//Release the VWSession
 //				vwSession = null;
-//				wiiscLog.log(wiiscLog.INFO, "Logged off");
+//				log.info("Logged off");
 //			}
 //			else
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Workflow Login FAILED, Workflow Server may be unavailable.");
+//				log.info("Workflow Login FAILED, Workflow Server may be unavailable.");
 //				//Update the FnWorkflow Object
 //				fnWorkflowResult.setErrorFlag(1);
 //				fnWorkflowResult.setErrorMessage("Workflow Login FAILED, Workflow Server may be unavailable.");
@@ -1057,7 +1062,7 @@ public class WorkflowManager {
 //		}
 //		catch(VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			if (vwSession != null)
 //			{
 //				//Set vwSession to null to kill any connections
@@ -1069,14 +1074,14 @@ public class WorkflowManager {
 //			fnWorkflowResult.setErrorMessage(ex.getMessage());
 //			fnWorkflowResult.setFnWorkflowStatus("Workflow Login FAILED");
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> initiateWorkflowWithDocument()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> initiateWorkflowWithDocument()");
+//		log.info("===========================================================");
 //		return fnWorkflowResult;
-//	}
-//
-//	//Update PE Workflow with FnWorkflow Object from an XML Request
-//	public FnWorkflow updateWorkflow(FnWorkflow fnWorkflowRequest, WIISCLog wiiscLog)
-//	{
+	}
+
+	//Update PE Workflow with FnWorkflow Object from an XML Request
+	public void updateWorkflow()
+	{
 //		//Create the FnWorkflow Object to Return
 //		FnWorkflow fnWorkflow = new FnWorkflow();
 //
@@ -1092,7 +1097,7 @@ public class WorkflowManager {
 //
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> updateWorkflow()");
+//			log.info("Entered WorkflowManager -> updateWorkflow()");
 //
 //			//Get the Workflow Fields
 //			String process = fnWorkflowRequest.getFnWorkflowProcess();
@@ -1121,7 +1126,7 @@ public class WorkflowManager {
 //
 //			if (vwSession != null)
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Logged in successfully to the Workflow Server");
+//				log.info("Logged in successfully to the Workflow Server");
 //
 //				//Get the VWStepElement to be used for updating the Workflow
 //				VWStepElement stepElement = getWorkflowStepElement(vwSession, process, step, user, propName, propValue, wiiscLog);
@@ -1164,7 +1169,7 @@ public class WorkflowManager {
 //					//Reassign the Workflow to another User
 //					if (response.equals("Reassign"))
 //					{
-//						wiiscLog.log(wiiscLog.INFO, "Reassign");
+//						log.info("Reassign");
 //						
 //						//Update the Step Element
 //						fnWorkflow = updateStepElement(stepElement, fnWorkflowRequest, null, response, user, wiiscLog);
@@ -1175,7 +1180,7 @@ public class WorkflowManager {
 //					//Return the Workflow to its Source
 //					else if (response.equals("Return"))
 //					{
-//						wiiscLog.log(wiiscLog.INFO, "Return");
+//						log.info("Return");
 //						
 //						//Update the Step Element
 //						fnWorkflow = updateStepElement(stepElement, fnWorkflowRequest, null, response, "", wiiscLog);
@@ -1186,7 +1191,7 @@ public class WorkflowManager {
 //					//Move the Workflow to a User's Inbox
 //					else if (response.equals("Move"))
 //					{
-//						wiiscLog.log(wiiscLog.INFO, "Move");
+//						log.info("Move");
 //						
 //						//Update the Step Element
 //						fnWorkflow = updateStepElement(stepElement, fnWorkflowRequest, null, response, user, wiiscLog);
@@ -1197,7 +1202,7 @@ public class WorkflowManager {
 //					//Apply Workflow Property Updates and Save
 //					else if (response.equals("Save"))
 //					{
-//						wiiscLog.log(wiiscLog.INFO, "Save");
+//						log.info("Save");
 //						
 //						//Update the Step Element
 //						fnWorkflow = updateStepElement(stepElement, fnWorkflowRequest, null, response, "", wiiscLog);
@@ -1228,7 +1233,7 @@ public class WorkflowManager {
 //														
 //							if (response.equalsIgnoreCase("IN PROGRESS"))
 //							{
-//								wiiscLog.log(wiiscLog.INFO, "Clarety - " + customResponse);
+//								log.info("Clarety - " + customResponse);
 //								
 //								//Update the Step Element
 //								fnWorkflow = updateStepElement(stepElement, fnWorkflowRequest, null, "DataFields", user, wiiscLog);
@@ -1263,7 +1268,7 @@ public class WorkflowManager {
 //							}
 //							else if (response.equalsIgnoreCase("SKIPPED"))
 //							{
-//								wiiscLog.log(wiiscLog.INFO, "Clarety - " + customResponse);
+//								log.info("Clarety - " + customResponse);
 //								//Update Current State to Skipped
 //								propName1 = "current_state";
 //								propValue1 = customResponse;
@@ -1295,7 +1300,7 @@ public class WorkflowManager {
 //							}
 //							else if (response.equalsIgnoreCase("SUSPENDED"))
 //							{
-//								wiiscLog.log(wiiscLog.INFO, "Clarety - " + customResponse);
+//								log.info("Clarety - " + customResponse);
 //								
 //								//Update the Step Element
 //								fnWorkflow = updateStepElement(stepElement, fnWorkflowRequest, stepElementParamsMap, "DataFields", user, wiiscLog);
@@ -1319,7 +1324,7 @@ public class WorkflowManager {
 //							}
 //							else if (response.equalsIgnoreCase("COMPLETED"))
 //							{
-//								wiiscLog.log(wiiscLog.INFO, "Clarety - " + customResponse);
+//								log.info("Clarety - " + customResponse);
 //								
 //								//Update Current State to Completed
 //								propName1 = "current_state";
@@ -1352,7 +1357,7 @@ public class WorkflowManager {
 //							}
 //							else if (response.equalsIgnoreCase("REVOKED"))
 //							{
-//								wiiscLog.log(wiiscLog.INFO, "Clarety - " + customResponse);
+//								log.info("Clarety - " + customResponse);
 //								
 //								//Update Current State to Revoked
 //								propName1 = "current_state";
@@ -1385,7 +1390,7 @@ public class WorkflowManager {
 //							}
 //							else if (response.equalsIgnoreCase("RETURNED"))
 //							{
-//								wiiscLog.log(wiiscLog.INFO, "Clarety - " + customResponse);
+//								log.info("Clarety - " + customResponse);
 //								
 //								//Update Current State to Returned
 //								propName1 = "current_state";
@@ -1431,7 +1436,7 @@ public class WorkflowManager {
 //							}
 //							else if (response.equalsIgnoreCase("CANCELLED"))
 //							{
-//								wiiscLog.log(wiiscLog.INFO, "Clarety - " + customResponse);
+//								log.info("Clarety - " + customResponse);
 //								
 //								//Update the Step Element
 //								fnWorkflow = updateStepElement(stepElement, fnWorkflowRequest, stepElementParamsMap, "DataFields", "", wiiscLog);
@@ -1462,7 +1467,7 @@ public class WorkflowManager {
 //							}
 //							else
 //							{
-//								wiiscLog.log(wiiscLog.INFO, "Clarety - ABORT");
+//								log.info("Clarety - ABORT");
 //
 //								//Update the Step Element
 //								fnWorkflow = updateStepElement(stepElement, fnWorkflowRequest, stepElementParamsMap, "DataFields", "", wiiscLog);
@@ -1476,7 +1481,7 @@ public class WorkflowManager {
 //								stepElement.doAbort();
 //
 //								//End of For Loop
-//								wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//								log.info("===========================================================");
 //
 //								//Display FnWorkflow Info
 //								displayFnWorkflowInfo = true;								
@@ -1485,7 +1490,7 @@ public class WorkflowManager {
 //						else
 //						{
 //							//Error because Response was not valid
-//							wiiscLog.log(wiiscLog.INFO, "Response " + response + " was Invalid");
+//							log.info("Response " + response + " was Invalid");
 //						}
 //					}
 //
@@ -1505,8 +1510,8 @@ public class WorkflowManager {
 //						//Check if the Workflow has Finished
 //						if (fnWorkflow.getErrorFlag() == 0 && fnWorkflow.getFnWorkflowStatus().length() > 0)
 //						{
-//							wiiscLog.log(wiiscLog.INFO, "===========================================================");
-//							wiiscLog.log(wiiscLog.INFO, "Workflow Process " + fnWorkflow.getFnWorkflowProcess() + " has finished");
+//							log.info("===========================================================");
+//							log.info("Workflow Process " + fnWorkflow.getFnWorkflowProcess() + " has finished");
 //							//Update FnWorkflow
 //							fnWorkflow.setErrorFlag(0);
 //							fnWorkflow.setErrorMessage("");
@@ -1514,8 +1519,8 @@ public class WorkflowManager {
 //						}
 //						else
 //						{
-//							wiiscLog.log(wiiscLog.INFO, "===========================================================");
-//							wiiscLog.log(wiiscLog.INFO, "Workflow Process " + fnWorkflow.getFnWorkflowProcess() + " for Workflow Step " + fnWorkflow.getFnWorkflowStep() + " has been updated");
+//							log.info("===========================================================");
+//							log.info("Workflow Process " + fnWorkflow.getFnWorkflowProcess() + " for Workflow Step " + fnWorkflow.getFnWorkflowStep() + " has been updated");
 //							//Update FnWorkflow
 //							fnWorkflow.setErrorFlag(0);
 //							fnWorkflow.setErrorMessage("");
@@ -1530,8 +1535,8 @@ public class WorkflowManager {
 //					else
 //					{
 //						//Don't show FnWorkflow Info because it was deleted
-//						wiiscLog.log(wiiscLog.INFO, "===========================================================");
-//						wiiscLog.log(wiiscLog.INFO, "Workflow Process " + process + " for Workflow Step " + step + " has been deleted");
+//						log.info("===========================================================");
+//						log.info("Workflow Process " + process + " for Workflow Step " + step + " has been deleted");
 //						//Update FnWorkflow
 //						fnWorkflow.setErrorFlag(0);
 //						fnWorkflow.setErrorMessage("");
@@ -1540,21 +1545,21 @@ public class WorkflowManager {
 //				}
 //				else
 //				{
-//					wiiscLog.log(wiiscLog.INFO, "Failed to get a StepElement");
+//					log.info("Failed to get a StepElement");
 //					//Update the FnWorkflow Object
 //					//fnWorkflow.setErrorFlag(1);
 //				}
 //
 //				//Logoff the Workflow Server
-//				wiiscLog.log(wiiscLog.INFO, "Logging off the Workflow Server");
+//				log.info("Logging off the Workflow Server");
 //				vwSession.logoff();
 //				//Release the VWSession
 //				vwSession = null;
-//				wiiscLog.log(wiiscLog.INFO, "Logged off");
+//				log.info("Logged off");
 //			}//End If VWSession
 //			else
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Workflow Login FAILED, Workflow Server may be unavailable.");
+//				log.info("Workflow Login FAILED, Workflow Server may be unavailable.");
 //				//Update the FnWorkflow Object
 //				fnWorkflow.setErrorFlag(1);
 //				fnWorkflow.setErrorMessage("Workflow Login FAILED, Workflow Server may be unavailable.");
@@ -1563,7 +1568,7 @@ public class WorkflowManager {
 //		}
 //		catch(VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			if (vwSession != null)
 //			{
 //				//Set vwSession to null to kill any connections
@@ -1575,15 +1580,15 @@ public class WorkflowManager {
 //			fnWorkflow.setErrorMessage(ex.getMessage());
 //			fnWorkflow.setFnWorkflowStatus("Workflow Login FAILED");
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> updateWorkflow()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> updateWorkflow()");
+//		log.info("===========================================================");
 //		return fnWorkflow;
-//	}
-//
-//
-//	//Initiate PE Workflow with Parameters
-//	public FnWorkflow initWorkflow(String process_sys_code, String process_id, String account_id, WIISCLog wiiscLog)
-//	{
+	}
+
+
+	//Initiate PE Workflow with Parameters
+	public void initWorkflow(String process_sys_code, String process_id, String account_id)
+	{
 //		//Create the FnWorkflow Object
 //		FnWorkflow fnWorkflow = new FnWorkflow();
 //		//Get a VWSession Object
@@ -1591,14 +1596,14 @@ public class WorkflowManager {
 //
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> initWorkflow()");
+//			log.info("Entered WorkflowManager -> initWorkflow()");
 //
 //			//Login to the Workflow Server
 //			vwSession = loginWorkflow(wiiscLog);
 //
 //			if (vwSession != null)
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Logged in successfully to the Workflow Server");
+//				log.info("Logged in successfully to the Workflow Server");
 //				//ResourceBundle globalConfig = ResourceBundle.getBundle(ConstantsUtil.GLOBAL_CONFIG);
 //				//Update the FnWorkflow Object
 //				fnWorkflow.setErrorFlag(0);
@@ -1623,8 +1628,8 @@ public class WorkflowManager {
 //				if (validProcess)
 //				{
 //					//Valid Process, so we Launch the Workflow
-//					wiiscLog.log(wiiscLog.INFO, "===========================================");
-//					wiiscLog.log(wiiscLog.INFO, "Workflow Process " + process_sys_code + " is valid");
+//					log.info("===========================================");
+//					log.info("Workflow Process " + process_sys_code + " is valid");
 //					//Create the Workflow
 //					VWStepElement stepElement = vwSession.createWorkflow(process_sys_code);
 //
@@ -1632,7 +1637,7 @@ public class WorkflowManager {
 //					if (stepElement != null)
 //					{
 //						//Initial Workflow Launch Step Properties
-//						wiiscLog.log(wiiscLog.INFO, "Workflow Process " + process_sys_code + " has launched");
+//						log.info("Workflow Process " + process_sys_code + " has launched");
 //
 //						fnWorkflow = updateFnWorkflowInfo(stepElement, "New", wiiscLog);
 //
@@ -1655,15 +1660,15 @@ public class WorkflowManager {
 //							for (int j = 0; j < stepResponses.length; j++)
 //							{
 //								String stepResponse = stepResponses[j];
-//								wiiscLog.log(wiiscLog.INFO, "Step Response: " + stepResponse);
+//								log.info("Step Response: " + stepResponse);
 //							}
 //						}
 //						else
 //						{
-//							wiiscLog.log(wiiscLog.INFO, "No Step Responses - Possible Launch Step");
+//							log.info("No Step Responses - Possible Launch Step");
 //						}
-//						wiiscLog.log(wiiscLog.INFO, "===========================================");
-//						wiiscLog.log(wiiscLog.INFO, "Setting the Workflow Data Fields");
+//						log.info("===========================================");
+//						log.info("Setting the Workflow Data Fields");
 //
 //						//Lock the Step Element
 //						//stepElement.doLock(true);
@@ -1690,12 +1695,12 @@ public class WorkflowManager {
 //								// check whether the parameter is single or an array
 //								// and set the parameter value(s)
 //
-//								//wiiscLog.log(wiiscLog.INFO, "Updating " + vwParametersData[i].getName());
+//								//log.info("Updating " + vwParametersData[i].getName());
 //
 //								switch (vwParametersData[i].getFieldType())
 //								{
 //								case VWFieldType.FIELD_TYPE_INT:
-//									//wiiscLog.log(wiiscLog.INFO, "Integer");
+//									//log.info("Integer");
 //									if (vwParametersData[i].isArray())
 //									{
 //										/*int[] arrParamValues = new int[] {1, 2, 3};
@@ -1705,7 +1710,7 @@ public class WorkflowManager {
 //									else
 //									{
 //										//List of Parameters from GlobalConfig.properties file
-//										//wiiscLog.log(wiiscLog.INFO, "Checking to see if any Integer parameters match a Workflow parameter");
+//										//log.info("Checking to see if any Integer parameters match a Workflow parameter");
 //										for (int a = 0; a < workflowParameterData.length; a++)
 //										{
 //											String param = workflowParameterData[a];
@@ -1716,18 +1721,18 @@ public class WorkflowManager {
 //											{
 //												if (param.equals("process_id"))
 //												{
-//													wiiscLog.log(wiiscLog.INFO, "Updating process_id");
+//													log.info("Updating process_id");
 //													stepElement.setParameterValue(vwParametersData[i].getName(), Integer.parseInt(process_id), true);
 //													fnWorkflowProperty.setName(param);
 //													fnWorkflowProperty.setValue(process_id);
-//													wiiscLog.log(wiiscLog.INFO, "process_id: " + process_id);
+//													log.info("process_id: " + process_id);
 //													break;
 //												}
 //											}
 //										}
 //									}
 //								case VWFieldType.FIELD_TYPE_STRING:
-//									//wiiscLog.log(wiiscLog.INFO, "String");
+//									//log.info("String");
 //									if (vwParametersData[i].isArray())
 //									{
 //										/*String[] arrParamValues =	new String[] {"Test_1", "Test_2", "Test_3"};
@@ -1737,7 +1742,7 @@ public class WorkflowManager {
 //									else
 //									{
 //										//List of Parameters from GlobalConfig.properties file
-//										//wiiscLog.log(wiiscLog.INFO, "Checking to see if any String parameters match a Workflow parameter");
+//										//log.info("Checking to see if any String parameters match a Workflow parameter");
 //										for (int a = 0; a < workflowParameterData.length; a++)
 //										{
 //											String param = workflowParameterData[a];
@@ -1748,23 +1753,23 @@ public class WorkflowManager {
 //											{
 //												if (param.equals("process_sys_code"))
 //												{
-//													wiiscLog.log(wiiscLog.INFO, "Updating process_sys_code");
+//													log.info("Updating process_sys_code");
 //													stepElement.setParameterValue(vwParametersData[i].getName(), process_sys_code, true);
 //													//fnWorkflow.setFnWorkflowName(process_sys_code);
 //													//fnWorkflow.setFnWorkflowRoster(process_sys_code);
 //													fnWorkflowProperty.setName(param);
 //													fnWorkflowProperty.setValue(process_sys_code);
-//													wiiscLog.log(wiiscLog.INFO, "process_sys_code: " + process_sys_code);
+//													log.info("process_sys_code: " + process_sys_code);
 //													break;
 //												}
 //												else if (param.equals("ID_"))
 //												{
-//													wiiscLog.log(wiiscLog.INFO, "Updating ID_");
+//													log.info("Updating ID_");
 //													stepElement.setParameterValue(vwParametersData[i].getName(), account_id, true);
 //													//fnWorkflow.setFnWorkflowID(account_id);
 //													fnWorkflowProperty.setName(param);
 //													fnWorkflowProperty.setValue(account_id);
-//													wiiscLog.log(wiiscLog.INFO, "ID_: " + account_id);
+//													log.info("ID_: " + account_id);
 //													break;
 //												}
 //												else
@@ -1779,7 +1784,7 @@ public class WorkflowManager {
 //									break;
 //
 //								case VWFieldType.FIELD_TYPE_ATTACHMENT:
-//									//wiiscLog.log(wiiscLog.INFO, "Attachment");
+//									//log.info("Attachment");
 //									if (!vwParametersData[i].isArray())
 //									{
 //										// Get the value for the VWAttachment
@@ -1801,7 +1806,7 @@ public class WorkflowManager {
 //									}
 //									break;
 //								case VWFieldType.FIELD_TYPE_PARTICIPANT:
-//									//wiiscLog.log(wiiscLog.INFO, "Participant");
+//									//log.info("Participant");
 //									// Instantiate a new VWParticipant array
 //									//VWParticipant[] participant = new VWParticipant[1];
 //									// Set the participant name using username value
@@ -1834,20 +1839,20 @@ public class WorkflowManager {
 //							//End of ReadOnly If
 //						}
 //						//End of For Loop
-//						wiiscLog.log(wiiscLog.INFO, "===========================================");
+//						log.info("===========================================");
 //						//Update additional custom data fields
 //						//More to add later
 //
 //						// Set the value for the system-defined Response parameter
 //						if (stepElement.getStepResponses() != null) {
-//							wiiscLog.log(wiiscLog.INFO, "Step Responses");
+//							log.info("Step Responses");
 //							String responseValue = "Ok";
 //							stepElement.setSelectedResponse(responseValue);
 //						}
 //						else
 //						{
-//							wiiscLog.log(wiiscLog.INFO, "No Step Responses");
-//							wiiscLog.log(wiiscLog.INFO, "===========================================");
+//							log.info("No Step Responses");
+//							log.info("===========================================");
 //						}
 //
 //						//Workflow Action Types
@@ -1862,7 +1867,7 @@ public class WorkflowManager {
 //
 //						switch (actionToPerform) {
 //						case ACTION_TYPE_REASIGN:
-//							wiiscLog.log(wiiscLog.INFO, "Reasign");
+//							log.info("Reasign");
 //							// Determine whether a step element
 //							// can be reassigned and reassign it
 //							if (stepElement.getCanReassign()) {
@@ -1871,7 +1876,7 @@ public class WorkflowManager {
 //							}
 //							break;
 //						case ACTION_TYPE_RETURN:
-//							wiiscLog.log(wiiscLog.INFO, "Return");
+//							log.info("Return");
 //							// Determine whether a step element can be returned to the
 //							// queue from which the user delegated or reassigned it and
 //							// return it
@@ -1880,19 +1885,19 @@ public class WorkflowManager {
 //							}
 //							break;
 //						case ACTION_TYPE_ABORT:
-//							wiiscLog.log(wiiscLog.INFO, "Abort");
+//							log.info("Abort");
 //							// Cancel the changes to the work item
 //							// without advancing it in the workflow
 //							stepElement.doAbort();
 //							break;
 //						case ACTION_TYPE_SAVE:
-//							wiiscLog.log(wiiscLog.INFO, "Save");
+//							log.info("Save");
 //							// Save the changes to the work item
 //							// and unlock it without advancing it in the workflow
 //							stepElement.doSave(true);
 //							break;
 //						case ACTION_TYPE_DISPATCH:
-//							wiiscLog.log(wiiscLog.INFO, "Dispatch");
+//							log.info("Dispatch");
 //							// Save the changes to the work item
 //							// and advance it in the workflow
 //							stepElement.doDispatch();
@@ -1900,8 +1905,8 @@ public class WorkflowManager {
 //						}
 //
 //						//Dispatch the Workflow Launch Step
-//						wiiscLog.log(wiiscLog.INFO, "===========================================");
-//						wiiscLog.log(wiiscLog.INFO, "Workflow Process " + process_sys_code + " has initiated");
+//						log.info("===========================================");
+//						log.info("Workflow Process " + process_sys_code + " has initiated");
 //						//Update FnWorkflow
 //						fnWorkflow.setErrorFlag(0);
 //						fnWorkflow.setErrorMessage("");
@@ -1915,7 +1920,7 @@ public class WorkflowManager {
 //					}
 //					else
 //					{
-//						wiiscLog.log(wiiscLog.INFO, "Workflow Process " + process_sys_code + " failed to launch");
+//						log.info("Workflow Process " + process_sys_code + " failed to launch");
 //						//Update FnWorkflow
 //						fnWorkflow.setErrorFlag(1);
 //						fnWorkflow.setErrorMessage("Process " + process_sys_code + " FAILED to launch");
@@ -1925,7 +1930,7 @@ public class WorkflowManager {
 //				else
 //				{
 //					//Missing Parameters
-//					wiiscLog.log(wiiscLog.INFO, "The Workflow Process " + process_sys_code + " is Invalid or does not exist");
+//					log.info("The Workflow Process " + process_sys_code + " is Invalid or does not exist");
 //					//Update FnWorkflow
 //					fnWorkflow.setErrorFlag(1);
 //					fnWorkflow.setErrorMessage("Process " + process_sys_code + " is Invalid");
@@ -1933,15 +1938,15 @@ public class WorkflowManager {
 //				}
 //
 //				//Logoff the Workflow Server
-//				wiiscLog.log(wiiscLog.INFO, "Logging off the Workflow Server");
+//				log.info("Logging off the Workflow Server");
 //				vwSession.logoff();
 //				//Release the VWSession
 //				vwSession = null;
-//				wiiscLog.log(wiiscLog.INFO, "Logged off");
+//				log.info("Logged off");
 //			}
 //			else
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Workflow Login FAILED, Workflow Server may be unavailable.");
+//				log.info("Workflow Login FAILED, Workflow Server may be unavailable.");
 //				//Update the FnWorkflow Object
 //				fnWorkflow.setErrorFlag(1);
 //				fnWorkflow.setErrorMessage("Workflow Login FAILED, Workflow Server may be unavailable.");
@@ -1952,7 +1957,7 @@ public class WorkflowManager {
 //		}
 //		catch(VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			if (vwSession != null)
 //			{
 //				//Set vwSession to null to kill any connections
@@ -1964,14 +1969,14 @@ public class WorkflowManager {
 //			fnWorkflow.setErrorMessage(ex.getMessage());
 //			fnWorkflow.setFnWorkflowStatus("Workflow Login FAILED");
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> initWorkflow()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> initWorkflow()");
+//		log.info("===========================================================");
 //		return fnWorkflow;
-//	}
-//
-//	//Create Workflows
-//	public FnWorkflowList createWorkflows(String process_sys_code, String count, WIISCLog wiiscLog)
-//	{
+	}
+
+	//Create Workflows
+	public void createWorkflows(String process_sys_code, String count)
+	{
 //		//Create the FnWorkflowList Object
 //		FnWorkflowList fnWorkflowList = new FnWorkflowList();
 //		//Workflow Count
@@ -1985,14 +1990,14 @@ public class WorkflowManager {
 //
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> createWorkflows()");
+//			log.info("Entered WorkflowManager -> createWorkflows()");
 //
 //			//Login to the Workflow Server
 //			vwSession = loginWorkflow(wiiscLog);
 //
 //			if (vwSession != null)
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Logged in successfully to the Workflow Server");
+//				log.info("Logged in successfully to the Workflow Server");
 //				//ResourceBundle globalConfig = ResourceBundle.getBundle(ConstantsUtil.GLOBAL_CONFIG);
 //				//Update the FnWorkflowList Object
 //				fnWorkflowList.setErrorFlag(0);
@@ -2008,7 +2013,7 @@ public class WorkflowManager {
 //					VWWorkflowDefinition vwWorkflowDef = null;
 //					try
 //					{
-//						wiiscLog.log(wiiscLog.INFO, "Checking Roster: " + workClassNames[i]);
+//						log.info("Checking Roster: " + workClassNames[i]);
 //						vwRoster = vwSession.getRoster(workClassNames[i]);
 //						vwWorkflowDef = vwSession.fetchWorkflowDefinition(-1, workClassNames[i], false);
 //					}
@@ -2020,7 +2025,7 @@ public class WorkflowManager {
 //					//If neither were null then add them to the list
 //					if (vwRoster != null && vwWorkflowDef != null)
 //					{
-//						wiiscLog.log(wiiscLog.INFO, "Roster and Workflow Definition exist");
+//						log.info("Roster and Workflow Definition exist");
 //						//Add Roster to valid Rosters list
 //						validRosters.add(workClassNames[i]);
 //					}
@@ -2033,8 +2038,8 @@ public class WorkflowManager {
 //				if (process_sys_code.length() == 0 && workflowCount > 0)
 //				{
 //					//ALL Workflows - no process_sys_code, no account_id, no Participant specified
-//					wiiscLog.log(wiiscLog.INFO, "Create Workflows until Workflow Count is 0");
-//					wiiscLog.log(wiiscLog.INFO, "Creating " + workflowCount + " Workflows");
+//					log.info("Create Workflows until Workflow Count is 0");
+//					log.info("Creating " + workflowCount + " Workflows");
 //					//Retrieve Work Class Names
 //					//String[] workClassNames = vwSession.fetchWorkClassNames(true);
 //					
@@ -2089,7 +2094,7 @@ public class WorkflowManager {
 //							}
 //							else
 //							{
-//								wiiscLog.log(wiiscLog.INFO, "Checking Roster: " + validRosters.get(0));
+//								log.info("Checking Roster: " + validRosters.get(0));
 //								//Check the Current Workflow Count against Workflow Count
 //								if (currentWorkflowCount <= workflowCount)
 //								{
@@ -2111,7 +2116,7 @@ public class WorkflowManager {
 //					}
 //					else
 //					{
-//						wiiscLog.log(wiiscLog.INFO, "There were No Rosters, so there are No Workflows");
+//						log.info("There were No Rosters, so there are No Workflows");
 //						//Update the FnWorkflowList Object
 //						fnWorkflowList.setErrorFlag(1);
 //						fnWorkflowList.setErrorMessage("There were No Rosters, so there are No Workflows");
@@ -2123,8 +2128,8 @@ public class WorkflowManager {
 //				else if (process_sys_code.length() > 0 && workflowCount > 0)
 //				{
 //					//ALL Workflows By Roster - no account_id, no Participant specified
-//					wiiscLog.log(wiiscLog.INFO, "Create Workflows By Roster until Workflow Count is 0");
-//					wiiscLog.log(wiiscLog.INFO, "Creating " + workflowCount + " Workflows");
+//					log.info("Create Workflows By Roster until Workflow Count is 0");
+//					log.info("Creating " + workflowCount + " Workflows");
 //					
 //					//Boolean to Validate the Requested Process
 //					boolean validProcess = false;
@@ -2132,7 +2137,7 @@ public class WorkflowManager {
 //					//Verify the Workflow Process is Valid			
 //					for (int a = 0; a < validRosters.size(); a++)
 //					{
-//						wiiscLog.log(wiiscLog.INFO, "Checking Roster: " + validRosters.get(a));
+//						log.info("Checking Roster: " + validRosters.get(a));
 //						//Verify that the Process Parameter is a valid WorkClass to Launch a Workflow
 //						if (validRosters.get(a).equals(process_sys_code))
 //						{
@@ -2168,7 +2173,7 @@ public class WorkflowManager {
 //					else
 //					{
 //						//Missing Parameters
-//						wiiscLog.log(wiiscLog.INFO, "The Workflow Process " + process_sys_code + " is Invalid or does not exist");
+//						log.info("The Workflow Process " + process_sys_code + " is Invalid or does not exist");
 //						//Update FnWorkflowList
 //						fnWorkflowList.setErrorFlag(1);
 //						fnWorkflowList.setErrorMessage("Process " + process_sys_code + " is Invalid");
@@ -2180,15 +2185,15 @@ public class WorkflowManager {
 //				}
 //
 //				//Logoff the Workflow Server
-//				wiiscLog.log(wiiscLog.INFO, "Logging off the Workflow Server");
+//				log.info("Logging off the Workflow Server");
 //				vwSession.logoff();
 //				//Release the VWSession
 //				vwSession = null;
-//				wiiscLog.log(wiiscLog.INFO, "Logged off");
+//				log.info("Logged off");
 //			}
 //			else
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Workflow Login FAILED, Workflow Server may be unavailable.");
+//				log.info("Workflow Login FAILED, Workflow Server may be unavailable.");
 //				//Update the FnWorkflowList Object
 //				fnWorkflowList.setErrorFlag(1);
 //				fnWorkflowList.setErrorMessage("Workflow Login FAILED, Workflow Server may be unavailable.");
@@ -2196,7 +2201,7 @@ public class WorkflowManager {
 //		}
 //		catch (VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			if (vwSession != null)
 //			{
 //				//Set vwSession to null to kill any connections
@@ -2207,14 +2212,14 @@ public class WorkflowManager {
 //			//Update ErrorMessage
 //			fnWorkflowList.setErrorMessage(ex.getMessage());
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> createWorkflows()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> createWorkflows()");
+//		log.info("===========================================================");
 //		return fnWorkflowList;
-//	}
-//	
-//	//Delete Workflows
-//	public FnWorkflowList deleteWorkflows(String process_sys_code, String account_id, String user, String region, WIISCLog wiiscLog)
-//	{
+	}
+	
+	//Delete Workflows
+	public void deleteWorkflows(String process_sys_code, String account_id, String user, String region)
+	{
 //		//Create the FnWorkflowList Object
 //		FnWorkflowList fnWorkflowList = new FnWorkflowList();
 //
@@ -2223,14 +2228,14 @@ public class WorkflowManager {
 //
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> deleteWorkflows()");
+//			log.info("Entered WorkflowManager -> deleteWorkflows()");
 //
 //			//Login to the Workflow Server
 //			vwSession = loginWorkflow(wiiscLog);
 //
 //			if (vwSession != null)
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Logged in successfully to the Workflow Server");
+//				log.info("Logged in successfully to the Workflow Server");
 //				//ResourceBundle globalConfig = ResourceBundle.getBundle(ConstantsUtil.GLOBAL_CONFIG);
 //				//Update the FnWorkflowList Object
 //				fnWorkflowList.setErrorFlag(0);
@@ -2242,7 +2247,7 @@ public class WorkflowManager {
 //				if (process_sys_code.length() == 0 && account_id.length() == 0 && user.length() == 0 && region.equals("true"))
 //				{
 //					//ALL Workflows - no process_sys_code, no account_id, no Participant specified
-//					wiiscLog.log(wiiscLog.INFO, "Delete ALL Workflows");
+//					log.info("Delete ALL Workflows");
 //
 //					//Get String[] of Roster
 //					String[] rosterNames = getRosters(vwSession, wiiscLog);
@@ -2261,7 +2266,7 @@ public class WorkflowManager {
 //					}
 //					else
 //					{
-//						wiiscLog.log(wiiscLog.INFO, "There were No Rosters, so there are No Workflows");
+//						log.info("There were No Rosters, so there are No Workflows");
 //						//Update the FnWorkflowList Object
 //						fnWorkflowList.setErrorFlag(1);
 //						fnWorkflowList.setErrorMessage("There were No Rosters, so there are No Workflows");
@@ -2273,7 +2278,7 @@ public class WorkflowManager {
 //				else if (process_sys_code.length() > 0 && account_id.length() == 0 && user.length() == 0 && !region.equals("true"))
 //				{
 //					//ALL Workflows By Roster - no account_id, no Participant specified
-//					wiiscLog.log(wiiscLog.INFO, "Delete ALL Workflows By Roster");
+//					log.info("Delete ALL Workflows By Roster");
 //
 //					FnWorkflowList tempFnWorkflowList = new FnWorkflowList();
 //					tempFnWorkflowList = deleteWorkflowsByRoster(vwSession, process_sys_code, wiiscLog);
@@ -2287,15 +2292,15 @@ public class WorkflowManager {
 //				}
 //
 //				//Logoff the Workflow Server
-//				wiiscLog.log(wiiscLog.INFO, "Logging off the Workflow Server");
+//				log.info("Logging off the Workflow Server");
 //				vwSession.logoff();
 //				//Release the VWSession
 //				vwSession = null;
-//				wiiscLog.log(wiiscLog.INFO, "Logged off");
+//				log.info("Logged off");
 //			}
 //			else
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Workflow Login FAILED, Workflow Server may be unavailable.");
+//				log.info("Workflow Login FAILED, Workflow Server may be unavailable.");
 //				//Update the FnWorkflowList Object
 //				fnWorkflowList.setErrorFlag(1);
 //				fnWorkflowList.setErrorMessage("Workflow Login FAILED, Workflow Server may be unavailable.");
@@ -2303,7 +2308,7 @@ public class WorkflowManager {
 //		}
 //		catch (VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			if (vwSession != null)
 //			{
 //				//Set vwSession to null to kill any connections
@@ -2314,18 +2319,18 @@ public class WorkflowManager {
 //			//Update ErrorMessage
 //			fnWorkflowList.setErrorMessage(ex.getMessage());
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> deleteWorkflows()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> deleteWorkflows()");
+//		log.info("===========================================================");
 //		return fnWorkflowList;
-//	}
-//	
-//	private boolean checkPropertiesFileExist(String propName, WIISCLog wiiscLog)
-//	{
+	}
+	
+	private void checkPropertiesFileExist(String propName)
+	{
 //		boolean propertiesExist = false;
 //		
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> checkPropertiesFileExist()");
+//			log.info("Entered WorkflowManager -> checkPropertiesFileExist()");
 //			//ResourceBundle res = ResourceBundle.getBundle(propName);
 //			ResourceBundle res = null;
 //			LocalResource resConfig = getLocalResource(propName);
@@ -2334,13 +2339,13 @@ public class WorkflowManager {
 //			//Check if the ResourceBundle exists
 //			if (res != null)
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Properties file " + propName + " exists");
+//				log.info("Properties file " + propName + " exists");
 //				System.out.println("Properties file " + propName + " exists");
 //				propertiesExist = true;
 //			}
 //			else
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Properties file " + propName + " does not exist");
+//				log.info("Properties file " + propName + " does not exist");
 //				System.out.println("Properties file " + propName + " does not exist");
 //				propertiesExist = false;
 //			}
@@ -2348,32 +2353,32 @@ public class WorkflowManager {
 //		catch (MissingResourceException e)
 //		{
 //			//Properties file does not exist
-//			wiiscLog.log(wiiscLog.INFO, "Properties file " + propName + " does not exist");
+//			log.info("Properties file " + propName + " does not exist");
 //			System.out.println("Properties file " + propName + " does not exist");
 //			propertiesExist = false;
 //		}
 //		catch (Exception e)
 //		{
 //			//Properties file does not exist
-//			wiiscLog.log(wiiscLog.INFO, "Properties file " + propName + " does not exist");
+//			log.info("Properties file " + propName + " does not exist");
 //			System.out.println("Properties file " + propName + " does not exist");
 //			propertiesExist = false;
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> checkPropertiesFileExist()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> checkPropertiesFileExist()");
+//		log.info("===========================================================");
 //		
 //		return propertiesExist;
-//	}	
-//
-//	//Create Workflows for a Roster
-//	private FnWorkflowList createWorkflowsByRoster(VWSession vwSession, String rosterName, WIISCLog wiiscLog)
-//	{
+	}	
+
+	//Create Workflows for a Roster
+	private void createWorkflowsByRoster(VWSession vwSession, String rosterName)
+	{
 //		//Create the FnWorkflowList Object
 //		FnWorkflowList fnWorkflowList = new FnWorkflowList();
 //		
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> createWorkflowsByRoster()");
+//			log.info("Entered WorkflowManager -> createWorkflowsByRoster()");
 //			
 //			//Create the Workflow
 //			VWStepElement stepElement = vwSession.createWorkflow(rosterName);
@@ -2386,7 +2391,7 @@ public class WorkflowManager {
 //			if (stepElement != null)
 //			{
 //				//Initial Workflow Launch Step Properties
-//				wiiscLog.log(wiiscLog.INFO, "Workflow Process " + rosterName + " has launched");
+//				log.info("Workflow Process " + rosterName + " has launched");
 //
 //				//Update the FnWorkflowResult
 //				fnWorkflowResult = updateFnWorkflowInfo(stepElement, "New", wiiscLog);
@@ -2398,15 +2403,15 @@ public class WorkflowManager {
 //					for (int j = 0; j < stepResponses.length; j++)
 //					{
 //						String stepResponse = stepResponses[j];
-//						wiiscLog.log(wiiscLog.INFO, "Step Response: " + stepResponse);
+//						log.info("Step Response: " + stepResponse);
 //					}
 //					String responseValue = "Ok";
-//					wiiscLog.log(wiiscLog.INFO, "Applying Step Response: " + responseValue);
+//					log.info("Applying Step Response: " + responseValue);
 //					stepElement.setSelectedResponse(responseValue);
 //				}
 //				else
 //				{
-//					wiiscLog.log(wiiscLog.INFO, "No Step Responses - Possible Launch Step");
+//					log.info("No Step Responses - Possible Launch Step");
 //				}
 //
 //				//DoStepElementAction - Dispatch the Workflow
@@ -2416,8 +2421,8 @@ public class WorkflowManager {
 //				//More to add later
 //
 //				//Dispatch the Workflow Launch Step
-//				wiiscLog.log(wiiscLog.INFO, "===========================================");
-//				wiiscLog.log(wiiscLog.INFO, "Workflow Process " + rosterName + " has initiated");
+//				log.info("===========================================");
+//				log.info("Workflow Process " + rosterName + " has initiated");
 //				//Update FnWorkflow
 //				fnWorkflowResult.setErrorFlag(0);
 //				fnWorkflowResult.setErrorMessage("");
@@ -2429,7 +2434,7 @@ public class WorkflowManager {
 //			}
 //			else
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Workflow Process " + rosterName + " failed to launch");
+//				log.info("Workflow Process " + rosterName + " failed to launch");
 //				//Update FnWorkflow
 //				fnWorkflowResult.setErrorFlag(1);
 //				fnWorkflowResult.setErrorMessage("Process " + rosterName + " FAILED to launch");
@@ -2438,27 +2443,27 @@ public class WorkflowManager {
 //		}
 //		catch (VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			//Update the FnWorkflowList Object
 //			fnWorkflowList.setErrorFlag(1);
 //			//Update ErrorMessage
 //			fnWorkflowList.setErrorMessage(ex.getMessage());
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> createWorkflowsByRoster()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> createWorkflowsByRoster()");
+//		log.info("===========================================================");
 //		
 //		return fnWorkflowList;
-//	}
-//	
-//	//Delete Workflows for a Roster
-//	private FnWorkflowList deleteWorkflowsByRoster(VWSession vwSession, String rosterName, WIISCLog wiiscLog)
-//	{
+	}
+	
+	//Delete Workflows for a Roster
+	private void deleteWorkflowsByRoster(VWSession vwSession, String rosterName)
+	{
 //		//Create the FnWorkflowList Object
 //		FnWorkflowList fnWorkflowList = new FnWorkflowList();
 //		
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> deleteWorkflowsByRoster()");
+//			log.info("Entered WorkflowManager -> deleteWorkflowsByRoster()");
 //			
 //			VWRoster vwRoster = vwSession.getRoster(rosterName);
 //			int workflowCount = vwRoster.fetchCount();
@@ -2493,7 +2498,7 @@ public class WorkflowManager {
 //						}
 //						else
 //						{
-//							wiiscLog.log(wiiscLog.INFO, "Failed to get a WorkObject");
+//							log.info("Failed to get a WorkObject");
 //							//Update the FnWorkflow Object
 //							fnWorkflowList.setErrorFlag(1);
 //							fnWorkflowList.setErrorMessage("Failed to get a WorkObject");
@@ -2507,7 +2512,7 @@ public class WorkflowManager {
 //		}
 //		catch (VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			if (vwSession != null)
 //			{
 //				//Set vwSession to null to kill any connections
@@ -2518,875 +2523,1084 @@ public class WorkflowManager {
 //			//Update ErrorMessage
 //			fnWorkflowList.setErrorMessage(ex.getMessage());
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> deleteWorkflowsByRoster()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> deleteWorkflowsByRoster()");
+//		log.info("===========================================================");
 //		
 //		return fnWorkflowList;
-//	}
-//
-//	//Get PE Workflow Info
-//	public FnWorkflow getWorkflowInfo(String process, String step, String user, String propName, String propValue, WIISCLog wiiscLog)
-//	{
-//		//Create the FnWorkflow Object
-//		FnWorkflow fnWorkflow = new FnWorkflow();
-//		//Get a VWSession Object
-//		VWSession vwSession = new VWSession();
-//
-//		//Get the Filter Name
-//		//String filterName = "";
-//		String[] filterName = null;
-//		//Get the Filter Value
-//		//String filterValue = "";
-//		String[] filterValue = null;
-//
-//		try
-//		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> getWorkflowInfo()");
-//			
-//			wiiscLog.log(wiiscLog.INFO, "Process: " + process);
-//			wiiscLog.log(wiiscLog.INFO, "Step: " + step);
-//			wiiscLog.log(wiiscLog.INFO, "User: " + user);
-//			wiiscLog.log(wiiscLog.INFO, "Property Name: " + propName);
-//			wiiscLog.log(wiiscLog.INFO, "Property Value: " + propValue);
-//			
-//			//Login to the Workflow Server
-//			vwSession = loginWorkflow(wiiscLog);
-//
-//			if (vwSession != null)
-//			{
-//				wiiscLog.log(wiiscLog.INFO, "Logged in successfully to the Workflow Server");
-//				//ResourceBundle globalConfig = ResourceBundle.getBundle(ConstantsUtil.GLOBAL_CONFIG);
-//				//Update the FnWorkflow Object
-//				fnWorkflow.setErrorFlag(0);
-//				fnWorkflow.setErrorMessage("");
-//
-//				/*****************************************************************************
-//				 * Get the Workflow by a Property and Property Value - workflow data field
-//				 *****************************************************************************/
-//				if (step.length() == 0 && propName.length() > 0 && propValue.length() > 0)
-//				{
-//					//By Property and Property Value only
-//					wiiscLog.log(wiiscLog.INFO, "Get the Workflow by Property and Property Value");
-//
-//					//Initialize the Array
-//					filterName = new String[1];
-//					filterValue = new String[1];
-//					filterName[0] = propName;
-//					filterValue[0] = propValue;
-//
-//					//Get String[] of Queues
-//					String[] queueNames = getQueues(vwSession, wiiscLog);
-//					//Check queueNames
-//					if (queueNames.length > 0)
-//					{
-//						//Loop and Get Workflows from each Queue
-//						for (int i = 0; i < queueNames.length; i++)
-//						{
-//							//Exclude the System Queues
-//							if (queueNames[i].contains("Instruction") == false &&
-//									queueNames[i].contains("(") == false &&
-//									queueNames[i].equals("Conductor") == false &&
-//									queueNames[i].equals("WSRequest") == false &&
-//									queueNames[i].equals("CE_Operations") == false)
-//							{
-//								//Get the Workflow
-//								fnWorkflow = getFnWorkflowByQueue(vwSession, queueNames[i], filterName, filterValue, wiiscLog);
-//								//Check the FnWorkflow to see if its Null
-//								if (fnWorkflow != null)
-//								{
-//									break;
-//								}
-//							}
-//						}
-//						//Check if the FnWorkflow was still null after checking each Queue
-//						if (fnWorkflow == null)
-//						{
-//							wiiscLog.log(wiiscLog.INFO, "There was No Workflow found for the Property " + propName + " and Property Value " + propValue);
-//							//Update the Error Flag to 0 since this is not a real Error
-//							fnWorkflow = new FnWorkflow();
-//							fnWorkflow.setErrorFlag(0);
-//							fnWorkflow.setErrorMessage("");
-//							wiiscLog.log(wiiscLog.INFO, "Workflow returning with ErrorFlag of 0");
-//						}
-//					}
-//					else
-//					{
-//						wiiscLog.log(wiiscLog.INFO, "There were No Queues, so there are No Workflows");
-//						//Update the FnWorkflow Object
-//						fnWorkflow.setErrorFlag(1);
-//						fnWorkflow.setErrorMessage("There were No Queues, so there are No Workflows");
-//					}
-//				}
-//				/*********************************************************************************
-//				 * Get the Workflow by a Step, Property and Property Value - workflow data field
-//				 *********************************************************************************/
-//				else if (step.length() > 0 && propName.length() > 0 && propValue.length() > 0)
-//				{
-//					//By Property and Property Value only
-//					wiiscLog.log(wiiscLog.INFO, "Get the Workflow by a Step, Property and Property Value");
-//
-//					//Initialize the Array
-//					filterName = new String[1];
-//					filterValue = new String[1];
-//					filterName[0] = propName;
-//					filterValue[0] = propValue;
-//
-//					//Set the Queue
-//					String queueName = step;
-//					//Check queueName
-//					if (queueName.length() > 0)
-//					{
-//						//Exclude the System Queues
-//						if (!queueName.contains("Instruction") &&
-//								!queueName.contains("(") &&
-//								!queueName.equals("Conductor") &&
-//								!queueName.equals("WSRequest") &&
-//								!queueName.equals("CE_Operations"))
-//						{
-//							//Get the Workflow
-//							fnWorkflow = getFnWorkflowByQueue(vwSession, queueName, filterName, filterValue, wiiscLog);
-//						}
-//					}
-//					else
-//					{
-//						wiiscLog.log(wiiscLog.INFO, "There was No Queue, so there are No Workflows");
-//						//Update the FnWorkflow Object
-//						fnWorkflow.setErrorFlag(1);
+	}
+
+	//Get PE Workflow Info
+	public FnWorkflow getWorkflowInfo(String process, String step, String user, String propName, String propValue)
+	{
+		//Create the FnWorkflow Object
+		FnWorkflow fnWorkflow = new FnWorkflow();
+		
+		//Get a VWSession Object
+		VWSession vwSession = new VWSession();
+
+		//Get the Filter Name
+		//String filterName = "";
+		String[] filterName = null;
+		//Get the Filter Value
+		//String filterValue = "";
+		String[] filterValue = null;
+
+		try
+		{
+			log.info("Entered WorkflowManager -> getWorkflowInfo()");
+			
+			log.info("Process: " + process);
+			log.info("Step: " + step);
+			log.info("User: " + user);
+			log.info("Property Name: " + propName);
+			log.info("Property Value: " + propValue);
+			
+			//Login to the Workflow Server
+			vwSession = loginWorkflow();
+
+			if (vwSession != null)
+			{
+				log.info("Logged in successfully to the Workflow Server");
+				//ResourceBundle globalConfig = ResourceBundle.getBundle(ConstantsUtil.GLOBAL_CONFIG);
+				//Update the FnWorkflow Object
+				fnWorkflow.setErrorFlag(0);
+				//fnWorkflow.setErrorMessage("");
+
+				/*****************************************************************************
+				 * Get the Workflow by a Property and Property Value - workflow data field
+				 *****************************************************************************/
+				if (step.length() == 0 && propName.length() > 0 && propValue.length() > 0)
+				{
+					//By Property and Property Value only
+					log.info("Get the Workflow by Property and Property Value");
+
+					//Initialize the Array
+					filterName = new String[1];
+					filterValue = new String[1];
+					filterName[0] = propName;
+					filterValue[0] = propValue;
+
+					//Get String[] of Queues
+					String[] queueNames = getQueues(vwSession);
+					//Check queueNames
+					if (queueNames.length > 0)
+					{
+						//Loop and Get Workflows from each Queue
+						for (int i = 0; i < queueNames.length; i++)
+						{
+							//Exclude the System Queues
+							if (queueNames[i].contains("Instruction") == false &&
+									queueNames[i].contains("(") == false &&
+									queueNames[i].equals("Conductor") == false &&
+									queueNames[i].equals("WSRequest") == false &&
+									queueNames[i].equals("CE_Operations") == false)
+							{
+								//Get the Workflow
+								fnWorkflow = getFnWorkflowByQueue(vwSession, queueNames[i], filterName, filterValue);
+								//Check the FnWorkflow to see if its Null
+								if (fnWorkflow != null)
+								{
+									break;
+								}
+							}
+						}
+						//Check if the FnWorkflow was still null after checking each Queue
+						if (fnWorkflow == null)
+						{
+							log.info("There was No Workflow found for the Property " + propName + " and Property Value " + propValue);
+							//Update the Error Flag to 0 since this is not a real Error
+							fnWorkflow = new FnWorkflow();
+							fnWorkflow.setErrorFlag(0);
+							//fnWorkflow.setErrorMessage("");
+							log.info("Workflow returning with ErrorFlag of 0");
+						}
+					}
+					else
+					{
+						log.info("There were No Queues, so there are No Workflows");
+						//Update the FnWorkflow Object
+						fnWorkflow.setErrorFlag(1);
+						//fnWorkflow.setErrorMessage("There were No Queues, so there are No Workflows");
+					}
+				}
+				/*********************************************************************************
+				 * Get the Workflow by a Step, Property and Property Value - workflow data field
+				 *********************************************************************************/
+				else if (step.length() > 0 && propName.length() > 0 && propValue.length() > 0)
+				{
+					//By Property and Property Value only
+					log.info("Get the Workflow by a Step, Property and Property Value");
+
+					//Initialize the Array
+					filterName = new String[1];
+					filterValue = new String[1];
+					filterName[0] = propName;
+					filterValue[0] = propValue;
+
+					//Set the Queue
+					String queueName = step;
+					//Check queueName
+					if (queueName.length() > 0)
+					{
+						//Exclude the System Queues
+						if (!queueName.contains("Instruction") &&
+								!queueName.contains("(") &&
+								!queueName.equals("Conductor") &&
+								!queueName.equals("WSRequest") &&
+								!queueName.equals("CE_Operations"))
+						{
+							//Get the Workflow
+							fnWorkflow = getFnWorkflowByQueue(vwSession, queueName, filterName, filterValue);
+						}
+					}
+					else
+					{
+						log.info("There was No Queue, so there are No Workflows");
+						//Update the FnWorkflow Object
+						fnWorkflow.setErrorFlag(1);
 //						fnWorkflow.setErrorMessage("There was No Queue, so there are No Workflows");
-//					}
-//				}
-//				else
-//				{
-//					//Return an Error
-//					wiiscLog.log(wiiscLog.INFO, "The Parameters Process, Step, Property Name and Property Value cannot be used together, so there are No Workflows");
-//					//Update the FnWorkflow Object
-//					fnWorkflow.setErrorFlag(1);
+					}
+				}
+				else
+				{
+					//Return an Error
+					log.info("The Parameters Process, Step, Property Name and Property Value cannot be used together, so there are No Workflows");
+					//Update the FnWorkflow Object
+					fnWorkflow.setErrorFlag(1);
 //					fnWorkflow.setErrorMessage("The Parameters Process, Step, Property Name and Property Value cannot be used together, so there are No Workflows");
-//				}
-//
-//				//Logoff the Workflow Server
-//				wiiscLog.log(wiiscLog.INFO, "Logging off the Workflow Server");
-//				vwSession.logoff();
-//				//Release the VWSession
-//				vwSession = null;
-//				wiiscLog.log(wiiscLog.INFO, "Logged off");
-//			}
-//			else
-//			{
-//				wiiscLog.log(wiiscLog.INFO, "Workflow Login FAILED, Workflow Server may be unavailable.");
-//				//Update the FnWorkflow Object
-//				fnWorkflow.setErrorFlag(1);
+				}
+
+				//Logoff the Workflow Server
+				log.info("Logging off the Workflow Server");
+				vwSession.logoff();
+				//Release the VWSession
+				vwSession = null;
+				log.info("Logged off");
+				
+				//Check if Workflow Output is Enabled to write the records to a file
+				if (appConfig.getEnableWorkflowOutput().equals("true")) {
+					if (appConfig.getWorkflowOutputPath() != null && !appConfig.getWorkflowOutputPath().equals("")) {
+						//Use the Output Path to create a file with the Workflow Info
+						//Call Write FnWorkflow to File
+					}
+				}
+			}
+			else
+			{
+				log.info("Workflow Login FAILED, Workflow Server may be unavailable.");
+				//Update the FnWorkflow Object
+				fnWorkflow.setErrorFlag(1);
 //				fnWorkflow.setErrorMessage("Workflow Login FAILED, Workflow Server may be unavailable.");
-//			}
-//
-//		}
-//		catch(VWException ex)
-//		{
-//			wiiscLog.log("ERROR", ex.getMessage());
-//			//Update the FnWorkflow Object
-//			fnWorkflow.setErrorFlag(1);
-//			//Update ErrorMessage
+			}
+
+		}
+		catch(VWException ex)
+		{
+			log.info("ERROR", ex.getMessage());
+			//Update the FnWorkflow Object
+			fnWorkflow.setErrorFlag(1);
+			//Update ErrorMessage
 //			fnWorkflow.setErrorMessage(ex.getMessage());
 //			fnWorkflow.setFnWorkflowStatus("Exception in getWorkflowInfo()");
-//		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> getWorkflowInfo()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
-//		return fnWorkflow;
-//	}
-//
-//	public FnBaseXML getWorkflowList(String process, String step, String user, String propName, String propValue, String sortBy, WIISCLog wiiscLog)
-//	{
-//		//Create an FnBaseXML
-//		FnBaseXML fnBaseXML = new FnBaseXML();
-//		//Create the FnWorkflowList Object
-//		FnWorkflowList fnWorkflowList = new FnWorkflowList();
-//
-//		//Get a VWSession Object
-//		VWSession vwSession = new VWSession();
-//		//FileNet DB Connection
-//		SQLServerConnection con = null;
-//		//Boolean to continue processing
-//		boolean beginProcessing = false;
-//
-//		//Get the Filter Name
-//		//String filterName = "";
-//		String[] filterName = null;
-//		//Get the Filter Value
-//		//String filterValue = "";
-//		String[] filterValue = null;
-//
-//		try
-//		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> getWorkflowList()");
-//			
-//			wiiscLog.log(wiiscLog.INFO, "Process: " + process);
-//			wiiscLog.log(wiiscLog.INFO, "Step: " + step);
-//			wiiscLog.log(wiiscLog.INFO, "User: " + user);
-//			wiiscLog.log(wiiscLog.INFO, "Property Name: " + propName);
-//			wiiscLog.log(wiiscLog.INFO, "Property Value: " + propValue);
-//			wiiscLog.log(wiiscLog.INFO, "Sort By: " + sortBy);
-//
-//			//Login to the Workflow Server
-//			vwSession = loginWorkflow(wiiscLog);
-//
-//			if (vwSession != null)
-//			{
-//				wiiscLog.log(wiiscLog.INFO, "Logged in successfully to the Workflow Server");
-//				//ResourceBundle globalConfig = ResourceBundle.getBundle(ConstantsUtil.GLOBAL_CONFIG);
-//				//Update the FnWorkflowList Object
-//				fnWorkflowList.setErrorFlag(0);
-//				fnWorkflowList.setErrorMessage("");
-//
-//				/****************************************
-//				 * Get ALL Workflows using Roster Search
-//				 ****************************************/
-//				//Add later if needed
-//				/**************************************************
-//				 * Get ALL Workflows using Queue Search - Workpool 
-//				 **************************************************/
-//				if (process.length() == 0 && step.length() == 0 && user.length() == 0 && propName.length() == 0 && propValue.length() == 0)
-//				{
-//					//ALL Workflows - no process_sys_code, no account_id, no Participant specified
-//					wiiscLog.log(wiiscLog.INFO, "Get ALL Workflows");
-//
-//					if (globalConfig.containsKey("workflowSearchUserField"))
-//					{
-//						//Check if the Property setting has a value
-//						if (globalConfig.getString("workflowSearchUserField").length() > 0)
-//						{
-//							//Initialize the Array
-//							filterName = new String[1];
-//							filterValue = new String[1];
-//							filterName[0] = globalConfig.getString("workflowSearchUserField");
-//							filterValue[0] = user;
-//						}
-//					}
-//					
-//					//Get String[] of Queue
-//					String[] queueNames = getQueues(vwSession, wiiscLog);
-//					//Check queueNames
-//					if (queueNames.length > 0)
-//					{
-//						//Check if DB FileNet Query will be used or FileNet API
-//						if (globalConfig.getString("workflowDBSearchEnabled").equals("true"))
-//						{
-//							con = loginWorkflowDB(wiiscLog);
-//							if (con != null)
-//							{
-//								beginProcessing = true;
-//							}
-//						}
-//						else
-//						{
-//							beginProcessing = true;
-//						}
-//						
-//						//Verify Processing can begin
-//						if (beginProcessing)
-//						{
-//							//Loop and Get Workflows from each Queue
-//							for (int i = 0; i < queueNames.length; i++)
-//							{
-//								//Exclude the System Queues
-//								if (!queueNames[i].contains("Instruction") &&
-//										!queueNames[i].contains("(") &&
-//										!queueNames[i].equals("Conductor") &&
-//										!queueNames[i].equals("WSRequest") &&
-//										!queueNames[i].equals("CE_Operations"))
-//								{
-//												
-//									//Get the FnWorkflowList by Queue Name
-//									fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, queueNames[i], filterName, filterValue, sortBy, wiiscLog);
-//																	
-//									//Check FnWorkflowList size
-//									if (fnWorkflowList.getCount() == 0 || fnWorkflowList.getErrorFlag() == 0)
-//									{
-//										fnWorkflowList.setStepName(queueNames[i]);
-//										//Add the List to the FnBaseXML
-//										fnBaseXML.addFnWorkflowList(fnWorkflowList);
-//									}
-//									else
-//									{
-//										wiiscLog.log(wiiscLog.INFO, "Error with Queue that needs addressed");
-//										//Update the FnBaseXML Object
-//										fnBaseXML.setErrorFlag(1);
-//										fnBaseXML.setErrorMessage("Error with Queue that needs addressed");
-//									}
-//								}
-//							}
-//						}
-//						else
-//						{
-//							wiiscLog.log(wiiscLog.INFO, "Processing cannot begin because a DB Connection could not be established");
-//						}
-//												
-//						//Close the FileNet DB Connection
-//						if (con != null)
-//						{
-//							try
-//							{
-//								wiiscLog.log(wiiscLog.INFO, "Closing the FileNet DB Connection");
-//								con.close();
-//							}
-//							catch(Exception e)
-//							{
-//								wiiscLog.log(wiiscLog.INFO, "Error closing the FileNet DB Connection");
-//								wiiscLog.log("ERROR", e.getMessage());
-//							}
-//						}
-//					}
-//					else
-//					{
-//						wiiscLog.log(wiiscLog.INFO, "There were No Queues, so there are No Workflows");
-//						//Update the FnBaseXML Object
-//						fnBaseXML.setErrorFlag(1);
-//						fnBaseXML.setErrorMessage("There were No Queues, so there are No Workflows");
-//					}					
-//				}
-//				/**********************************
-//				 * Get ALL Workflows for a Process
-//				 **********************************/
-//				else if (process.length() > 0 && step.length() == 0 && user.length() == 0 && propName.length() == 0 && propValue.length() == 0)
-//				{
-//					//By process only
-//					wiiscLog.log(wiiscLog.INFO, "Get ALL Workflows for a Process");
-//					
-//					//Get the FnWorkflowList
-//					fnWorkflowList = getFnWorkflowListByRoster(vwSession, process, filterName, filterValue, wiiscLog);
-//					//Add the List to the FnBaseXML
-//					fnBaseXML.addFnWorkflowList(fnWorkflowList);
-//				}
-//				/**********************************
-//				 * Get ALL Workflows for a Step
-//				 **********************************/
-//				else if (process.length() == 0 && step.length() > 0 && user.length() == 0 && propName.length() == 0 && propValue.length() == 0)
-//				{
-//					//By step only
-//					wiiscLog.log(wiiscLog.INFO, "Get ALL Workflows for a Step");
-//					
-//					if (globalConfig.containsKey("workflowSearchUserField"))
-//					{
-//						//Check if the Property setting has a value
-//						if (globalConfig.getString("workflowSearchUserField").length() > 0)
-//						{
-//							//Initialize the Array
-//							filterName = new String[1];
-//							filterValue = new String[1];
-//							filterName[0] = globalConfig.getString("workflowSearchUserField");
-//							filterValue[0] = "";
-//						}
-//					}
-//					
-//					//Check if DB FileNet Query will be used or FileNet API
-//					if (globalConfig.getString("workflowDBSearchEnabled").equals("true"))
-//					{
-//						con = loginWorkflowDB(wiiscLog);
-//						if (con != null)
-//						{
-//							beginProcessing = true;
-//						}
-//					}
-//					else
-//					{
-//						beginProcessing = true;
-//					}
-//
-//					//Verify Processing can begin
-//					if (beginProcessing)
-//					{
-//						//Get the FnWorkflowList
-//						fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, step, filterName, filterValue, sortBy, wiiscLog);
-//						//Add the List to the FnBaseXML
-//						fnBaseXML.addFnWorkflowList(fnWorkflowList);
-//					}
-//					else
-//					{
-//						wiiscLog.log(wiiscLog.INFO, "Processing cannot begin because a DB Connection could not be established");
-//					}
-//											
-//					//Close the FileNet DB Connection
-//					if (con != null)
-//					{
-//						try
-//						{
-//							wiiscLog.log(wiiscLog.INFO, "Closing the FileNet DB Connection");
-//							con.close();
-//						}
-//						catch(Exception e)
-//						{
-//							wiiscLog.log(wiiscLog.INFO, "Error closing the FileNet DB Connection");
-//							wiiscLog.log("ERROR", e.getMessage());
-//						}
-//					}
-//				}
-//				/*****************************************************************************
-//				 * Get ALL Workflows by a Property and Property Value - workflow data field
-//				 *****************************************************************************/
-//				else if (process.length() == 0 && step.length() == 0 && user.length() == 0 && propName.length() > 0 && propValue.length() > 0)
-//				{
-//					//By Property and Property Value only
-//					wiiscLog.log(wiiscLog.INFO, "Get ALL Workflows by Property and Property Value");
-//
-//					//Get String[] of Queues
-//					String[] queueNames = getQueues(vwSession, wiiscLog);
-//					//Check queueNames
-//					if (queueNames.length > 0)
-//					{
-//						if (globalConfig.containsKey("workflowSearchUserField"))
-//						{
-//							//Check if the Property setting has a value
-//							if (globalConfig.getString("workflowSearchUserField").length() == 0)
-//							{
-//								//Initialize the Array
-//								filterName = new String[1];
-//								filterValue = new String[1];
-//								filterName[0] = propName;
-//								filterValue[0] = propValue;
-//								wiiscLog.log(wiiscLog.INFO, "Property Value Only");
-//							}
-//							else
-//							{
-//								//Initialize the Array
-//								filterName = new String[2];
-//								filterValue = new String[2];
-//								filterName[0] = globalConfig.getString("workflowSearchUserField");
-//								filterValue[0] = user;
-//								filterName[1] = propName;
-//								filterValue[1] = propValue;
-//								wiiscLog.log(wiiscLog.INFO, "Property Value and User");
-//							}
-//						}
-//												
-//						//Check if DB FileNet Query will be used or FileNet API
-//						if (globalConfig.getString("workflowDBSearchEnabled").equals("true"))
-//						{
-//							con = loginWorkflowDB(wiiscLog);
-//							if (con != null)
-//							{
-//								beginProcessing = true;
-//							}
-//						}
-//						else
-//						{
-//							beginProcessing = true;
-//						}
-//						
-//						//Verify Processing can begin
-//						if (beginProcessing)
-//						{
-//							//Loop and Get Workflows from each Queue
-//							for (int i = 0; i < queueNames.length; i++)
-//							{
-//								//Exclude the System Queues
-//								if (!queueNames[i].contains("Instruction") &&
-//										!queueNames[i].contains("(") &&
-//										!queueNames[i].equals("Conductor") &&
-//										!queueNames[i].equals("WSRequest") &&
-//										!queueNames[i].equals("CE_Operations"))
-//								{
-//									fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, queueNames[i], filterName, filterValue, sortBy, wiiscLog);
-//									//Add the List to the FnBaseXML
-//									fnBaseXML.addFnWorkflowList(fnWorkflowList);
-//								}
-//							}
-//						}
-//						else
-//						{
-//							wiiscLog.log(wiiscLog.INFO, "Processing cannot begin because a DB Connection could not be established");
-//						}
-//												
-//						//Close the FileNet DB Connection
-//						if (con != null)
-//						{
-//							try
-//							{
-//								wiiscLog.log(wiiscLog.INFO, "Closing the FileNet DB Connection");
-//								con.close();
-//							}
-//							catch(Exception e)
-//							{
-//								wiiscLog.log(wiiscLog.INFO, "Error closing the FileNet DB Connection");
-//								wiiscLog.log("ERROR", e.getMessage());
-//							}
-//						}
-//					}
-//					else
-//					{
-//						wiiscLog.log(wiiscLog.INFO, "There were No Queues, so there are No Workflows");
-//						//Update the FnWorkflowList Object
-//						fnWorkflowList.setErrorFlag(1);
-//						fnWorkflowList.setErrorMessage("There were No Queues, so there are No Workflows");
-//						//Update the FnBaseXML Object
-//						fnBaseXML.setErrorFlag(1);
-//						fnBaseXML.setErrorMessage("There were No Queues, so there are No Workflows");
-//					}
-//				}
-//				/***************************************************************************************
-//				 * Get ALL Workflows by User/Participant - workflow data field User/Participant - Inbox
-//				 ***************************************************************************************/
-//				else if (process.length() == 0 && step.length() == 0 && user.length() > 0 && propName.length() == 0 && propValue.length() == 0)
-//				{
-//					//By Participant Only
-//					wiiscLog.log(wiiscLog.INFO, "Get ALL Workflows by User");
-//
-//					//Initialize the Array
-//					filterName = new String[1];
-//					filterValue = new String[1];
-//					//Queue
-//					String queueName = "";
-//					//Get String[] of Queues
-//					String[] queueNames = null;
-//					
-//					if (globalConfig.containsKey("workflowSearchUserField"))
-//					{
-//						//Check if the Property setting has a value
-//						if (globalConfig.getString("workflowSearchUserField").length() == 0)
-//						{
-//							//Update the Array
-//							filterName[0] = "F_BoundUser";
-//							filterValue[0] = user;
-//
-//							//Get the Inbox(0) Queue and use this to find the Workflows for the particular User
-//							queueName = "Inbox(0)";
-//							
-//							fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, queueName, filterName, filterValue, sortBy, wiiscLog);
-//							//Add the List to the FnBaseXML
-//							fnBaseXML.addFnWorkflowList(fnWorkflowList);
-//						}
-//						else
-//						{
-//							//String[] of Queues
-//							queueNames = getQueues(vwSession, wiiscLog);
-//							//Check queueNames
-//							if (queueNames.length > 0)
-//							{
-//								//Update the Array
-//								filterName[0] = globalConfig.getString("workflowSearchUserField");
-//								filterValue[0] = user;
-//								
-//								//Loop and Get Workflows from each Queue
-//								for (int i = 0; i < queueNames.length; i++)
-//								{
-//									//Exclude the System Queues
-//									if (!queueNames[i].contains("Instruction") &&
-//											!queueNames[i].contains("(") &&
-//											!queueNames[i].equals("Conductor") &&
-//											!queueNames[i].equals("WSRequest") &&
-//											!queueNames[i].equals("CE_Operations"))
-//									{
-//										fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, queueNames[i], filterName, filterValue, sortBy, wiiscLog);
-//										//Add the List to the FnBaseXML
-//										fnBaseXML.addFnWorkflowList(fnWorkflowList);
-//									}
-//								}
-//							}
-//							else
-//							{
-//								wiiscLog.log(wiiscLog.INFO, "There were No Queues, so there are No Workflows");
-//								//Update the FnBaseXML Object
-//								fnBaseXML.setErrorFlag(1);
-//								fnBaseXML.setErrorMessage("There were No Queues, so there are No Workflows");
-//							}
-//						}
-//					}
-//					else
-//					{
-//						//Update the Array
-//						filterName[0] = "F_BoundUser";
-//						filterValue[0] = user;
-//
-//						//Get the Inbox(0) Queue and use this to find the Workflows for the particular User
-//						queueName = "Inbox(0)";
-//						
-//						fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, queueName, filterName, filterValue, sortBy, wiiscLog);
-//						//Add the List to the FnBaseXML
-//						fnBaseXML.addFnWorkflowList(fnWorkflowList);
-//					}
-//				}
-//				/***************************************************************************************
-//				 * Get ALL Workflows by User/Participant, Property and Property Value - Inbox Search
-//				 ***************************************************************************************/
-//				else if (process.length() == 0 && step.length() == 0 && user.length() > 0 && propName.length() > 0 && propValue.length() > 0)
-//				{
-//					//By Participant Only
-//					wiiscLog.log(wiiscLog.INFO, "Get ALL Workflows by User, Property and Property Value");
-//
-//					//Initialize the Array
-//					filterName = new String[2];
-//					filterValue = new String[2];
-//					//Queue
-//					String queueName = "";
-//					//Get String[] of Queues
-//					String[] queueNames = null;
-//					
-//					if (globalConfig.containsKey("workflowSearchUserField"))
-//					{
-//						//Check if the Property setting has a value
-//						if (globalConfig.getString("workflowSearchUserField").length() == 0)
-//						{
-//							//Update the Array
-//							filterName[0] = "F_BoundUser";
-//							filterValue[0] = user;
-//							filterName[1] = propName;
-//							filterValue[1] = propValue;
-//
-//							//Get the Inbox(0) Queue and use this to find the Workflows for the particular User
-//							queueName = "Inbox(0)";
-//							
-//							fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, queueName, filterName, filterValue, sortBy, wiiscLog);
-//							//Add the List to the FnBaseXML
-//							fnBaseXML.addFnWorkflowList(fnWorkflowList);
-//						}
-//						else
-//						{
-//							//String[] of Queues
-//							queueNames = getQueues(vwSession, wiiscLog);
-//							//Check queueNames
-//							if (queueNames.length > 0)
-//							{
-//								//Update the Array
-//								filterName[0] = globalConfig.getString("workflowSearchUserField");
-//								filterValue[0] = user;
-//								filterName[1] = propName;
-//								filterValue[1] = propValue;
-//								
-//								//Loop and Get Workflows from each Queue
-//								for (int i = 0; i < queueNames.length; i++)
-//								{
-//									//Exclude the System Queues
-//									if (!queueNames[i].contains("Instruction") &&
-//											!queueNames[i].contains("(") &&
-//											!queueNames[i].equals("Conductor") &&
-//											!queueNames[i].equals("WSRequest") &&
-//											!queueNames[i].equals("CE_Operations"))
-//									{
-//										fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, queueNames[i], filterName, filterValue, sortBy, wiiscLog);
-//										//Add the List to the FnBaseXML
-//										fnBaseXML.addFnWorkflowList(fnWorkflowList);
-//									}
-//								}
-//							}
-//							else
-//							{
-//								wiiscLog.log(wiiscLog.INFO, "There were No Queues, so there are No Workflows");
-//								//Update the FnBaseXML Object
-//								fnBaseXML.setErrorFlag(1);
-//								fnBaseXML.setErrorMessage("There were No Queues, so there are No Workflows");
-//							}
-//						}
-//					}
-//					else
-//					{
-//						//Update the Array
-//						filterName[0] = "F_BoundUser";
-//						filterValue[0] = user;
-//						filterName[1] = propName;
-//						filterValue[1] = propValue;
-//
-//						//Get the Inbox(0) Queue and use this to find the Workflows for the particular User
-//						queueName = "Inbox(0)";
-//						
-//						fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, queueName, filterName, filterValue, sortBy, wiiscLog);
-//						//Add the List to the FnBaseXML
-//						fnBaseXML.addFnWorkflowList(fnWorkflowList);
-//					}
-//				}
-//				/*********************************************************************************
-//				 * Get ALL Workflows by a Step, Property and Property Value - workflow data field
-//				 *********************************************************************************/
-//				else if (process.length() == 0 && step.length() > 0 && user.length() == 0 && propName.length() > 0 && propValue.length() > 0)
-//				{
-//					//By Property and Property Value only
-//					wiiscLog.log(wiiscLog.INFO, "Get ALL Workflows by a Step, Property and Property Value");
-//
-//					//Initialize the Array
-//					filterName = new String[1];
-//					filterValue = new String[1];
-//					filterName[0] = propName;
-//					filterValue[0] = propValue;
-//
-//					//Set the Queue
-//					String queueName = step;
-//					//Check queueName
-//					if (queueName.length() > 0)
-//					{
-//						//Check if DB FileNet Query will be used or FileNet API
-//						if (globalConfig.getString("workflowDBSearchEnabled").equals("true"))
-//						{
-//							con = loginWorkflowDB(wiiscLog);
-//							if (con != null)
-//							{
-//								beginProcessing = true;
-//							}
-//						}
-//						else
-//						{
-//							beginProcessing = true;
-//						}
-//						
-//						//Verify Processing can begin
-//						if (beginProcessing)
-//						{
-//							//Exclude the System Queues
-//							if (!queueName.contains("Instruction") &&
-//									!queueName.contains("(") &&
-//									!queueName.equals("Conductor") &&
-//									!queueName.equals("WSRequest") &&
-//									!queueName.equals("CE_Operations"))
-//							{
-//								fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, queueName, filterName, filterValue, sortBy, wiiscLog);
-//								//Add the List to the FnBaseXML
-//								fnBaseXML.addFnWorkflowList(fnWorkflowList);
-//							}
-//						}
-//						else
-//						{
-//							wiiscLog.log(wiiscLog.INFO, "Processing cannot begin because a DB Connection could not be established");
-//						}
-//												
-//						//Close the FileNet DB Connection
-//						if (con != null)
-//						{
-//							try
-//							{
-//								wiiscLog.log(wiiscLog.INFO, "Closing the FileNet DB Connection");
-//								con.close();
-//							}
-//							catch(Exception e)
-//							{
-//								wiiscLog.log(wiiscLog.INFO, "Error closing the FileNet DB Connection");
-//								wiiscLog.log("ERROR", e.getMessage());
-//							}
-//						}
-//					}
-//					else
-//					{
-//						wiiscLog.log(wiiscLog.INFO, "There was No Queue, so there are No Workflows");
-//						//Update the FnWorkflowList Object
-//						fnWorkflowList.setErrorFlag(1);
-//						fnWorkflowList.setErrorMessage("There was No Queue, so there are No Workflows");
-//						//Update the FnBaseXML Object
-//						fnBaseXML.setErrorFlag(1);
-//						fnBaseXML.setErrorMessage("There was No Queue, so there are No Workflows");
-//					}
-//				}
-//				/**********************************************
-//				 * Get ALL Workflows by Step and User
-//				 **********************************************/
-//				else if (process.length() == 0 && step.length() > 0 && user.length() > 0 && propName.length() == 0 && propValue.length() == 0)
-//				{
-//					//By Process and Account ID
-//					wiiscLog.log(wiiscLog.INFO, "Get ALL Workflows by Step and User");
-//
-//					//Initialize the Array
-//					filterName = new String[1];
-//					filterValue = new String[1];
-//					
-//					if (globalConfig.containsKey("workflowSearchUserField"))
-//					{
-//						//Check if the Property setting has a value
-//						if (globalConfig.getString("workflowSearchUserField").length() == 0)
-//						{
-//							//Update the Array
-//							filterName[0] = "F_BoundUser";
-//							filterValue[0] = user;
-//						}
-//						else
-//						{
-//							//Update the Array
-//							filterName[0] = globalConfig.getString("workflowSearchUserField");
-//							filterValue[0] = user;
-//						}
-//					}
-//					else
-//					{
-//						//Update the Array
-//						filterName[0] = "F_BoundUser";
-//						filterValue[0] = user;
-//					}
-//					
-//					//Set the Queue
-//					String queueName = step;
-//					//Check queueName
-//					if (queueName.length() > 0)
-//					{
-//						//Exclude the System Queues
-//						if (!queueName.contains("Instruction") &&
-//								!queueName.contains("(") &&
-//								!queueName.equals("Conductor") &&
-//								!queueName.equals("WSRequest") &&
-//								!queueName.equals("CE_Operations"))
-//						{
-//							fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, queueName, filterName, filterValue, sortBy, wiiscLog);
-//							//Add the List to the FnBaseXML
-//							fnBaseXML.addFnWorkflowList(fnWorkflowList);
-//						}
-//					}
-//					else
-//					{
-//						wiiscLog.log(wiiscLog.INFO, "There were No Queues, so there are No Workflows");
-//						//Update the FnWorkflowList Object
-//						fnWorkflowList.setErrorFlag(1);
-//						fnWorkflowList.setErrorMessage("There were No Queues, so there are No Workflows");
-//						//Update the FnBaseXML Object
-//						fnBaseXML.setErrorFlag(1);
-//						fnBaseXML.setErrorMessage("There were No Queues, so there are No Workflows");
-//					}
-//				}
-//				else
-//				{
-//					//Return an Error
-//					wiiscLog.log(wiiscLog.INFO, "The Process, Step, Property Name and Property Value combination is not an allowed function, so there are No Workflows");
-//					//Update the FnWorkflowList Object
-//					fnWorkflowList.setErrorFlag(1);
-//					fnWorkflowList.setErrorMessage("The Process, Step, Property Name and Property Value combination is not an allowed function, so there are No Workflows");
-//					//Update the FnBaseXML Object
-//					fnBaseXML.setErrorFlag(1);
-//					fnBaseXML.setErrorMessage("The Process, Step, Property Name and Property Value combination is not an allowed function, so there are No Workflows");
-//				}
-//
-//				//Logoff the Workflow Server
-//				wiiscLog.log(wiiscLog.INFO, "Logging off the Workflow Server");
-//				vwSession.logoff();
-//				//Release the VWSession
-//				vwSession = null;
-//				wiiscLog.log(wiiscLog.INFO, "Logged off");
-//			}
-//			else
-//			{
-//				wiiscLog.log(wiiscLog.INFO, "Workflow Login FAILED, Workflow Server may be unavailable.");
-//				//Update the FnWorkflowList Object
-//				fnWorkflowList.setErrorFlag(1);
-//				fnWorkflowList.setErrorMessage("Workflow Login FAILED, Workflow Server may be unavailable.");
-//				//Update the FnBaseXML Object
-//				fnBaseXML.setErrorFlag(1);
-//				fnBaseXML.setErrorMessage("Workflow Login FAILED, Workflow Server may be unavailable.");
-//			}
-//		}
-//		catch (VWException ex)
-//		{
-//			wiiscLog.log("ERROR", ex.getMessage());
-//			if (vwSession != null)
-//			{
-//				//Set vwSession to null to kill any connections
-//				vwSession = null;
-//			}
-//			//Update the FnWorkflowList Object
-//			fnWorkflowList.setErrorFlag(1);
-//			//Update ErrorMessage
-//			fnWorkflowList.setErrorMessage(ex.getMessage());
-//			//Update the FnBaseXML Object
-//			fnBaseXML.setErrorFlag(1);
-//			//Update ErrorMessage
-//			fnBaseXML.setErrorMessage(ex.getMessage());
-//		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> getWorkflowList()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
-//		return fnBaseXML;
-//	}
-//	
-//	public FnBaseXML getWorkflowCountsList(String process, String step, String user, String propName, String propValue, String sortBy, WIISCLog wiiscLog)
-//	{
+		}
+		log.info("Leaving WorkflowManager -> getWorkflowInfo()");
+		log.info("===========================================================");
+		return fnWorkflow;
+	}
+
+	public FnBase getWorkflowList(String process, String step, String user, String propName, String propValue, String sortBy)
+	{
+		//Create an FnBaseXML
+		FnBase fnBase = new FnBase();
+		//Create the FnWorkflowList Object
+		FnWorkflowList fnWorkflowList = new FnWorkflowList();
+
+		//Get a VWSession Object
+		VWSession vwSession = new VWSession();
+		//FileNet DB Connection
+		SQLServerConnection con = null;
+		//Boolean to continue processing
+		boolean beginProcessing = false;
+
+		//Get the Filter Name
+		//String filterName = "";
+		String[] filterName = null;
+		//Get the Filter Value
+		//String filterValue = "";
+		String[] filterValue = null;
+
+		try
+		{
+			log.info("Entered WorkflowManager -> getWorkflowList()");
+			
+			log.info("Process: " + process);
+			log.info("Step: " + step);
+			log.info("User: " + user);
+			log.info("Property Name: " + propName);
+			log.info("Property Value: " + propValue);
+			log.info("Sort By: " + sortBy);
+
+			//Login to the Workflow Server
+			vwSession = loginWorkflow();
+
+			if (vwSession != null)
+			{
+				log.info("Logged in successfully to the Workflow Server");
+				//ResourceBundle globalConfig = ResourceBundle.getBundle(ConstantsUtil.GLOBAL_CONFIG);
+				//Update the FnWorkflowList Object
+				fnWorkflowList.setErrorFlag(0);
+				//fnWorkflowList.setErrorMessage("");
+
+				/****************************************
+				 * Get ALL Workflows using Roster Search
+				 ****************************************/
+				//Add later if needed
+				/**************************************************
+				 * Get ALL Workflows using Queue Search - Workpool 
+				 **************************************************/
+				if (process.length() == 0 && step.length() == 0 && user.length() == 0 && propName.length() == 0 && propValue.length() == 0)
+				{
+					//ALL Workflows - no process_sys_code, no account_id, no Participant specified
+					log.info("Get ALL Workflows");
+
+					if (appConfig.getWorkflowSearchUserField() != null && appConfig.getWorkflowSearchUserField().length() > 0)
+					{
+						//Initialize the Array
+						filterName = new String[1];
+						filterValue = new String[1];
+						filterName[0] = appConfig.getWorkflowSearchUserField();
+						filterValue[0] = user;
+					}
+					
+					//Get String[] of Queue
+					String[] queueNames = getQueues(vwSession);
+					//Check queueNames
+					if (queueNames.length > 0)
+					{
+						//Check if DB FileNet Query will be used or FileNet API
+						if (appConfig.getWorkflowDBSearchEnabled().equals("true"))
+						{
+							con = loginWorkflowDB();
+							if (con != null)
+							{
+								beginProcessing = true;
+							}
+						}
+						else
+						{
+							beginProcessing = true;
+						}
+						
+						//Verify Processing can begin
+						if (beginProcessing)
+						{
+							//Loop and Get Workflows from each Queue
+							for (int i = 0; i < queueNames.length; i++)
+							{
+								//Exclude the System Queues
+								if (!queueNames[i].contains("Instruction") &&
+										!queueNames[i].contains("(") &&
+										!queueNames[i].equals("Conductor") &&
+										!queueNames[i].equals("WSRequest") &&
+										!queueNames[i].equals("CE_Operations"))
+								{
+												
+									//Get the FnWorkflowList by Queue Name
+									fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, queueNames[i], filterName, filterValue, sortBy);
+																	
+									//Check FnWorkflowList size
+									if (fnWorkflowList.getCount() == 0 || fnWorkflowList.getErrorFlag() == 0)
+									{
+										fnWorkflowList.setStepName(queueNames[i]);
+										//Add the List to the FnBaseXML
+										fnBase.addFnWorkflowList(fnWorkflowList);
+										
+										//Check if Workflow Output is Enabled to write the records to a file
+										if (appConfig.getEnableWorkflowOutput().equals("true")) {
+											if (appConfig.getWorkflowOutputPath() != null && !appConfig.getWorkflowOutputPath().equals("")) {
+												//Use the Output Path to create a file with the Workflow Info
+												//Call Write FnWorkflow to File
+												outputToFile(fnBase, "Workflow", appConfig.getWorkflowOutputPath());
+											}
+										}
+									}
+									else
+									{
+										log.info("Error with Queue that needs addressed");
+										//Update the FnBaseXML Object
+										fnBase.setErrorFlag(1);
+										//fnBase.setErrorMessage("Error with Queue that needs addressed");
+									}
+								}
+							}
+						}
+						else
+						{
+							log.info("Processing cannot begin because a DB Connection could not be established");
+						}
+												
+						//Close the FileNet DB Connection
+						if (con != null)
+						{
+							try
+							{
+								log.info("Closing the FileNet DB Connection");
+								con.close();
+							}
+							catch(Exception e)
+							{
+								log.info("Error closing the FileNet DB Connection");
+								log.info("ERROR", e.getMessage());
+							}
+						}
+					}
+					else
+					{
+						log.info("There were No Queues, so there are No Workflows");
+						//Update the FnBaseXML Object
+						fnBase.setErrorFlag(1);
+						//fnBase.setErrorMessage("There were No Queues, so there are No Workflows");
+					}					
+				}
+				/**********************************
+				 * Get ALL Workflows for a Process
+				 **********************************/
+				else if (process.length() > 0 && step.length() == 0 && user.length() == 0 && propName.length() == 0 && propValue.length() == 0)
+				{
+					//By process only
+					log.info("Get ALL Workflows for a Process");
+					
+					//Get the FnWorkflowList
+					fnWorkflowList = getFnWorkflowListByRoster(vwSession, process, filterName, filterValue);
+					//Add the List to the FnBaseXML
+					fnBase.addFnWorkflowList(fnWorkflowList);
+					
+					//Check if Workflow Output is Enabled to write the records to a file
+					if (appConfig.getEnableWorkflowOutput().equals("true")) {
+						if (appConfig.getWorkflowOutputPath() != null && !appConfig.getWorkflowOutputPath().equals("")) {
+							//Use the Output Path to create a file with the Workflow Info
+							//Call Write FnWorkflow to File
+							outputToFile(fnBase, "Workflow", appConfig.getWorkflowOutputPath());
+						}
+					}
+				}
+				/**********************************
+				 * Get ALL Workflows for a Step
+				 **********************************/
+				else if (process.length() == 0 && step.length() > 0 && user.length() == 0 && propName.length() == 0 && propValue.length() == 0)
+				{
+					//By step only
+					log.info("Get ALL Workflows for a Step");
+					
+					if (appConfig.getWorkflowSearchUserField() != null && appConfig.getWorkflowSearchUserField().length() > 0)
+					{
+						//Initialize the Array
+						filterName = new String[1];
+						filterValue = new String[1];
+						filterName[0] = appConfig.getWorkflowSearchUserField();
+						filterValue[0] = "";
+					}
+					
+					//Check if DB FileNet Query will be used or FileNet API
+					if (appConfig.getWorkflowDBSearchEnabled().equals("true"))
+					{
+						con = loginWorkflowDB();
+						if (con != null)
+						{
+							beginProcessing = true;
+						}
+					}
+					else
+					{
+						beginProcessing = true;
+					}
+
+					//Verify Processing can begin
+					if (beginProcessing)
+					{
+						//Get the FnWorkflowList
+						fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, step, filterName, filterValue, sortBy);
+						//Add the List to the FnBaseXML
+						fnBase.addFnWorkflowList(fnWorkflowList);
+						
+						//Check if Workflow Output is Enabled to write the records to a file
+						if (appConfig.getEnableWorkflowOutput().equals("true")) {
+							if (appConfig.getWorkflowOutputPath() != null && !appConfig.getWorkflowOutputPath().equals("")) {
+								//Use the Output Path to create a file with the Workflow Info
+								//Call Write FnWorkflow to File
+								outputToFile(fnBase, "Workflow", appConfig.getWorkflowOutputPath());
+							}
+						}
+					}
+					else
+					{
+						log.info("Processing cannot begin because a DB Connection could not be established");
+					}
+											
+					//Close the FileNet DB Connection
+					if (con != null)
+					{
+						try
+						{
+							log.info("Closing the FileNet DB Connection");
+							con.close();
+						}
+						catch(Exception e)
+						{
+							log.info("Error closing the FileNet DB Connection");
+							log.info("ERROR", e.getMessage());
+						}
+					}
+				}
+				/*****************************************************************************
+				 * Get ALL Workflows by a Property and Property Value - workflow data field
+				 *****************************************************************************/
+				else if (process.length() == 0 && step.length() == 0 && user.length() == 0 && propName.length() > 0 && propValue.length() > 0)
+				{
+					//By Property and Property Value only
+					log.info("Get ALL Workflows by Property and Property Value");
+
+					//Get String[] of Queues
+					String[] queueNames = getQueues(vwSession);
+					//Check queueNames
+					if (queueNames.length > 0)
+					{
+						if (appConfig.getWorkflowSearchUserField() != null)
+						{
+							//Check if the Property setting has a value
+							if (appConfig.getWorkflowSearchUserField().length() == 0)
+							{
+								//Initialize the Array
+								filterName = new String[1];
+								filterValue = new String[1];
+								filterName[0] = propName;
+								filterValue[0] = propValue;
+								log.info("Property Value Only");
+							}
+							else
+							{
+								//Initialize the Array
+								filterName = new String[2];
+								filterValue = new String[2];
+								filterName[0] = appConfig.getWorkflowSearchUserField();
+								filterValue[0] = user;
+								filterName[1] = propName;
+								filterValue[1] = propValue;
+								log.info("Property Value and User");
+							}
+						}
+												
+						//Check if DB FileNet Query will be used or FileNet API
+						if (appConfig.getWorkflowDBSearchEnabled().equals("true"))
+						{
+							con = loginWorkflowDB();
+							if (con != null)
+							{
+								beginProcessing = true;
+							}
+						}
+						else
+						{
+							beginProcessing = true;
+						}
+						
+						//Verify Processing can begin
+						if (beginProcessing)
+						{
+							//Loop and Get Workflows from each Queue
+							for (int i = 0; i < queueNames.length; i++)
+							{
+								//Exclude the System Queues
+								if (!queueNames[i].contains("Instruction") &&
+										!queueNames[i].contains("(") &&
+										!queueNames[i].equals("Conductor") &&
+										!queueNames[i].equals("WSRequest") &&
+										!queueNames[i].equals("CE_Operations"))
+								{
+									fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, queueNames[i], filterName, filterValue, sortBy);
+									//Add the List to the FnBaseXML
+									fnBase.addFnWorkflowList(fnWorkflowList);
+									
+									//Check if Workflow Output is Enabled to write the records to a file
+									if (appConfig.getEnableWorkflowOutput().equals("true")) {
+										if (appConfig.getWorkflowOutputPath() != null && !appConfig.getWorkflowOutputPath().equals("")) {
+											//Use the Output Path to create a file with the Workflow Info
+											//Call Write FnWorkflow to File
+											outputToFile(fnBase, "Workflow", appConfig.getWorkflowOutputPath());
+										}
+									}
+								}
+							}
+						}
+						else
+						{
+							log.info("Processing cannot begin because a DB Connection could not be established");
+						}
+												
+						//Close the FileNet DB Connection
+						if (con != null)
+						{
+							try
+							{
+								log.info("Closing the FileNet DB Connection");
+								con.close();
+							}
+							catch(Exception e)
+							{
+								log.info("Error closing the FileNet DB Connection");
+								log.info("ERROR", e.getMessage());
+							}
+						}
+					}
+					else
+					{
+						log.info("There were No Queues, so there are No Workflows");
+						//Update the FnWorkflowList Object
+						fnWorkflowList.setErrorFlag(1);
+						//fnWorkflowList.setErrorMessage("There were No Queues, so there are No Workflows");
+						//Update the FnBaseXML Object
+						fnBase.setErrorFlag(1);
+						//fnBase.setErrorMessage("There were No Queues, so there are No Workflows");
+					}
+				}
+				/***************************************************************************************
+				 * Get ALL Workflows by User/Participant - workflow data field User/Participant - Inbox
+				 ***************************************************************************************/
+				else if (process.length() == 0 && step.length() == 0 && user.length() > 0 && propName.length() == 0 && propValue.length() == 0)
+				{
+					//By Participant Only
+					log.info("Get ALL Workflows by User");
+
+					//Initialize the Array
+					filterName = new String[1];
+					filterValue = new String[1];
+					//Queue
+					String queueName = "";
+					//Get String[] of Queues
+					String[] queueNames = null;
+					
+					if (appConfig.getWorkflowSearchUserField() != null)
+					{
+						//Check if the Property setting has a value
+						if (appConfig.getWorkflowSearchUserField().length() == 0)
+						{
+							//Update the Array
+							filterName[0] = "F_BoundUser";
+							filterValue[0] = user;
+
+							//Get the Inbox(0) Queue and use this to find the Workflows for the particular User
+							queueName = "Inbox(0)";
+							
+							fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, queueName, filterName, filterValue, sortBy);
+							//Add the List to the FnBaseXML
+							fnBase.addFnWorkflowList(fnWorkflowList);
+							
+							//Check if Workflow Output is Enabled to write the records to a file
+							if (appConfig.getEnableWorkflowOutput().equals("true")) {
+								if (appConfig.getWorkflowOutputPath() != null && !appConfig.getWorkflowOutputPath().equals("")) {
+									//Use the Output Path to create a file with the Workflow Info
+									//Call Write FnWorkflow to File
+									outputToFile(fnBase, "Workflow", appConfig.getWorkflowOutputPath());
+								}
+							}
+						}
+						else
+						{
+							//String[] of Queues
+							queueNames = getQueues(vwSession);
+							//Check queueNames
+							if (queueNames.length > 0)
+							{
+								//Update the Array
+								filterName[0] = appConfig.getWorkflowSearchUserField();
+								filterValue[0] = user;
+								
+								//Loop and Get Workflows from each Queue
+								for (int i = 0; i < queueNames.length; i++)
+								{
+									//Exclude the System Queues
+									if (!queueNames[i].contains("Instruction") &&
+											!queueNames[i].contains("(") &&
+											!queueNames[i].equals("Conductor") &&
+											!queueNames[i].equals("WSRequest") &&
+											!queueNames[i].equals("CE_Operations"))
+									{
+										fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, queueNames[i], filterName, filterValue, sortBy);
+										//Add the List to the FnBaseXML
+										fnBase.addFnWorkflowList(fnWorkflowList);
+										
+										//Check if Workflow Output is Enabled to write the records to a file
+										if (appConfig.getEnableWorkflowOutput().equals("true")) {
+											if (appConfig.getWorkflowOutputPath() != null && !appConfig.getWorkflowOutputPath().equals("")) {
+												//Use the Output Path to create a file with the Workflow Info
+												//Call Write FnWorkflow to File
+												outputToFile(fnBase, "Workflow", appConfig.getWorkflowOutputPath());
+											}
+										}
+									}
+								}
+							}
+							else
+							{
+								log.info("There were No Queues, so there are No Workflows");
+								//Update the FnBaseXML Object
+								fnBase.setErrorFlag(1);
+								//fnBase.setErrorMessage("There were No Queues, so there are No Workflows");
+							}
+						}
+					}
+					else
+					{
+						//Update the Array
+						filterName[0] = "F_BoundUser";
+						filterValue[0] = user;
+
+						//Get the Inbox(0) Queue and use this to find the Workflows for the particular User
+						queueName = "Inbox(0)";
+						
+						fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, queueName, filterName, filterValue, sortBy);
+						//Add the List to the FnBaseXML
+						fnBase.addFnWorkflowList(fnWorkflowList);
+						
+						//Check if Workflow Output is Enabled to write the records to a file
+						if (appConfig.getEnableWorkflowOutput().equals("true")) {
+							if (appConfig.getWorkflowOutputPath() != null && !appConfig.getWorkflowOutputPath().equals("")) {
+								//Use the Output Path to create a file with the Workflow Info
+								//Call Write FnWorkflow to File
+								outputToFile(fnBase, "Workflow", appConfig.getWorkflowOutputPath());
+							}
+						}
+					}
+				}
+				/***************************************************************************************
+				 * Get ALL Workflows by User/Participant, Property and Property Value - Inbox Search
+				 ***************************************************************************************/
+				else if (process.length() == 0 && step.length() == 0 && user.length() > 0 && propName.length() > 0 && propValue.length() > 0)
+				{
+					//By Participant Only
+					log.info("Get ALL Workflows by User, Property and Property Value");
+
+					//Initialize the Array
+					filterName = new String[2];
+					filterValue = new String[2];
+					//Queue
+					String queueName = "";
+					//Get String[] of Queues
+					String[] queueNames = null;
+					
+					if (appConfig.getWorkflowSearchUserField() != null)
+					{
+						//Check if the Property setting has a value
+						if (appConfig.getWorkflowSearchUserField().length() == 0)
+						{
+							//Update the Array
+							filterName[0] = "F_BoundUser";
+							filterValue[0] = user;
+							filterName[1] = propName;
+							filterValue[1] = propValue;
+
+							//Get the Inbox(0) Queue and use this to find the Workflows for the particular User
+							queueName = "Inbox(0)";
+							
+							fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, queueName, filterName, filterValue, sortBy);
+							//Add the List to the FnBaseXML
+							fnBase.addFnWorkflowList(fnWorkflowList);
+							
+							//Check if Workflow Output is Enabled to write the records to a file
+							if (appConfig.getEnableWorkflowOutput().equals("true")) {
+								if (appConfig.getWorkflowOutputPath() != null && !appConfig.getWorkflowOutputPath().equals("")) {
+									//Use the Output Path to create a file with the Workflow Info
+									//Call Write FnWorkflow to File
+									outputToFile(fnBase, "Workflow", appConfig.getWorkflowOutputPath());
+								}
+							}
+						}
+						else
+						{
+							//String[] of Queues
+							queueNames = getQueues(vwSession);
+							//Check queueNames
+							if (queueNames.length > 0)
+							{
+								//Update the Array
+								filterName[0] = appConfig.getWorkflowSearchUserField();
+								filterValue[0] = user;
+								filterName[1] = propName;
+								filterValue[1] = propValue;
+								
+								//Loop and Get Workflows from each Queue
+								for (int i = 0; i < queueNames.length; i++)
+								{
+									//Exclude the System Queues
+									if (!queueNames[i].contains("Instruction") &&
+											!queueNames[i].contains("(") &&
+											!queueNames[i].equals("Conductor") &&
+											!queueNames[i].equals("WSRequest") &&
+											!queueNames[i].equals("CE_Operations"))
+									{
+										fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, queueNames[i], filterName, filterValue, sortBy);
+										//Add the List to the FnBaseXML
+										fnBase.addFnWorkflowList(fnWorkflowList);
+										
+										//Check if Workflow Output is Enabled to write the records to a file
+										if (appConfig.getEnableWorkflowOutput().equals("true")) {
+											if (appConfig.getWorkflowOutputPath() != null && !appConfig.getWorkflowOutputPath().equals("")) {
+												//Use the Output Path to create a file with the Workflow Info
+												//Call Write FnWorkflow to File
+												outputToFile(fnBase, "Workflow", appConfig.getWorkflowOutputPath());
+											}
+										}
+									}
+								}
+							}
+							else
+							{
+								log.info("There were No Queues, so there are No Workflows");
+								//Update the FnBaseXML Object
+								fnBase.setErrorFlag(1);
+								//fnBase.setErrorMessage("There were No Queues, so there are No Workflows");
+							}
+						}
+					}
+					else
+					{
+						//Update the Array
+						filterName[0] = "F_BoundUser";
+						filterValue[0] = user;
+						filterName[1] = propName;
+						filterValue[1] = propValue;
+
+						//Get the Inbox(0) Queue and use this to find the Workflows for the particular User
+						queueName = "Inbox(0)";
+						
+						fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, queueName, filterName, filterValue, sortBy);
+						//Add the List to the FnBaseXML
+						fnBase.addFnWorkflowList(fnWorkflowList);
+						
+						//Check if Workflow Output is Enabled to write the records to a file
+						if (appConfig.getEnableWorkflowOutput().equals("true")) {
+							if (appConfig.getWorkflowOutputPath() != null && !appConfig.getWorkflowOutputPath().equals("")) {
+								//Use the Output Path to create a file with the Workflow Info
+								//Call Write FnWorkflow to File
+								outputToFile(fnBase, "Workflow", appConfig.getWorkflowOutputPath());
+							}
+						}
+					}
+				}
+				/*********************************************************************************
+				 * Get ALL Workflows by a Step, Property and Property Value - workflow data field
+				 *********************************************************************************/
+				else if (process.length() == 0 && step.length() > 0 && user.length() == 0 && propName.length() > 0 && propValue.length() > 0)
+				{
+					//By Property and Property Value only
+					log.info("Get ALL Workflows by a Step, Property and Property Value");
+
+					//Initialize the Array
+					filterName = new String[1];
+					filterValue = new String[1];
+					filterName[0] = propName;
+					filterValue[0] = propValue;
+
+					//Set the Queue
+					String queueName = step;
+					//Check queueName
+					if (queueName.length() > 0)
+					{
+						//Check if DB FileNet Query will be used or FileNet API
+						if (appConfig.getWorkflowDBSearchEnabled().equals("true"))
+						{
+							con = loginWorkflowDB();
+							if (con != null)
+							{
+								beginProcessing = true;
+							}
+						}
+						else
+						{
+							beginProcessing = true;
+						}
+						
+						//Verify Processing can begin
+						if (beginProcessing)
+						{
+							//Exclude the System Queues
+							if (!queueName.contains("Instruction") &&
+									!queueName.contains("(") &&
+									!queueName.equals("Conductor") &&
+									!queueName.equals("WSRequest") &&
+									!queueName.equals("CE_Operations"))
+							{
+								fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, queueName, filterName, filterValue, sortBy);
+								//Add the List to the FnBaseXML
+								fnBase.addFnWorkflowList(fnWorkflowList);
+								
+								//Check if Workflow Output is Enabled to write the records to a file
+								if (appConfig.getEnableWorkflowOutput().equals("true")) {
+									if (appConfig.getWorkflowOutputPath() != null && !appConfig.getWorkflowOutputPath().equals("")) {
+										//Use the Output Path to create a file with the Workflow Info
+										//Call Write FnWorkflow to File
+										outputToFile(fnBase, "Workflow", appConfig.getWorkflowOutputPath());
+									}
+								}
+								
+							}
+						}
+						else
+						{
+							log.info("Processing cannot begin because a DB Connection could not be established");
+						}
+												
+						//Close the FileNet DB Connection
+						if (con != null)
+						{
+							try
+							{
+								log.info("Closing the FileNet DB Connection");
+								con.close();
+							}
+							catch(Exception e)
+							{
+								log.info("Error closing the FileNet DB Connection");
+								log.info("ERROR", e.getMessage());
+							}
+						}
+					}
+					else
+					{
+						log.info("There was No Queue, so there are No Workflows");
+						//Update the FnWorkflowList Object
+						fnWorkflowList.setErrorFlag(1);
+						//fnWorkflowList.setErrorMessage("There was No Queue, so there are No Workflows");
+						//Update the FnBaseXML Object
+						fnBase.setErrorFlag(1);
+						//fnBase.setErrorMessage("There was No Queue, so there are No Workflows");
+					}
+				}
+				/**********************************************
+				 * Get ALL Workflows by Step and User
+				 **********************************************/
+				else if (process.length() == 0 && step.length() > 0 && user.length() > 0 && propName.length() == 0 && propValue.length() == 0)
+				{
+					//By Process and Account ID
+					log.info("Get ALL Workflows by Step and User");
+
+					//Initialize the Array
+					filterName = new String[1];
+					filterValue = new String[1];
+					
+					if (appConfig.getWorkflowSearchUserField() != null)
+					{
+						//Check if the Property setting has a value
+						if (appConfig.getWorkflowSearchUserField().length() == 0)
+						{
+							//Update the Array
+							filterName[0] = "F_BoundUser";
+							filterValue[0] = user;
+						}
+						else
+						{
+							//Update the Array
+							filterName[0] = appConfig.getWorkflowSearchUserField();
+							filterValue[0] = user;
+						}
+					}
+					else
+					{
+						//Update the Array
+						filterName[0] = "F_BoundUser";
+						filterValue[0] = user;
+					}
+					
+					//Set the Queue
+					String queueName = step;
+					//Check queueName
+					if (queueName.length() > 0)
+					{
+						//Exclude the System Queues
+						if (!queueName.contains("Instruction") &&
+								!queueName.contains("(") &&
+								!queueName.equals("Conductor") &&
+								!queueName.equals("WSRequest") &&
+								!queueName.equals("CE_Operations"))
+						{
+							fnWorkflowList = getFnWorkflowListByQueue(con, vwSession, queueName, filterName, filterValue, sortBy);
+							//Add the List to the FnBaseXML
+							fnBase.addFnWorkflowList(fnWorkflowList);
+							
+							//Check if Workflow Output is Enabled to write the records to a file
+							if (appConfig.getEnableWorkflowOutput().equals("true")) {
+								if (appConfig.getWorkflowOutputPath() != null && !appConfig.getWorkflowOutputPath().equals("")) {
+									//Use the Output Path to create a file with the Workflow Info
+									//Call Write FnWorkflow to File
+									outputToFile(fnBase, "Workflow", appConfig.getWorkflowOutputPath());
+								}
+							}
+						}
+					}
+					else
+					{
+						log.info("There were No Queues, so there are No Workflows");
+						//Update the FnWorkflowList Object
+						fnWorkflowList.setErrorFlag(1);
+						//fnWorkflowList.setErrorMessage("There were No Queues, so there are No Workflows");
+						//Update the FnBaseXML Object
+						fnBase.setErrorFlag(1);
+						//fnBase.setErrorMessage("There were No Queues, so there are No Workflows");
+					}
+				}
+				else
+				{
+					//Return an Error
+					log.info("The Process, Step, Property Name and Property Value combination is not an allowed function, so there are No Workflows");
+					//Update the FnWorkflowList Object
+					fnWorkflowList.setErrorFlag(1);
+					//fnWorkflowList.setErrorMessage("The Process, Step, Property Name and Property Value combination is not an allowed function, so there are No Workflows");
+					//Update the FnBaseXML Object
+					fnBase.setErrorFlag(1);
+					//fnBase.setErrorMessage("The Process, Step, Property Name and Property Value combination is not an allowed function, so there are No Workflows");
+				}
+
+				//Logoff the Workflow Server
+				log.info("Logging off the Workflow Server");
+				vwSession.logoff();
+				//Release the VWSession
+				vwSession = null;
+				log.info("Logged off");
+			}
+			else
+			{
+				log.info("Workflow Login FAILED, Workflow Server may be unavailable.");
+				//Update the FnWorkflowList Object
+				fnWorkflowList.setErrorFlag(1);
+				//fnWorkflowList.setErrorMessage("Workflow Login FAILED, Workflow Server may be unavailable.");
+				//Update the FnBaseXML Object
+				fnBase.setErrorFlag(1);
+				//fnBase.setErrorMessage("Workflow Login FAILED, Workflow Server may be unavailable.");
+			}
+		}
+		catch (VWException ex)
+		{
+			log.info("ERROR", ex.getMessage());
+			if (vwSession != null)
+			{
+				//Set vwSession to null to kill any connections
+				vwSession = null;
+			}
+			//Update the FnWorkflowList Object
+			fnWorkflowList.setErrorFlag(1);
+			//Update ErrorMessage
+			//fnWorkflowList.setErrorMessage(ex.getMessage());
+			//Update the FnBaseXML Object
+			fnBase.setErrorFlag(1);
+			//Update ErrorMessage
+			//fnBase.setErrorMessage(ex.getMessage());
+		}
+		log.info("Leaving WorkflowManager -> getWorkflowList()");
+		log.info("===========================================================");
+		return fnBase;
+	}
+	
+	private void outputToFile(Object object, String objectType, String outputPath) {
+		//Log Output File
+		PrintWriter outDestination1 = null;
+		//CSV Output File
+		PrintWriter outDestination2 = null;
+		
+		try {
+						
+			String outputFile1 = outputPath + "/" + objectType + "_Output_" + getDateTime() + ".log";
+			String outputFile2 = outputPath + "/" + objectType + "_Output_" + getDateTime() + ".csv";
+			//Write to File
+			outDestination1 = getWriter(outputFile1);
+			outDestination2 = getWriter(outputFile2);
+			
+			//Check the objectType
+			if (objectType.equals("Imaging")) {
+				//Do Something
+			} else if (objectType.equals("Workflow")) {
+				
+				if (object instanceof FnBase) {
+					FnBase fnBase = (FnBase) object;
+					
+					//Header
+					outDestination1.println("====================================");
+					outDestination1.println(outputFile1);
+					outDestination1.println("====================================");
+					
+					//workflowCount
+					outDestination1.println("Workflow Count: " + fnBase.getWorkflowCount());
+					
+					//fnWorkflowList
+					List<FnWorkflowList> list = fnBase.getFnWorkflowList();
+					for (FnWorkflowList wflist : list) {
+						outDestination1.println("====================================");
+						outDestination1.println("WORKFLOW START");
+						outDestination1.println("Workflow Process Name: " + wflist.getProcessName());
+						outDestination1.println("Workflow Step Name: " + wflist.getStepName());
+						outDestination1.println("====================================");
+						List<FnWorkflow> list2 = wflist.getFnWorkflowList();
+						for (FnWorkflow wf : list2) {
+							outDestination1.println("Workflow ID: " + wf.getFnWorkflowID());
+							outDestination1.println("Workflow Name: " + wf.getFnWorkflowName());
+							outDestination1.println("Workflow Process: " + wf.getFnWorkflowProcess());
+							outDestination1.println("Workflow Queue: " + wf.getFnWorkflowQueue());
+							outDestination1.println("Workflow Response: " + wf.getFnWorkflowResponse());
+							outDestination1.println("Workflow Roster: " + wf.getFnWorkflowRoster());
+							outDestination1.println("Workflow Step: " + wf.getFnWorkflowStep());
+							outDestination1.println("Workflow User: " + wf.getFnWorkflowUser());
+							outDestination1.println("====================================");
+							
+							//Output to CSV
+							outDestination2.print(wf.getFnWorkflowID() + ",");
+							outDestination2.print(wf.getFnWorkflowProcess() + ",");
+							outDestination2.print(wf.getFnWorkflowQueue() + ",");
+							
+							FnWorkflowPropertyList wfpropList = wf.getFnWorkflowPropertyList();
+							List<FnWorkflowProperty> wfpropList2 = wfpropList.getFnWorkflowPropsList();
+							for (FnWorkflowProperty wfprop : wfpropList2) {
+								outDestination1.println("Name: " + wfprop.getName());
+								outDestination1.println("Value: " + wfprop.getValue());
+								outDestination1.println("====================================");
+								
+								//Output to CSV
+								outDestination2.print(wfprop.getName() + ",");
+								outDestination2.print(wfprop.getValue() + ",");
+							}
+						}
+						outDestination1.println("WORKFLOW END");
+					}
+					//outDestination1.println(fnBase.getFnWorkflowList());
+					
+				}
+				
+			} else if (objectType.equals("Both")) {
+				//Do Something
+			} else {
+				//Do Something - log error
+			}
+			
+			//Close the Files
+			outDestination1.close();
+			outDestination1 = null;
+			
+			outDestination2.close();
+			outDestination2 = null;
+			
+		} catch (Exception e) {
+			log.info("ERROR", e.getMessage());
+			
+			//Close the Files
+			outDestination1.close();
+			outDestination1 = null;
+			
+			outDestination2.close();
+			outDestination2 = null;
+		}
+		
+	}
+
+	public void getWorkflowCountsList(String process, String step, String user, String propName, String propValue, String sortBy)
+	{
 //		//Create an FnBaseXML
 //		FnBaseXML fnBaseXML = new FnBaseXML();
 //		//Create the FnWorkflowList Object
@@ -3404,20 +3618,20 @@ public class WorkflowManager {
 //
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> getWorkflowCountsList()");
-//			wiiscLog.log(wiiscLog.INFO, "Process: " + process);
-//			wiiscLog.log(wiiscLog.INFO, "Step: " + step);
-//			wiiscLog.log(wiiscLog.INFO, "User: " + user);
-//			wiiscLog.log(wiiscLog.INFO, "Property Name: " + propName);
-//			wiiscLog.log(wiiscLog.INFO, "Property Value: " + propValue);
-//			wiiscLog.log(wiiscLog.INFO, "Sort By: " + sortBy);
+//			log.info("Entered WorkflowManager -> getWorkflowCountsList()");
+//			log.info("Process: " + process);
+//			log.info("Step: " + step);
+//			log.info("User: " + user);
+//			log.info("Property Name: " + propName);
+//			log.info("Property Value: " + propValue);
+//			log.info("Sort By: " + sortBy);
 //
 //			//Login to the Workflow Server
 //			vwSession = loginWorkflow(wiiscLog);
 //
 //			if (vwSession != null)
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Logged in successfully to the Workflow Server");
+//				log.info("Logged in successfully to the Workflow Server");
 //				//ResourceBundle globalConfig = ResourceBundle.getBundle(ConstantsUtil.GLOBAL_CONFIG);
 //				//Update the FnWorkflowList Object
 //				fnWorkflowList.setErrorFlag(0);
@@ -3433,7 +3647,7 @@ public class WorkflowManager {
 //				if (process.length() == 0 && step.length() == 0 && user.length() == 0 && propName.length() == 0 && propValue.length() == 0)
 //				{
 //					//ALL Workflows - no process_sys_code, no account_id, no Participant specified
-//					wiiscLog.log(wiiscLog.INFO, "Get ALL Workflows");
+//					log.info("Get ALL Workflows");
 //
 //					if (globalConfig.containsKey("workflowSearchUserField"))
 //					{
@@ -3476,7 +3690,7 @@ public class WorkflowManager {
 //								}
 //								else
 //								{
-//									wiiscLog.log(wiiscLog.INFO, "Error with Queue that needs addressed");
+//									log.info("Error with Queue that needs addressed");
 //									//Update the FnBaseXML Object
 //									fnBaseXML.setErrorFlag(1);
 //									fnBaseXML.setErrorMessage("Error with Queue that needs addressed");
@@ -3486,7 +3700,7 @@ public class WorkflowManager {
 //					}
 //					else
 //					{
-//						wiiscLog.log(wiiscLog.INFO, "There were No Queues, so there are No Workflows");
+//						log.info("There were No Queues, so there are No Workflows");
 //						//Update the FnBaseXML Object
 //						fnBaseXML.setErrorFlag(1);
 //						fnBaseXML.setErrorMessage("There were No Queues, so there are No Workflows");
@@ -3498,7 +3712,7 @@ public class WorkflowManager {
 //				else if (process.length() > 0 && step.length() == 0 && user.length() == 0 && propName.length() == 0 && propValue.length() == 0)
 //				{
 //					//By process only
-//					wiiscLog.log(wiiscLog.INFO, "Get ALL Workflows for a Process");
+//					log.info("Get ALL Workflows for a Process");
 //					
 //					//Get the FnWorkflowList
 //					fnWorkflowList = getFnWorkflowListByRoster(vwSession, process, filterName, filterValue, wiiscLog);
@@ -3511,7 +3725,7 @@ public class WorkflowManager {
 //				else if (process.length() == 0 && step.length() > 0 && user.length() == 0 && propName.length() == 0 && propValue.length() == 0)
 //				{
 //					//By step only
-//					wiiscLog.log(wiiscLog.INFO, "Get ALL Workflows for a Step");
+//					log.info("Get ALL Workflows for a Step");
 //					
 //					if (globalConfig.containsKey("workflowSearchUserField"))
 //					{
@@ -3538,7 +3752,7 @@ public class WorkflowManager {
 //				else if (process.length() == 0 && step.length() == 0 && user.length() == 0 && propName.length() > 0 && propValue.length() > 0)
 //				{
 //					//By Property and Property Value only
-//					wiiscLog.log(wiiscLog.INFO, "Get ALL Workflows by Property and Property Value");
+//					log.info("Get ALL Workflows by Property and Property Value");
 //
 //					//Get String[] of Queues
 //					String[] queueNames = getQueues(vwSession, wiiscLog);
@@ -3586,7 +3800,7 @@ public class WorkflowManager {
 //					}
 //					else
 //					{
-//						wiiscLog.log(wiiscLog.INFO, "There were No Queues, so there are No Workflows");
+//						log.info("There were No Queues, so there are No Workflows");
 //						//Update the FnWorkflowList Object
 //						fnWorkflowList.setErrorFlag(1);
 //						fnWorkflowList.setErrorMessage("There were No Queues, so there are No Workflows");
@@ -3601,7 +3815,7 @@ public class WorkflowManager {
 //				else if (process.length() == 0 && step.length() == 0 && user.length() > 0 && propName.length() == 0 && propValue.length() == 0)
 //				{
 //					//By Participant Only
-//					wiiscLog.log(wiiscLog.INFO, "Get ALL Workflows by User");
+//					log.info("Get ALL Workflows by User");
 //
 //					//Initialize the Array
 //					filterName = new String[1];
@@ -3656,7 +3870,7 @@ public class WorkflowManager {
 //							}
 //							else
 //							{
-//								wiiscLog.log(wiiscLog.INFO, "There were No Queues, so there are No Workflows");
+//								log.info("There were No Queues, so there are No Workflows");
 //								//Update the FnBaseXML Object
 //								fnBaseXML.setErrorFlag(1);
 //								fnBaseXML.setErrorMessage("There were No Queues, so there are No Workflows");
@@ -3683,7 +3897,7 @@ public class WorkflowManager {
 //				else if (process.length() == 0 && step.length() == 0 && user.length() > 0 && propName.length() > 0 && propValue.length() > 0)
 //				{
 //					//By Participant Only
-//					wiiscLog.log(wiiscLog.INFO, "Get ALL Workflows by User, Property and Property Value");
+//					log.info("Get ALL Workflows by User, Property and Property Value");
 //
 //					//Initialize the Array
 //					filterName = new String[2];
@@ -3742,7 +3956,7 @@ public class WorkflowManager {
 //							}
 //							else
 //							{
-//								wiiscLog.log(wiiscLog.INFO, "There were No Queues, so there are No Workflows");
+//								log.info("There were No Queues, so there are No Workflows");
 //								//Update the FnBaseXML Object
 //								fnBaseXML.setErrorFlag(1);
 //								fnBaseXML.setErrorMessage("There were No Queues, so there are No Workflows");
@@ -3771,7 +3985,7 @@ public class WorkflowManager {
 //				else if (process.length() == 0 && step.length() > 0 && user.length() == 0 && propName.length() > 0 && propValue.length() > 0)
 //				{
 //					//By Property and Property Value only
-//					wiiscLog.log(wiiscLog.INFO, "Get ALL Workflows by a Step, Property and Property Value");
+//					log.info("Get ALL Workflows by a Step, Property and Property Value");
 //
 //					//Initialize the Array
 //					filterName = new String[1];
@@ -3798,7 +4012,7 @@ public class WorkflowManager {
 //					}
 //					else
 //					{
-//						wiiscLog.log(wiiscLog.INFO, "There was No Queue, so there are No Workflows");
+//						log.info("There was No Queue, so there are No Workflows");
 //						//Update the FnWorkflowList Object
 //						fnWorkflowList.setErrorFlag(1);
 //						fnWorkflowList.setErrorMessage("There was No Queue, so there are No Workflows");
@@ -3813,7 +4027,7 @@ public class WorkflowManager {
 //				else if (process.length() == 0 && step.length() > 0 && user.length() > 0 && propName.length() == 0 && propValue.length() == 0)
 //				{
 //					//By Process and Account ID
-//					wiiscLog.log(wiiscLog.INFO, "Get ALL Workflows by Step and User");
+//					log.info("Get ALL Workflows by Step and User");
 //
 //					//Initialize the Array
 //					filterName = new String[1];
@@ -3861,7 +4075,7 @@ public class WorkflowManager {
 //					}
 //					else
 //					{
-//						wiiscLog.log(wiiscLog.INFO, "There were No Queues, so there are No Workflows");
+//						log.info("There were No Queues, so there are No Workflows");
 //						//Update the FnWorkflowList Object
 //						fnWorkflowList.setErrorFlag(1);
 //						fnWorkflowList.setErrorMessage("There were No Queues, so there are No Workflows");
@@ -3873,7 +4087,7 @@ public class WorkflowManager {
 //				else
 //				{
 //					//Return an Error
-//					wiiscLog.log(wiiscLog.INFO, "The Process, Step, Property Name and Property Value combination is not an allowed function, so there are No Workflows");
+//					log.info("The Process, Step, Property Name and Property Value combination is not an allowed function, so there are No Workflows");
 //					//Update the FnWorkflowList Object
 //					fnWorkflowList.setErrorFlag(1);
 //					fnWorkflowList.setErrorMessage("The Process, Step, Property Name and Property Value combination is not an allowed function, so there are No Workflows");
@@ -3883,15 +4097,15 @@ public class WorkflowManager {
 //				}
 //
 //				//Logoff the Workflow Server
-//				wiiscLog.log(wiiscLog.INFO, "Logging off the Workflow Server");
+//				log.info("Logging off the Workflow Server");
 //				vwSession.logoff();
 //				//Release the VWSession
 //				vwSession = null;
-//				wiiscLog.log(wiiscLog.INFO, "Logged off");
+//				log.info("Logged off");
 //			}
 //			else
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Workflow Login FAILED, Workflow Server may be unavailable.");
+//				log.info("Workflow Login FAILED, Workflow Server may be unavailable.");
 //				//Update the FnWorkflowList Object
 //				fnWorkflowList.setErrorFlag(1);
 //				fnWorkflowList.setErrorMessage("Workflow Login FAILED, Workflow Server may be unavailable.");
@@ -3902,7 +4116,7 @@ public class WorkflowManager {
 //		}
 //		catch (VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			if (vwSession != null)
 //			{
 //				//Set vwSession to null to kill any connections
@@ -3917,116 +4131,116 @@ public class WorkflowManager {
 //			//Update ErrorMessage
 //			fnBaseXML.setErrorMessage(ex.getMessage());
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> getWorkflowCountsList()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> getWorkflowCountsList()");
+//		log.info("===========================================================");
 //		return fnBaseXML;
-//	}
-//	
-//	private FnWorkflow updateFnWorkflowInfo(VWStepElement stepElement, String workflowType, WIISCLog wiiscLog)
-//	{
-//		//Create the FnWorkflow Object
-//		FnWorkflow fnWorkflow = new FnWorkflow();
-//
-//		try
-//		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> updateFnWorkflowInfo()");
-//			wiiscLog.log(wiiscLog.INFO, "===========================================================");
-//			//Workflow Name
-//			wiiscLog.log(wiiscLog.INFO, "Workflow Name: " + stepElement.getWorkflowName());
-//			fnWorkflow.setFnWorkflowName(stepElement.getWorkflowName());
-//			//Workflow Process
-//			wiiscLog.log(wiiscLog.INFO, "Workflow Process: " + stepElement.getRosterName());
-//			fnWorkflow.setFnWorkflowProcess(stepElement.getRosterName());
-//			//Workflow Activity/Step
-//			wiiscLog.log(wiiscLog.INFO, "Workflow Activity: " + stepElement.getQueueName());
-//			fnWorkflow.setFnWorkflowStep(stepElement.getQueueName());
-//			//Workflow Roster
-//			wiiscLog.log(wiiscLog.INFO, "Workflow Roster: " + stepElement.getRosterName());
-//			fnWorkflow.setFnWorkflowRoster(stepElement.getRosterName());
-//			//Workflow Queue
-//			wiiscLog.log(wiiscLog.INFO, "Workflow Queue: " + stepElement.getQueueName());
-//			fnWorkflow.setFnWorkflowQueue(stepElement.getQueueName());
-//
-//			/*//Workflow Object
-//			wiiscLog.log(wiiscLog.INFO, "Workflow Object Name: " + stepElement.getWorkObjectName());
-//			fnWorkflow.setFnWorkflowObject(stepElement.getWorkObjectName());*/
-//
-//			//Workflow ID
-//			wiiscLog.log(wiiscLog.INFO, "Workflow ID: " + stepElement.getWorkObjectNumber());
-//			fnWorkflow.setFnWorkflowID(stepElement.getWorkObjectNumber());
-//			//Workflow Originator
-//			wiiscLog.log(wiiscLog.INFO, "Workflow Originator: " + stepElement.getOriginator());
-//			//Workflow Participant
-//			wiiscLog.log(wiiscLog.INFO, "Workflow Participant: " + stepElement.getParticipantName());
-//			fnWorkflow.setFnWorkflowUser(stepElement.getParticipantName());
-//
-//			//Check the WorkflowType - New or Existing
-//			if (!workflowType.equals("New"))
-//			{
-//				wiiscLog.log(wiiscLog.INFO, "Workflow Date Received: " + stepElement.getDateReceived().toString());
-//			}
-//
-//			wiiscLog.log(wiiscLog.INFO, "===========================================================");
-//		}
-//		catch (VWException ex)
-//		{
-//			wiiscLog.log("ERROR", ex.getMessage());
-//			//Update ErrorFlag
-//			fnWorkflow.setErrorFlag(1);
-//			//Update ErrorMessage
-//			fnWorkflow.setErrorMessage(ex.getMessage());
-//		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> updateFnWorkflowInfo()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
-//		return fnWorkflow;
-//	}
-//
-//	private FnWorkflowPropertyList updateFnWorkflowPropertyListInfo(VWStepElement stepElement, WIISCLog wiiscLog)
-//	{
-//		//Create the FnWorkflowPropertyList Object
-//		FnWorkflowPropertyList fnWorkflowPropertyList = new FnWorkflowPropertyList();
-//
-//		try
-//		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> updateFnWorkflowPropertyListInfo()");
-//			//Get the VWStepElement System and User Defined Data Fields
-//			//VWParameter[] vwParametersData = stepElement.getParameters(VWFieldType.ALL_FIELD_TYPES, VWStepElement.FIELD_USER_AND_SYSTEM_DEFINED);
-//			
-//			//Get the VWStepElement User Defined Data Fields
-//			VWParameter[] vwParametersData = stepElement.getParameters(VWFieldType.ALL_FIELD_TYPES, VWStepElement.FIELD_USER_DEFINED);
-//			
-//			//Get the name, type, mode and value for each VWParameter
-//			for (int i = 0; i < vwParametersData.length; i++)
-//			{
-//				//Create the FnWorkflowProperty Object
-//				FnWorkflowProperty fnWorkflowProperty = new FnWorkflowProperty();
-//				//Get the Parameter Name
-//				String vwParameterName = vwParametersData[i].getName();
-//				fnWorkflowProperty.setName(vwParameterName);
-//				wiiscLog.log(wiiscLog.INFO, "VWParameterName: " + vwParameterName);
-//				//Get the Parameter Value
-//				String vwParameterValue = vwParametersData[i].getStringValue();
-//				fnWorkflowProperty.setValue(vwParameterValue);
-//				wiiscLog.log(wiiscLog.INFO, "VWParameterValue: " + vwParameterValue);
-//				//Add the FnWorkflowProperty to the FnWorkflowPropertyList
-//				fnWorkflowPropertyList.addFnWorkflowProperty(fnWorkflowProperty);
-//			}
-//		}
-//		catch (VWException ex)
-//		{
-//			wiiscLog.log("ERROR", ex.getMessage());
-//			//Update ErrorFlag
-//			fnWorkflowPropertyList.setErrorFlag(1);
-//			//Update ErrorMessage
-//			fnWorkflowPropertyList.setErrorMessage(ex.getMessage());
-//		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> updateFnWorkflowPropertyListInfo()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
-//		return fnWorkflowPropertyList;
-//	}
-//
-//	private boolean doStepElementAttachment(VWStepElement stepElement, VWParameter vwParam, FnDocument fnDocument, WIISCLog wiiscLog)
-//	{
+	}
+	
+	private FnWorkflow updateFnWorkflowInfo(VWStepElement stepElement, String workflowType)
+	{
+		//Create the FnWorkflow Object
+		FnWorkflow fnWorkflow = new FnWorkflow();
+
+		try
+		{
+			log.info("Entered WorkflowManager -> updateFnWorkflowInfo()");
+			log.info("===========================================================");
+			//Workflow Name
+			log.info("Workflow Name: " + stepElement.getWorkflowName());
+			fnWorkflow.setFnWorkflowName(stepElement.getWorkflowName());
+			//Workflow Process
+			log.info("Workflow Process: " + stepElement.getRosterName());
+			fnWorkflow.setFnWorkflowProcess(stepElement.getRosterName());
+			//Workflow Activity/Step
+			log.info("Workflow Activity: " + stepElement.getQueueName());
+			fnWorkflow.setFnWorkflowStep(stepElement.getQueueName());
+			//Workflow Roster
+			log.info("Workflow Roster: " + stepElement.getRosterName());
+			fnWorkflow.setFnWorkflowRoster(stepElement.getRosterName());
+			//Workflow Queue
+			log.info("Workflow Queue: " + stepElement.getQueueName());
+			fnWorkflow.setFnWorkflowQueue(stepElement.getQueueName());
+
+			/*//Workflow Object
+			log.info("Workflow Object Name: " + stepElement.getWorkObjectName());
+			fnWorkflow.setFnWorkflowObject(stepElement.getWorkObjectName());*/
+
+			//Workflow ID
+			log.info("Workflow ID: " + stepElement.getWorkObjectNumber());
+			fnWorkflow.setFnWorkflowID(stepElement.getWorkObjectNumber());
+			//Workflow Originator
+			log.info("Workflow Originator: " + stepElement.getOriginator());
+			//Workflow Participant
+			log.info("Workflow Participant: " + stepElement.getParticipantName());
+			fnWorkflow.setFnWorkflowUser(stepElement.getParticipantName());
+
+			//Check the WorkflowType - New or Existing
+			if (!workflowType.equals("New"))
+			{
+				log.info("Workflow Date Received: " + stepElement.getDateReceived().toString());
+			}
+
+			log.info("===========================================================");
+		}
+		catch (VWException ex)
+		{
+			log.info("ERROR", ex.getMessage());
+			//Update ErrorFlag
+			fnWorkflow.setErrorFlag(1);
+			//Update ErrorMessage
+			//fnWorkflow.setErrorMessage(ex.getMessage());
+		}
+		log.info("Leaving WorkflowManager -> updateFnWorkflowInfo()");
+		log.info("===========================================================");
+		return fnWorkflow;
+	}
+
+	private FnWorkflowPropertyList updateFnWorkflowPropertyListInfo(VWStepElement stepElement)
+	{
+		//Create the FnWorkflowPropertyList Object
+		FnWorkflowPropertyList fnWorkflowPropertyList = new FnWorkflowPropertyList();
+
+		try
+		{
+			log.info("Entered WorkflowManager -> updateFnWorkflowPropertyListInfo()");
+			//Get the VWStepElement System and User Defined Data Fields
+			//VWParameter[] vwParametersData = stepElement.getParameters(VWFieldType.ALL_FIELD_TYPES, VWStepElement.FIELD_USER_AND_SYSTEM_DEFINED);
+			
+			//Get the VWStepElement User Defined Data Fields
+			VWParameter[] vwParametersData = stepElement.getParameters(VWFieldType.ALL_FIELD_TYPES, VWStepElement.FIELD_USER_DEFINED);
+			
+			//Get the name, type, mode and value for each VWParameter
+			for (int i = 0; i < vwParametersData.length; i++)
+			{
+				//Create the FnWorkflowProperty Object
+				FnWorkflowProperty fnWorkflowProperty = new FnWorkflowProperty();
+				//Get the Parameter Name
+				String vwParameterName = vwParametersData[i].getName();
+				fnWorkflowProperty.setName(vwParameterName);
+				log.info("VWParameterName: " + vwParameterName);
+				//Get the Parameter Value
+				String vwParameterValue = vwParametersData[i].getStringValue();
+				fnWorkflowProperty.setValue(vwParameterValue);
+				log.info("VWParameterValue: " + vwParameterValue);
+				//Add the FnWorkflowProperty to the FnWorkflowPropertyList
+				fnWorkflowPropertyList.addFnWorkflowProperty(fnWorkflowProperty);
+			}
+		}
+		catch (VWException ex)
+		{
+			log.info("ERROR", ex.getMessage());
+			//Update ErrorFlag
+			fnWorkflowPropertyList.setErrorFlag(1);
+			//Update ErrorMessage
+			//fnWorkflowPropertyList.setErrorMessage(ex.getMessage());
+		}
+		log.info("Leaving WorkflowManager -> updateFnWorkflowPropertyListInfo()");
+		log.info("===========================================================");
+		return fnWorkflowPropertyList;
+	}
+
+	private void doStepElementAttachment(VWStepElement stepElement, VWParameter vwParam, String fnDocument)
+	{
 //		boolean attachmentAdded = false;
 //		//Create a List from the FnWorkflowRequest variable
 //		//List<FnWorkflowProperty> fnWorkflowPropertyListRequest = fnWorkflowRequest.getFnWorkflowPropsList();
@@ -4036,7 +4250,7 @@ public class WorkflowManager {
 //
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> doStepElementAttachment()");
+//			log.info("Entered WorkflowManager -> doStepElementAttachment()");
 //			//Check parameter mode
 //			boolean readOnly = false;
 //			if (vwParam.getMode() == VWModeType.MODE_TYPE_IN)
@@ -4057,7 +4271,7 @@ public class WorkflowManager {
 //						//Check attachment
 //						if (attachment != null)
 //						{
-//							wiiscLog.log(wiiscLog.INFO, "1 Attachment");
+//							log.info("1 Attachment");
 //							// Set the attachment name
 //							attachment.setAttachmentName(fnDocument.getFnDocumentName());
 //							// Set the attachment description
@@ -4077,13 +4291,13 @@ public class WorkflowManager {
 //							{
 //								//Update the boolean
 //								attachmentAdded = true;
-//								wiiscLog.log(wiiscLog.INFO, "Attachment Added");
+//								log.info("Attachment Added");
 //							}
 //							else
 //							{
 //								//Update the boolean
 //								attachmentAdded = false;
-//								wiiscLog.log(wiiscLog.INFO, "Attachment Failed");
+//								log.info("Attachment Failed");
 //							}
 //						}
 //					}
@@ -4093,7 +4307,7 @@ public class WorkflowManager {
 //						// Get the value for the VWAttachment[]
 //						VWAttachment[] attachments = (VWAttachment[]) vwParam.getValue();
 //						VWAttachment[] updatedAttachments = new VWAttachment[attachments.length];
-//						wiiscLog.log(wiiscLog.INFO, "Multiple Attachments " + attachments.length);
+//						log.info("Multiple Attachments " + attachments.length);
 //						for (int i = 0; i < attachments.length; i++)
 //						{
 //							VWAttachment attachment = attachments[i];
@@ -4109,7 +4323,7 @@ public class WorkflowManager {
 //							//Check to see if fnDocument has more than 1 attachment to use
 //							if (fnDocument.getFnDocumentID().contains(","))
 //							{
-//								wiiscLog.log(wiiscLog.INFO, "Split ID list");
+//								log.info("Split ID list");
 //								String[] docIDs = fnDocument.getFnDocumentID().split(",");
 //								//String docID = "";
 //								//Set the document ID and version
@@ -4131,7 +4345,7 @@ public class WorkflowManager {
 //						stepElement.setParameterValue(vwParam.getName(),updatedAttachments,true);
 //						//Update the boolean
 //						attachmentAdded = true;
-//						wiiscLog.log(wiiscLog.INFO, "Attachment Added");
+//						log.info("Attachment Added");
 //					}
 //					break;
 //				default:
@@ -4142,18 +4356,18 @@ public class WorkflowManager {
 //		}
 //		catch (VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
-//			wiiscLog.log(wiiscLog.INFO, "Attachment Failed");
+//			log.info("ERROR", ex.getMessage());
+//			log.info("Attachment Failed");
 //			//Update the boolean
 //			attachmentAdded = false;
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> doStepElementAttachment()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> doStepElementAttachment()");
+//		log.info("===========================================================");
 //		return attachmentAdded;
-//	}
-//
-//	private FnWorkflowProperty doStepElementParticipant(VWStepElement stepElement, VWParameter vwParam, FnWorkflow fnWorkflowRequest, WIISCLog wiiscLog)
-//	{
+	}
+
+	private void doStepElementParticipant(VWStepElement stepElement, VWParameter vwParam, String fnWorkflowRequest)
+	{
 //
 //		//Create a List from the FnWorkflowRequest variable
 //		//List<FnWorkflowProperty> fnWorkflowPropertyListRequest = fnWorkflowRequest.getFnWorkflowPropsList();
@@ -4165,7 +4379,7 @@ public class WorkflowManager {
 //		
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> doStepElementParticipant()");
+//			log.info("Entered WorkflowManager -> doStepElementParticipant()");
 //			
 //			if (vwParam.getMode() == VWModeType.MODE_TYPE_IN)
 //			{
@@ -4177,7 +4391,7 @@ public class WorkflowManager {
 //				switch (vwParam.getFieldType())
 //				{
 //				case VWFieldType.FIELD_TYPE_PARTICIPANT:
-//					wiiscLog.log(wiiscLog.INFO, "Participant Field Name: " + vwParam);
+//					log.info("Participant Field Name: " + vwParam);
 //					// Instantiate a new VWParticipant array
 //					VWParticipant[] participant = new VWParticipant[1];
 //					// Set the participant name using username value
@@ -4195,21 +4409,21 @@ public class WorkflowManager {
 //		}
 //		catch (VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> doStepElementParticipant()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> doStepElementParticipant()");
+//		log.info("===========================================================");
 //		return fnWorkflowPropertyResult;
-//	}
-//
-//	private FnWorkflowPropertyList doStepElementDataFields(VWStepElement stepElement, FnWorkflow fnWorkflowRequest, WIISCLog wiiscLog)
-//	{
+	}
+
+	private void doStepElementDataFields(VWStepElement stepElement, String fnWorkflowRequest)
+	{
 //		//Create the FnWorkflowPropertyList
 //		FnWorkflowPropertyList fnWorkflowPropertyListResult = new FnWorkflowPropertyList();
 //		
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> doStepElementDataFields()");
+//			log.info("Entered WorkflowManager -> doStepElementDataFields()");
 //			
 //			//Get the VWStepElement System and User Defined Data Fields
 //			VWParameter[] vwParametersData = stepElement.getParameters(VWFieldType.ALL_FIELD_TYPES, VWStepElement.FIELD_USER_AND_SYSTEM_DEFINED);
@@ -4223,7 +4437,7 @@ public class WorkflowManager {
 //				if (vwParam.getFieldType() != VWFieldType.FIELD_TYPE_ATTACHMENT && 
 //						vwParam.getFieldType() != VWFieldType.FIELD_TYPE_PARTICIPANT)
 //				{
-//					wiiscLog.log(wiiscLog.INFO, "Updating Workflow Data Field: " + vwParam.getName());
+//					log.info("Updating Workflow Data Field: " + vwParam.getName());
 //					FnWorkflowProperty fnWorkflowPropertyResult = new FnWorkflowProperty();
 //					//Call DoStepElementDataField
 //					fnWorkflowPropertyResult = doStepElementDataField(stepElement, vwParam, fnWorkflowRequest, wiiscLog);
@@ -4236,19 +4450,19 @@ public class WorkflowManager {
 //		}
 //		catch (VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			//Update ErrorFlag
 //			fnWorkflowPropertyListResult.setErrorFlag(1);
 //			//Update ErrorMessage
 //			fnWorkflowPropertyListResult.setErrorMessage(ex.getMessage());
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> doStepElementDataFields()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> doStepElementDataFields()");
+//		log.info("===========================================================");
 //		return fnWorkflowPropertyListResult;
-//	}
-//
-//	private FnWorkflowProperty doStepElementDataField(VWStepElement stepElement, VWParameter vwParam, FnWorkflow fnWorkflowRequest, WIISCLog wiiscLog)
-//	{
+	}
+
+	private void doStepElementDataField(VWStepElement stepElement, VWParameter vwParam, String fnWorkflowRequest)
+	{
 //		//Create a List from the FnWorkflowRequest variable
 //		FnWorkflowPropertyList fnWorkflowPropertyList = fnWorkflowRequest.getFnWorkflowPropertyList();
 //		List<FnWorkflowProperty> fnWorkflowPropertyListRequest = fnWorkflowPropertyList.getFnWorkflowPropsList();
@@ -4260,7 +4474,7 @@ public class WorkflowManager {
 //		
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> doStepElementDataField()");
+//			log.info("Entered WorkflowManager -> doStepElementDataField()");
 //			
 //			if (vwParam.getMode() == VWModeType.MODE_TYPE_IN)
 //			{
@@ -4295,8 +4509,8 @@ public class WorkflowManager {
 //							if (vwParam.getName().equals(fnWorkflowPropertyRequest.getName()))
 //							{
 //								//If the Property Matches - then Save it to the Workflow Data Field
-//								//wiiscLog.log(wiiscLog.INFO, "Updating " + fnWorkflowPropertyRequest.getName());
-//								wiiscLog.log(wiiscLog.INFO, "Updating Workflow Data Value: " + fnWorkflowPropertyRequest.getValue());
+//								//log.info("Updating " + fnWorkflowPropertyRequest.getName());
+//								log.info("Updating Workflow Data Value: " + fnWorkflowPropertyRequest.getValue());
 //								stepElement.setParameterValue(vwParam.getName(), Integer.parseInt(fnWorkflowPropertyRequest.getValue()), true);
 //								//Update the FnPropertyResult
 //								fnWorkflowPropertyResult.setName(fnWorkflowPropertyRequest.getName());
@@ -4322,8 +4536,8 @@ public class WorkflowManager {
 //							if (vwParam.getName().equals(fnWorkflowPropertyRequest.getName()))
 //							{
 //								//If the Property Matches - then Save it to the Workflow Data Field
-//								//wiiscLog.log(wiiscLog.INFO, "Updating " + fnWorkflowPropertyRequest.getName());
-//								wiiscLog.log(wiiscLog.INFO, "Updating Workflow Data Value: " + fnWorkflowPropertyRequest.getValue());
+//								//log.info("Updating " + fnWorkflowPropertyRequest.getName());
+//								log.info("Updating Workflow Data Value: " + fnWorkflowPropertyRequest.getValue());
 //								stepElement.setParameterValue(vwParam.getName(), fnWorkflowPropertyRequest.getValue(), true);
 //								//Update the FnPropertyResult
 //								fnWorkflowPropertyResult.setName(fnWorkflowPropertyRequest.getName());
@@ -4340,38 +4554,38 @@ public class WorkflowManager {
 //		}
 //		catch (VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> doStepElementDataField()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> doStepElementDataField()");
+//		log.info("===========================================================");
 //		return fnWorkflowPropertyResult;
-//	}
-//
-//	private FnWorkflow updateStepElement(VWStepElement stepElement, FnWorkflow fnWorkflowRequest, Map<String, String> stepElementParamsMap, String stepElementAction, String stepElementActionValue, WIISCLog wiiscLog)
-//	{
+	}
+
+	private void updateStepElement(VWStepElement stepElement, String fnWorkflowRequest, Map<String, String> stepElementParamsMap, String stepElementAction, String stepElementActionValue)
+	{
 //		FnWorkflow fnWorkflowResult = new FnWorkflow();
 //		FnWorkflowPropertyList fnWorkflowPropertyListResult = new FnWorkflowPropertyList();
 //		
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> updateStepElement()");
+//			log.info("Entered WorkflowManager -> updateStepElement()");
 //			
 //			//If Attachment, call doStepElementAttachment and doStepElementAction
 //			if (stepElementAction.equals("Attachment"))
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Attachment");
+//				log.info("Attachment");
 //				//Not implemented yet
 //			}
 //			//If Participant, call doStepElementParticipant and doStepElementAction
 //			else if (stepElementAction.equals("Participant"))
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Participant");
+//				log.info("Participant");
 //				//Not implemented yet
 //			}
 //			//If DataFields, call doStepElementDataFields and doStepElementAction
 //			else if (stepElementAction.equals("DataFields"))
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "DataFields");
+//				log.info("DataFields");
 //				//Lock the Step Element
 //				stepElement.doLock(true);
 //
@@ -4379,18 +4593,18 @@ public class WorkflowManager {
 //				fnWorkflowPropertyListResult =  doStepElementDataFields(stepElement, fnWorkflowRequest, wiiscLog);
 //
 //				//End of For Loop
-//				wiiscLog.log(wiiscLog.INFO, "===========================================");
+//				log.info("===========================================");
 //
 //				// Set the value for the system-defined Response parameter
 //				if (stepElement.getStepResponses() != null) {
-//					wiiscLog.log(wiiscLog.INFO, "Step Responses");
+//					log.info("Step Responses");
 //					String responseValue = "Ok";
 //					stepElement.setSelectedResponse(responseValue);
 //				}
 //				else
 //				{
-//					wiiscLog.log(wiiscLog.INFO, "No Step Responses");
-//					wiiscLog.log(wiiscLog.INFO, "===========================================");
+//					log.info("No Step Responses");
+//					log.info("===========================================");
 //				}
 //
 //				//DoStepElementAction - Save & Unlock the Workflow
@@ -4399,7 +4613,7 @@ public class WorkflowManager {
 //			//If Parameters, call doStepElementParameterFields and doStepElementAction
 //			else if (stepElementAction.equals("Parameters-Save"))
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Parameters-Save");
+//				log.info("Parameters-Save");
 //				if (stepElementParamsMap.size() > 0)
 //				{
 //					//Lock the Step Element
@@ -4407,22 +4621,22 @@ public class WorkflowManager {
 //
 //					//Update the Step Element
 //					for (Map.Entry<String, String> entry : stepElementParamsMap.entrySet()) {
-//						wiiscLog.log(wiiscLog.INFO, "Entry: " + entry.getKey() + " Value: " + entry.getValue());
+//						log.info("Entry: " + entry.getKey() + " Value: " + entry.getValue());
 //						stepElement.setParameterValue(entry.getKey(), entry.getValue(), true);
 //					}
 //
-//					wiiscLog.log(wiiscLog.INFO, "===========================================");
+//					log.info("===========================================");
 //
 //					// Set the value for the system-defined Response parameter
 //					if (stepElement.getStepResponses() != null) {
-//						wiiscLog.log(wiiscLog.INFO, "Step Responses");
+//						log.info("Step Responses");
 //						String responseValue = "Ok";
 //						stepElement.setSelectedResponse(responseValue);
 //					}
 //					else
 //					{
-//						wiiscLog.log(wiiscLog.INFO, "No Step Responses");
-//						wiiscLog.log(wiiscLog.INFO, "===========================================");
+//						log.info("No Step Responses");
+//						log.info("===========================================");
 //					}
 //
 //					//DoStepElementAction - Save & Unlock the Workflow
@@ -4432,7 +4646,7 @@ public class WorkflowManager {
 //			//If Parameters, call doStepElementParameterFields and doStepElementAction
 //			else if (stepElementAction.equals("Parameters-Dispatch"))
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Parameters-Dispatch");
+//				log.info("Parameters-Dispatch");
 //				if (stepElementParamsMap.size() > 0)
 //				{
 //					//Lock the Step Element
@@ -4440,22 +4654,22 @@ public class WorkflowManager {
 //
 //					//Update the Step Element
 //					for (Map.Entry<String, String> entry : stepElementParamsMap.entrySet()) {
-//						wiiscLog.log(wiiscLog.INFO, "Entry: " + entry.getKey() + " Value: " + entry.getValue());
+//						log.info("Entry: " + entry.getKey() + " Value: " + entry.getValue());
 //						stepElement.setParameterValue(entry.getKey(), entry.getValue(), true);
 //					}
 //
-//					wiiscLog.log(wiiscLog.INFO, "===========================================");
+//					log.info("===========================================");
 //
 //					// Set the value for the system-defined Response parameter
 //					if (stepElement.getStepResponses() != null) {
-//						wiiscLog.log(wiiscLog.INFO, "Step Responses");
+//						log.info("Step Responses");
 //						String responseValue = "Ok";
 //						stepElement.setSelectedResponse(responseValue);
 //					}
 //					else
 //					{
-//						wiiscLog.log(wiiscLog.INFO, "No Step Responses");
-//						wiiscLog.log(wiiscLog.INFO, "===========================================");
+//						log.info("No Step Responses");
+//						log.info("===========================================");
 //					}
 //
 //					//DoStepElementAction - Save & Unlock the Workflow & Dispatch
@@ -4465,7 +4679,7 @@ public class WorkflowManager {
 //			//If Save, call doStepElementDataFields and doStepElementAction
 //			else if (stepElementAction.equals("Save"))
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Save");
+//				log.info("Save");
 //				//Lock the Step Element
 //				stepElement.doLock(true);
 //
@@ -4473,18 +4687,18 @@ public class WorkflowManager {
 //				fnWorkflowPropertyListResult =  doStepElementDataFields(stepElement, fnWorkflowRequest, wiiscLog);
 //
 //				//End of For Loop
-//				wiiscLog.log(wiiscLog.INFO, "===========================================");
+//				log.info("===========================================");
 //
 //				// Set the value for the system-defined Response parameter
 //				if (stepElement.getStepResponses() != null) {
-//					wiiscLog.log(wiiscLog.INFO, "Step Responses");
+//					log.info("Step Responses");
 //					String responseValue = "Ok";
 //					stepElement.setSelectedResponse(responseValue);
 //				}
 //				else
 //				{
-//					wiiscLog.log(wiiscLog.INFO, "No Step Responses");
-//					wiiscLog.log(wiiscLog.INFO, "===========================================");
+//					log.info("No Step Responses");
+//					log.info("===========================================");
 //				}
 //
 //				//DoStepElementAction - Save & Unlock the Workflow
@@ -4493,7 +4707,7 @@ public class WorkflowManager {
 //			//If Dispatch, call doStepElementDataFields and doStepElementAction
 //			else if (stepElementAction.equals("Dispatch"))
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Dispatch");
+//				log.info("Dispatch");
 //				//Lock the Step Element
 //				stepElement.doLock(true);
 //
@@ -4501,18 +4715,18 @@ public class WorkflowManager {
 //				fnWorkflowPropertyListResult =  doStepElementDataFields(stepElement, fnWorkflowRequest, wiiscLog);
 //
 //				//End of For Loop
-//				wiiscLog.log(wiiscLog.INFO, "===========================================");
+//				log.info("===========================================");
 //
 //				// Set the value for the system-defined Response parameter
 //				if (stepElement.getStepResponses() != null) {
-//					wiiscLog.log(wiiscLog.INFO, "Step Responses");
+//					log.info("Step Responses");
 //					String responseValue = "Ok";
 //					stepElement.setSelectedResponse(responseValue);
 //				}
 //				else
 //				{
-//					wiiscLog.log(wiiscLog.INFO, "No Step Responses");
-//					wiiscLog.log(wiiscLog.INFO, "===========================================");
+//					log.info("No Step Responses");
+//					log.info("===========================================");
 //				}
 //
 //				//DoStepElementAction - Save & Unlock the Workflow & Dispatch
@@ -4521,7 +4735,7 @@ public class WorkflowManager {
 //			//If any other value, call doStepElementAction
 //			else
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Other");
+//				log.info("Other");
 //				//Lock the Step Element
 //				stepElement.doLock(true);
 //				//DoStepElementAction - Save & Unlock the Workflow
@@ -4534,19 +4748,19 @@ public class WorkflowManager {
 //		}
 //		catch (VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			//Update ErrorFlag
 //			fnWorkflowPropertyListResult.setErrorFlag(1);
 //			//Update ErrorMessage
 //			fnWorkflowPropertyListResult.setErrorMessage(ex.getMessage());
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> updateStepElement()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> updateStepElement()");
+//		log.info("===========================================================");
 //		return fnWorkflowResult;
-//	}
-//	
-//	private FnWorkflow doStepElementAction(VWStepElement stepElement, String action, String actionValue, WIISCLog wiiscLog)
-//	{
+	}
+	
+	private void doStepElementAction(VWStepElement stepElement, String action, String actionValue)
+	{
 //		//Create the FnWorkflow Object
 //		FnWorkflow fnWorkflowResult = new FnWorkflow();
 //		//Create the FnWorkflowPropertyList Object
@@ -4554,62 +4768,62 @@ public class WorkflowManager {
 //
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> doStepElementAction()");
+//			log.info("Entered WorkflowManager -> doStepElementAction()");
 //			//Check the Action
 //			if (action.equals("Reassign"))
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Reassign");
+//				log.info("Reassign");
 //				// Determine whether a step element
 //				// can be reassigned and reassign it
 //				if (stepElement.getCanReassign())
 //				{
-//					wiiscLog.log(wiiscLog.INFO, "Able to Reassign");
+//					log.info("Able to Reassign");
 //					String participantName = actionValue;
 //					stepElement.doReassign(participantName,false,null);
 //				}
 //			}
 //			else if (action.equals("Return"))
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Return");
+//				log.info("Return");
 //				// Determine whether a step element can be returned to the
 //				// queue from which the user delegated or reassigned it and
 //				// return it
 //				if (stepElement.getCanReturnToSource())
 //				{
-//					wiiscLog.log(wiiscLog.INFO, "Able to Return");
+//					log.info("Able to Return");
 //					stepElement.doReturnToSource();
 //				}
 //			}
 //			else if (action.equals("Move"))
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Move");
+//				log.info("Move");
 //				// Determine whether a step element
 //				// can be reassigned and reassign it
 //				//
 //				if (stepElement.getCanReassign())
 //				{
-//					wiiscLog.log(wiiscLog.INFO, "Able to Move");
+//					log.info("Able to Move");
 //					String participantName = actionValue;
 //					stepElement.doReassign(participantName,false,"Inbox");
 //				}
 //			}
 //			else if (action.equals("Abort"))
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Abort");
+//				log.info("Abort");
 //				// Cancel the changes to the work item
 //				// without advancing it in the workflow
 //				stepElement.doAbort();
 //			}
 //			else if (action.equals("Save"))
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Save");
+//				log.info("Save");
 //				// Save the changes to the work item
 //				// and unlock it without advancing it in the workflow
 //				stepElement.doSave(true);
 //			}
 //			else if (action.equals("Dispatch"))
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Dispatch");
+//				log.info("Dispatch");
 //				// Save the changes to the work item
 //				// and advance it in the workflow
 //				stepElement.doDispatch();
@@ -4625,482 +4839,474 @@ public class WorkflowManager {
 //		}
 //		catch (VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			//Update ErrorFlag
 //			fnWorkflowResult.setErrorFlag(1);
 //			//Update ErrorMessage
 //			fnWorkflowResult.setErrorMessage(ex.getMessage());
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> doStepElementAction()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> doStepElementAction()");
+//		log.info("===========================================================");
 //		return fnWorkflowResult;
-//	}
-//
-//	private FnWorkflowList getQueueDBQuery(SQLServerConnection con, VWQueue vwQueue, String queueName, String[] filterName, String[] filterValue, WIISCLog wiiscLog)
-//	{
-//		//DB Query to the FileNet Queue to get the results
-//		//Create the FnWorkflowList
-//		FnWorkflowList fnWorkflowList = new FnWorkflowList();
-//		Statement stmt = null;
-//		ResultSet rs = null;
-//		
-//		try
-//		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> getQueueDBQuery()");
-//			//Workflow Region
-//			String workflowRegion = "";
-//			//Workflow Search Results Limit
-//			String workflowSearchLimit = "";
-//			//Workflow Data Fields Properties
-//			String workflowDataFieldsProperties = "";
-//			//Workflow Data Fields Properties file
-//			ResourceBundle workflowDataFieldsProps = null;
-//			//Workflow Data Fields FnWorkflowPropertyList
-//			FnWorkflowPropertyList fnWorkflowPropertyList = new FnWorkflowPropertyList();
-//			//SQL Query
-//			String SQL = "";
-//						
-//			//Get some Workflow Information
-//			workflowRegion = globalConfig.getString("peWorkflowRegion");
-//			workflowSearchLimit = globalConfig.getString("workflowSearchLimit");
-//			workflowDataFieldsProperties = globalConfig.getString("workflowDataFieldsProperties");
-//			
-//			wiiscLog.log(wiiscLog.INFO, "Queue: " + queueName);
-//			wiiscLog.log(wiiscLog.INFO, "FilterName[0]: " + filterName[0]);
-//			wiiscLog.log(wiiscLog.INFO, "FilterValue[0]: " + filterValue[0]);
-//			wiiscLog.log(wiiscLog.INFO, "Workflow Region: " + workflowRegion);
-//									
-//			//Build the Properties to retrieve from the SQL Query
-//			if (checkPropertiesFileExist(workflowDataFieldsProperties, wiiscLog))
-//			{
-//				LocalResource resWorkflowFields = getLocalResource(workflowDataFieldsProperties);
-//				workflowDataFieldsProps = resWorkflowFields.getLocalBundle(resWorkflowFields.getBundlePath(), resWorkflowFields.getBundleFile());
-//				//Integer for the Property Count to use from the Doc Class Config Properties file
-//				int propCount = 1;
-//				//Get Workflow Data Field Properties
-//				while (workflowDataFieldsProps.containsKey("prop" + propCount))
-//				{
-//					FnWorkflowProperty fnWorkflowProperty = new FnWorkflowProperty();
-//					fnWorkflowProperty.setName(workflowDataFieldsProps.getString("prop" + propCount));
-//					fnWorkflowPropertyList.addFnWorkflowProperty(fnWorkflowProperty);
-//					propCount++;
-//				}
-//			}
-//			
-//			//Output FnWorkflowPropertyList
-//			//outputFnWorkflowPropertyList(fnWorkflowPropertyList, wiiscLog);
-//			
-//			//Check Queue Field Names
-//			VWQueueDefinition vwQueueDef = vwQueue.fetchQueueDefinition();
-//			List<FnWorkflowProperty> fnWorkflowProps = fnWorkflowPropertyList.getFnWorkflowPropsList();
-//			FnWorkflowPropertyList validFnWorkflowPropertyList = new FnWorkflowPropertyList();
-//			
-//			for (int i = 0; i < fnWorkflowProps.size(); i++)
-//			{
-//				FnWorkflowProperty fnWorkflowProp = fnWorkflowProps.get(i);
-//				//Check for the Queue Field
-//				if (vwQueueDef.hasFieldName(fnWorkflowProp.getName()))
-//				{
-//					//Add the FnWorkflowProperty to the validFnWorkflowPropertyList
-//					validFnWorkflowPropertyList.addFnWorkflowProperty(fnWorkflowProp);
-//				}
-//			}
-//			
-//			//Clear the Temp List
-//			fnWorkflowProps.clear();
-//			
-//			//Update FnWorkflowPropertyList
-//			if (validFnWorkflowPropertyList.getCount() > 0)
-//			{
-//				//Clear the old FnWorkflowPropertyList
-//				fnWorkflowPropertyList.getFnWorkflowPropsList().clear();
-//				//Add the updated FnWorkflowPropertyList
-//				fnWorkflowPropertyList.addFnWorkflowPropertyList(validFnWorkflowPropertyList);
-//			}
-//			
-//			//Output FnWorkflowPropertyList
-//			//outputFnWorkflowPropertyList(fnWorkflowPropertyList, wiiscLog);
-//			
-//			//Build the SQL Query Statement
-//			if (filterName.length > 0)
-//			{
-//				wiiscLog.log(wiiscLog.INFO, "FilterName is being used");
-//				//Check FnWorkflowPropertyList
-//				if (fnWorkflowPropertyList.getCount() > 0)
-//				{
-//					String params = "";
-//					fnWorkflowProps = fnWorkflowPropertyList.getFnWorkflowPropsList();
-//					for (int i = 0; i < fnWorkflowProps.size(); i++)
-//					{
-//						if (params.length() == 0)
-//						{
-//							params = fnWorkflowProps.get(i).getName();
-//						}
-//						else
-//						{
-//							params = params + "," + fnWorkflowProps.get(i).getName();
-//						}
-//					}
-//					wiiscLog.log(wiiscLog.INFO, "Select Params: " + params);
-//					//Update SQL Query
-//					if (workflowSearchLimit.length() == 0)
-//					{
-//						SQL = "SELECT " + params + " FROM VWVQ" + workflowRegion + "_" + queueName + " where " + filterName[0] + " = '" + filterValue[0] + "'";
-//					}
-//					else
-//					{
-//						SQL = "SELECT TOP " + workflowSearchLimit + " " + params + " FROM VWVQ" + workflowRegion + "_" + queueName + " where " + filterName[0] + " = '" + filterValue[0] + "'";
-//					}
-//				}
-//				else
-//				{
-//					//Update SQL Query
-//					if (workflowSearchLimit.length() == 0)
-//					{
-//						SQL = "SELECT * FROM VWVQ" + workflowRegion + "_" + queueName + " where " + filterName[0] + " = '" + filterValue[0] + "'";
-//					}
-//					else
-//					{
-//						SQL = "SELECT TOP " + workflowSearchLimit + " * FROM VWVQ" + workflowRegion + "_" + queueName + " where " + filterName[0] + " = '" + filterValue[0] + "'";
-//					}
-//				}
-//			}
-//			else
-//			{
-//				wiiscLog.log(wiiscLog.INFO, "FilterName is NOT being used");
-//				//Check FnWorkflowPropertyList
-//				if (fnWorkflowPropertyList.getCount() > 0)
-//				{
-//					String params = "";
-//					fnWorkflowProps = fnWorkflowPropertyList.getFnWorkflowPropsList();
-//					for (int i = 0; i < fnWorkflowProps.size(); i++)
-//					{
-//						if (params.length() == 0)
-//						{
-//							params = fnWorkflowProps.get(i).getName();
-//						}
-//						else
-//						{
-//							params = params + "," + fnWorkflowProps.get(i).getName();
-//						}
-//					}
-//					wiiscLog.log(wiiscLog.INFO, "Select Params: " + params);
-//					//Update SQL Query
-//					if (workflowSearchLimit.length() == 0)
-//					{
-//						SQL = "SELECT " + params + " FROM VWVQ" + workflowRegion + "_" + queueName;
-//					}
-//					else
-//					{
-//						SQL = "SELECT TOP " + workflowSearchLimit + " " + params + " FROM VWVQ" + workflowRegion + "_" + queueName;
-//					}
-//				}
-//				else
-//				{
-//					//Update SQL Query
-//					if (workflowSearchLimit.length() == 0)
-//					{
-//						SQL = "SELECT * FROM VWVQ" + workflowRegion + "_" + queueName;
-//					}
-//					else
-//					{
-//						SQL = "SELECT TOP " + workflowSearchLimit + " * FROM VWVQ" + workflowRegion + "_" + queueName;
-//					}
-//				}
-//			}
-//			wiiscLog.log(wiiscLog.INFO, "SQL Query: " + SQL); 
-//
-//			//Execute an SQL statement that returns some data.
-//			stmt = con.createStatement();
-//			rs = stmt.executeQuery(SQL);
-//
-//			// Iterate through the data in the result set and display it.
-//			while (rs.next())
-//			{
-//				String propName = "";
-//				String propValue = "";
-//				FnWorkflow fnWorkflow = new FnWorkflow();
-//				FnWorkflowPropertyList fnWorkflowPropertyListResult = new FnWorkflowPropertyList();
-//				
-//				List<FnWorkflowProperty> fnWorkflowPropsResult = fnWorkflowPropertyList.getFnWorkflowPropsList();
-//				for (int i = 0; i < fnWorkflowPropsResult.size(); i++)
-//				{
-//					//Get Prop Name
-//					propName = fnWorkflowPropsResult.get(i).getName();
-//					propValue = rs.getString(propName);
-//					wiiscLog.log(wiiscLog.INFO, "Property Name: " + propName);
-//					wiiscLog.log(wiiscLog.INFO, "Property Value: " + propValue);
-//					//Create the FnWorkflowProperty
-//					FnWorkflowProperty fnWorkflowProperty = new FnWorkflowProperty();
-//					//Set the FnWorkflowProperty Name
-//					fnWorkflowProperty.setName(propName);
-//					//Set the FnWorkflowProperty Value from the DB
-//					fnWorkflowProperty.setValue(propValue);
-//					//Add the FnWorkflowProperty to the FnWorkflowPropertyListResult
-//					fnWorkflowPropertyListResult.addFnWorkflowProperty(fnWorkflowProperty);
-//				}
-//				//Separate the Workflow Results
-//				wiiscLog.log(wiiscLog.INFO, "===========================================================");
-//				if (fnWorkflowPropertyListResult.getCount() > 0)
-//				{
-//					//Add the FnWorkflowPropertyListResult to the FnWorkflow
-//					fnWorkflow.setFnWorkflowPropertyList(fnWorkflowPropertyListResult);
-//					//Add the FnWorkflow to the FnWorkflowList
-//					fnWorkflowList.addFnWorkflow(fnWorkflow);
-//				}
-//				else
-//				{
-//					//Add the FnWorkflow to the FnWorkflowList
-//					fnWorkflowList.addFnWorkflow(fnWorkflow);
-//				}
-//			}
-//			wiiscLog.log(wiiscLog.INFO, "FileNet Workflow List from DB Query Finished");
-//		}
-//
-//		// Handle any errors that may have occurred.
-//		catch (Exception e)
-//		{
-//			//e.printStackTrace();
-//			wiiscLog.log("ERROR", e.getMessage());
-//		}
-//		finally
-//		{
-//			if (rs != null)
-//			{
-//				try
-//				{
-//					wiiscLog.log(wiiscLog.INFO, "Closing ResultSet");
-//					rs.close();
-//				}
-//				catch(Exception e)
-//				{
-//					wiiscLog.log(wiiscLog.INFO, "Error closing ResultSet");
-//					wiiscLog.log("ERROR", e.getMessage());
-//				}
-//			}
-//			if (stmt != null)
-//			{
-//				try
-//				{
-//					wiiscLog.log(wiiscLog.INFO, "Closing Statement");
-//					stmt.close();
-//				}
-//				catch(Exception e)
-//				{
-//					wiiscLog.log(wiiscLog.INFO, "Error closing Statement");
-//					wiiscLog.log("ERROR", e.getMessage());
-//				}
-//			}
-//		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> getQueueDBQuery()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
-//		return fnWorkflowList;
-//	}
-//	
-//	private VWQueueQuery getQueueQuery(VWQueue vwQueue, String[] filterName, String[] filterValue, String sortBy, WIISCLog wiiscLog)
-//	{
+	}
+
+	private FnWorkflowList getQueueDBQuery(SQLServerConnection con, VWQueue vwQueue, String queueName, String[] filterName, String[] filterValue)
+	{
+		//DB Query to the FileNet Queue to get the results
+		//Create the FnWorkflowList
+		FnWorkflowList fnWorkflowList = new FnWorkflowList();
+		Statement stmt = null;
+		ResultSet rs = null;
+		
+		try
+		{
+			log.info("Entered WorkflowManager -> getQueueDBQuery()");
+			//Workflow Region
+			String workflowRegion = "";
+			//Workflow Search Results Limit
+			String workflowSearchLimit = "";
+			//Workflow Data Fields
+			List<String> workflowDataFields = new ArrayList<String>();
+			//Workflow Data Fields FnWorkflowPropertyList
+			FnWorkflowPropertyList fnWorkflowPropertyList = new FnWorkflowPropertyList();
+			//SQL Query
+			String SQL = "";
+						
+			//Get some Workflow Information
+			workflowRegion = appConfig.getPeWorkflowRegion();
+			workflowSearchLimit = appConfig.getWorkflowSearchLimit();
+			
+			workflowDataFields = appConfig.getWorkflowDataFields();
+			
+			log.info("Queue: " + queueName);
+			log.info("FilterName[0]: " + filterName[0]);
+			log.info("FilterValue[0]: " + filterValue[0]);
+			log.info("Workflow Region: " + workflowRegion);
+									
+			//Build the Properties to retrieve from the SQL Query
+			if (workflowDataFields != null && workflowDataFields.size() > 0)
+			{
+				for(String dataField : workflowDataFields) {
+					FnWorkflowProperty fnWorkflowProperty = new FnWorkflowProperty();
+					fnWorkflowProperty.setName(dataField);
+					fnWorkflowPropertyList.addFnWorkflowProperty(fnWorkflowProperty);
+				}
+			}
+			
+			//Output FnWorkflowPropertyList
+			//outputFnWorkflowPropertyList(fnWorkflowPropertyList);
+			
+			//Check Queue Field Names
+			VWQueueDefinition vwQueueDef = vwQueue.fetchQueueDefinition();
+			List<FnWorkflowProperty> fnWorkflowProps = fnWorkflowPropertyList.getFnWorkflowPropsList();
+			FnWorkflowPropertyList validFnWorkflowPropertyList = new FnWorkflowPropertyList();
+			
+			for (int i = 0; i < fnWorkflowProps.size(); i++)
+			{
+				FnWorkflowProperty fnWorkflowProp = fnWorkflowProps.get(i);
+				//Check for the Queue Field
+				if (vwQueueDef.hasFieldName(fnWorkflowProp.getName()))
+				{
+					//Add the FnWorkflowProperty to the validFnWorkflowPropertyList
+					validFnWorkflowPropertyList.addFnWorkflowProperty(fnWorkflowProp);
+				}
+			}
+			
+			//Clear the Temp List
+			fnWorkflowProps.clear();
+			
+			//Update FnWorkflowPropertyList
+			if (validFnWorkflowPropertyList.getCount() > 0)
+			{
+				//Clear the old FnWorkflowPropertyList
+				fnWorkflowPropertyList.getFnWorkflowPropsList().clear();
+				//Add the updated FnWorkflowPropertyList
+				fnWorkflowPropertyList.addFnWorkflowPropertyList(validFnWorkflowPropertyList);
+			}
+			
+			//Output FnWorkflowPropertyList
+			//outputFnWorkflowPropertyList(fnWorkflowPropertyList, wiiscLog);
+			
+			//Build the SQL Query Statement
+			if (filterName.length > 0)
+			{
+				log.info("FilterName is being used");
+				//Check FnWorkflowPropertyList
+				if (fnWorkflowPropertyList.getCount() > 0)
+				{
+					String params = "";
+					fnWorkflowProps = fnWorkflowPropertyList.getFnWorkflowPropsList();
+					for (int i = 0; i < fnWorkflowProps.size(); i++)
+					{
+						if (params.length() == 0)
+						{
+							params = fnWorkflowProps.get(i).getName();
+						}
+						else
+						{
+							params = params + "," + fnWorkflowProps.get(i).getName();
+						}
+					}
+					log.info("Select Params: " + params);
+					//Update SQL Query
+					if (workflowSearchLimit.length() == 0)
+					{
+						SQL = "SELECT " + params + " FROM VWVQ" + workflowRegion + "_" + queueName + " where " + filterName[0] + " = '" + filterValue[0] + "'";
+					}
+					else
+					{
+						SQL = "SELECT TOP " + workflowSearchLimit + " " + params + " FROM VWVQ" + workflowRegion + "_" + queueName + " where " + filterName[0] + " = '" + filterValue[0] + "'";
+					}
+				}
+				else
+				{
+					//Update SQL Query
+					if (workflowSearchLimit.length() == 0)
+					{
+						SQL = "SELECT * FROM VWVQ" + workflowRegion + "_" + queueName + " where " + filterName[0] + " = '" + filterValue[0] + "'";
+					}
+					else
+					{
+						SQL = "SELECT TOP " + workflowSearchLimit + " * FROM VWVQ" + workflowRegion + "_" + queueName + " where " + filterName[0] + " = '" + filterValue[0] + "'";
+					}
+				}
+			}
+			else
+			{
+				log.info("FilterName is NOT being used");
+				//Check FnWorkflowPropertyList
+				if (fnWorkflowPropertyList.getCount() > 0)
+				{
+					String params = "";
+					fnWorkflowProps = fnWorkflowPropertyList.getFnWorkflowPropsList();
+					for (int i = 0; i < fnWorkflowProps.size(); i++)
+					{
+						if (params.length() == 0)
+						{
+							params = fnWorkflowProps.get(i).getName();
+						}
+						else
+						{
+							params = params + "," + fnWorkflowProps.get(i).getName();
+						}
+					}
+					log.info("Select Params: " + params);
+					//Update SQL Query
+					if (workflowSearchLimit.length() == 0)
+					{
+						SQL = "SELECT " + params + " FROM VWVQ" + workflowRegion + "_" + queueName;
+					}
+					else
+					{
+						SQL = "SELECT TOP " + workflowSearchLimit + " " + params + " FROM VWVQ" + workflowRegion + "_" + queueName;
+					}
+				}
+				else
+				{
+					//Update SQL Query
+					if (workflowSearchLimit.length() == 0)
+					{
+						SQL = "SELECT * FROM VWVQ" + workflowRegion + "_" + queueName;
+					}
+					else
+					{
+						SQL = "SELECT TOP " + workflowSearchLimit + " * FROM VWVQ" + workflowRegion + "_" + queueName;
+					}
+				}
+			}
+			log.info("SQL Query: " + SQL); 
+
+			//Execute an SQL statement that returns some data.
+			stmt = con.createStatement();
+			rs = stmt.executeQuery(SQL);
+
+			// Iterate through the data in the result set and display it.
+			while (rs.next())
+			{
+				String propName = "";
+				String propValue = "";
+				FnWorkflow fnWorkflow = new FnWorkflow();
+				FnWorkflowPropertyList fnWorkflowPropertyListResult = new FnWorkflowPropertyList();
+				
+				List<FnWorkflowProperty> fnWorkflowPropsResult = fnWorkflowPropertyList.getFnWorkflowPropsList();
+				for (int i = 0; i < fnWorkflowPropsResult.size(); i++)
+				{
+					//Get Prop Name
+					propName = fnWorkflowPropsResult.get(i).getName();
+					propValue = rs.getString(propName);
+					log.info("Property Name: " + propName);
+					log.info("Property Value: " + propValue);
+					//Create the FnWorkflowProperty
+					FnWorkflowProperty fnWorkflowProperty = new FnWorkflowProperty();
+					//Set the FnWorkflowProperty Name
+					fnWorkflowProperty.setName(propName);
+					//Set the FnWorkflowProperty Value from the DB
+					fnWorkflowProperty.setValue(propValue);
+					//Add the FnWorkflowProperty to the FnWorkflowPropertyListResult
+					fnWorkflowPropertyListResult.addFnWorkflowProperty(fnWorkflowProperty);
+				}
+				//Separate the Workflow Results
+				log.info("===========================================================");
+				if (fnWorkflowPropertyListResult.getCount() > 0)
+				{
+					//Add the FnWorkflowPropertyListResult to the FnWorkflow
+					fnWorkflow.setFnWorkflowPropertyList(fnWorkflowPropertyListResult);
+					//Add the FnWorkflow to the FnWorkflowList
+					fnWorkflowList.addFnWorkflow(fnWorkflow);
+				}
+				else
+				{
+					//Add the FnWorkflow to the FnWorkflowList
+					fnWorkflowList.addFnWorkflow(fnWorkflow);
+				}
+			}
+			log.info("FileNet Workflow List from DB Query Finished");
+		}
+
+		// Handle any errors that may have occurred.
+		catch (Exception e)
+		{
+			//e.printStackTrace();
+			log.info("ERROR", e.getMessage());
+		}
+		finally
+		{
+			if (rs != null)
+			{
+				try
+				{
+					log.info("Closing ResultSet");
+					rs.close();
+				}
+				catch(Exception e)
+				{
+					log.info("Error closing ResultSet");
+					log.info("ERROR", e.getMessage());
+				}
+			}
+			if (stmt != null)
+			{
+				try
+				{
+					log.info("Closing Statement");
+					stmt.close();
+				}
+				catch(Exception e)
+				{
+					log.info("Error closing Statement");
+					log.info("ERROR", e.getMessage());
+				}
+			}
+		}
+		log.info("Leaving WorkflowManager -> getQueueDBQuery()");
+		log.info("===========================================================");
+		return fnWorkflowList;
+	}
+	
+	private VWQueueQuery getQueueQuery(VWQueue vwQueue, String[] filterName, String[] filterValue, String sortBy)
+	{
+		//Create the VWQueueQuery Object
+		VWQueueQuery query = null;
+
+		try
+		{
+			log.info("Entered WorkflowManager -> getQueueQuery()");
+			//Fetch Count
+			int fetchCount = 0;
+			//Query Flags
+			int queryFlags = VWQueue.QUERY_NO_OPTIONS;
+			String queryFilter="";
+			//Object[] substitutionVars = null;
+			int fetchType = VWFetchType.FETCH_TYPE_QUEUE_ELEMENT;
+
+			//Update Queue Buffer Size
+			fetchCount = vwQueue.fetchCount();
+			//Make sure fetchCount is > 0, otherwise skip
+			if (fetchCount > 0)
+			{
+				//Setup the BufferSize for the Query
+				if (fetchCount > 200)
+				{
+					vwQueue.setBufferSize(200);
+					log.info("Buffer Size set to 200");
+				}
+				else if (fetchCount > 50 && fetchCount < 200)
+				{
+					vwQueue.setBufferSize(fetchCount);
+					log.info("Buffer Size set to " + fetchCount);
+				}
+				else
+				{
+					vwQueue.setBufferSize(50);
+					log.info("Buffer Size set to 50");
+				}
+				
+				//Check if FilterName and FilterValue are Valid
+				if (filterName != null && filterValue != null)
+				{
+					//Setup variables for Query
+					Object[] substitutionVars = null;
+					Object[] minValues = null;
+					Object[] maxValues = null;
+					
+					//Check if Query Filter, Substitution Vars, Min and Max need updated
+					if (filterName.length == 3 && filterValue.length == 3)
+					{
+						log.info("Filter Name and Value is Length of 3");
+						log.info("filterName[0]: " + filterName[0]);
+						log.info("filterValue[0]: " + filterValue[0]);
+						log.info("filterName[1]: " + filterName[1]);
+						log.info("filterValue[1]: " + filterValue[1]);
+						log.info("filterName[2]: " + filterName[2]);
+						log.info("filterValue[2]: " + filterValue[2]);
+						//Used for Filtered Query
+						//32 + 64
+						//queryFlags = VWQueue.QUERY_MIN_VALUES_INCLUSIVE + VWQueue.QUERY_MAX_VALUES_INCLUSIVE;
+						//0
+						queryFlags = VWQueue.QUERY_NO_OPTIONS;
+						
+						queryFilter = filterName[0] + "=:A AND " + filterName[1] + "=:B AND " + filterName[2] + "=:C";
+						substitutionVars = new String[3];
+						substitutionVars[0] = filterValue[0];
+						substitutionVars[1] = filterValue[1];
+						substitutionVars[2] = filterValue[2];
+						
+						minValues = new String[3];
+						minValues[0] = filterValue[0];
+						minValues[1] = filterValue[1];
+						minValues[2] = filterValue[2];
+						
+						maxValues = new String[3];
+						maxValues[0] = filterValue[0];
+						maxValues[1] = filterValue[1];
+						maxValues[2] = filterValue[2];
+
+						//Run the Queue Query
+						//query = vwQueue.createQuery(null, minValues, maxValues, queryFlags, queryFilter, substitutionVars, fetchType);
+						//query = vwQueue.createQuery("Indx_" + filterName[0], null, null, queryFlags, queryFilter, substitutionVars, fetchType);
+						//query = vwQueue.createQuery(null, null, null, queryFlags, queryFilter, substitutionVars, fetchType);					
+					}
+					else if (filterName.length == 2 && filterValue.length == 2)
+					{
+						log.info("Filter Name and Value is Length of 2");
+						log.info("filterName[0]: " + filterName[0]);
+						log.info("filterValue[0]: " + filterValue[0]);
+						log.info("filterName[1]: " + filterName[1]);
+						log.info("filterValue[1]: " + filterValue[1]);
+						//Used for Filtered Query
+						//32 + 64
+						//queryFlags = VWQueue.QUERY_MIN_VALUES_INCLUSIVE + VWQueue.QUERY_MAX_VALUES_INCLUSIVE;
+						//0
+						queryFlags = VWQueue.QUERY_NO_OPTIONS;
+						
+						queryFilter = filterName[0] + "=:A AND " + filterName[1] + "=:B";
+						substitutionVars = new String[2];
+						substitutionVars[0] = filterValue[0];
+						substitutionVars[1] = filterValue[1];
+												
+						minValues = new String[2];
+						minValues[0] = filterValue[0];
+						minValues[1] = filterValue[1];
+												
+						maxValues = new String[2];
+						maxValues[0] = filterValue[0];
+						maxValues[1] = filterValue[1];
+												
+						//Run the Queue Query
+						//query = vwQueue.createQuery(null, minValues, maxValues, queryFlags, queryFilter, substitutionVars, fetchType);
+						//query = vwQueue.createQuery("Indx_" + filterName[0] + "+" + "Indx_" + filterName[1], null, null, queryFlags, queryFilter, substitutionVars, fetchType);
+						//query = vwQueue.createQuery(null, null, null, queryFlags, queryFilter, substitutionVars, fetchType);
+					}
+					else if (filterName.length == 1 && filterValue.length == 1)
+					{
+						log.info("Filter Name and Value is Length of 1");
+						log.info("filterName[0]: " + filterName[0]);
+						log.info("filterValue[0]: " + filterValue[0]);
+						//Used for Filtered Query
+						//32 + 64
+						//queryFlags = VWQueue.QUERY_MIN_VALUES_INCLUSIVE + VWQueue.QUERY_MAX_VALUES_INCLUSIVE;
+						//0
+						queryFlags = VWQueue.QUERY_NO_OPTIONS;
+						//queryFlags = VWQueue.QUERY_GET_NO_SYSTEM_FIELDS + VWQueue.QUERY_GET_NO_TRANSLATED_SYSTEM_FIELDS;
+						
+						queryFilter = filterName[0] + " = :A";
+						substitutionVars = new String[1];
+						substitutionVars[0] = filterValue[0];
+												
+						minValues = new String[1];
+						minValues[0] = filterValue[0];
+												
+						maxValues = new String[1];
+						maxValues[0] = filterValue[0];
+												
+						//Run the Queue Query
+						//query = vwQueue.createQuery(null, minValues, maxValues, queryFlags, queryFilter, substitutionVars, fetchType);
+						//query = vwQueue.createQuery("Indx_" + filterName[0], null, null, queryFlags, queryFilter, substitutionVars, fetchType);
+						//query = vwQueue.createQuery(null, null, null, queryFlags, queryFilter, substitutionVars, fetchType);
+					}
+					else
+					{
+						//Do Nothing
+					}
+					
+					//Setup the Query and Check if sortBy is being used
+					if (sortBy.length() == 0)
+					{
+						//sortBy was empty
+						log.info("sortBy: " + sortBy);
+						query = vwQueue.createQuery(null, null, null, queryFlags, queryFilter, substitutionVars, fetchType);
+					}
+					else
+					{
+						//sortBy was not empty
+						log.info("sortBy: " + sortBy);
+						query = vwQueue.createQuery("Indx_" + sortBy, null, null, queryFlags, queryFilter, substitutionVars, fetchType);
+					}
+				}
+				else
+				{
+					log.info("Filter Name and Value is Length of Null");
+					
+					//Used to Return All Workflows with No Filter
+					//Setup the Query and Check if sortBy is being used
+					if (sortBy.length() == 0)
+					{
+						//sortBy was empty
+						log.info("sortBy: " + sortBy);
+						query = vwQueue.createQuery(null, null, null, queryFlags, queryFilter, null, fetchType);
+					}
+					else
+					{
+						//sortBy not was empty
+						log.info("sortBy: " + sortBy);
+						query = vwQueue.createQuery("Indx_" + sortBy, null, null, queryFlags, queryFilter, null, fetchType);
+					}
+				}
+			}
+			else
+			{
+				log.info("Queue has No Records so a query will not be performed");
+				query = null;
+			}
+		}
+		catch (VWException ex)
+		{
+			log.info("ERROR", ex.getMessage());
+			query = null;
+		}
+		log.info("Leaving WorkflowManager -> getQueueQuery()");
+		log.info("===========================================================");
+		return query;
+	}
+
+	private void getQueueQueryByWobNum(VWQueue vwQueue, String wobNum)
+	{
 //		//Create the VWQueueQuery Object
 //		VWQueueQuery query = null;
 //
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> getQueueQuery()");
-//			//Fetch Count
-//			int fetchCount = 0;
-//			//Query Flags
-//			int queryFlags = VWQueue.QUERY_NO_OPTIONS;
-//			String queryFilter="";
-//			//Object[] substitutionVars = null;
-//			int fetchType = VWFetchType.FETCH_TYPE_QUEUE_ELEMENT;
-//
-//			//Update Queue Buffer Size
-//			fetchCount = vwQueue.fetchCount();
-//			//Make sure fetchCount is > 0, otherwise skip
-//			if (fetchCount > 0)
-//			{
-//				//Setup the BufferSize for the Query
-//				if (fetchCount > 200)
-//				{
-//					vwQueue.setBufferSize(200);
-//					wiiscLog.log(wiiscLog.INFO, "Buffer Size set to 200");
-//				}
-//				else if (fetchCount > 50 && fetchCount < 200)
-//				{
-//					vwQueue.setBufferSize(fetchCount);
-//					wiiscLog.log(wiiscLog.INFO, "Buffer Size set to " + fetchCount);
-//				}
-//				else
-//				{
-//					vwQueue.setBufferSize(50);
-//					wiiscLog.log(wiiscLog.INFO, "Buffer Size set to 50");
-//				}
-//				
-//				//Check if FilterName and FilterValue are Valid
-//				if (filterName != null && filterValue != null)
-//				{
-//					//Setup variables for Query
-//					Object[] substitutionVars = null;
-//					Object[] minValues = null;
-//					Object[] maxValues = null;
-//					
-//					//Check if Query Filter, Substitution Vars, Min and Max need updated
-//					if (filterName.length == 3 && filterValue.length == 3)
-//					{
-//						wiiscLog.log(wiiscLog.INFO, "Filter Name and Value is Length of 3");
-//						wiiscLog.log(wiiscLog.INFO, "filterName[0]: " + filterName[0]);
-//						wiiscLog.log(wiiscLog.INFO, "filterValue[0]: " + filterValue[0]);
-//						wiiscLog.log(wiiscLog.INFO, "filterName[1]: " + filterName[1]);
-//						wiiscLog.log(wiiscLog.INFO, "filterValue[1]: " + filterValue[1]);
-//						wiiscLog.log(wiiscLog.INFO, "filterName[2]: " + filterName[2]);
-//						wiiscLog.log(wiiscLog.INFO, "filterValue[2]: " + filterValue[2]);
-//						//Used for Filtered Query
-//						//32 + 64
-//						//queryFlags = VWQueue.QUERY_MIN_VALUES_INCLUSIVE + VWQueue.QUERY_MAX_VALUES_INCLUSIVE;
-//						//0
-//						queryFlags = VWQueue.QUERY_NO_OPTIONS;
-//						
-//						queryFilter = filterName[0] + "=:A AND " + filterName[1] + "=:B AND " + filterName[2] + "=:C";
-//						substitutionVars = new String[3];
-//						substitutionVars[0] = filterValue[0];
-//						substitutionVars[1] = filterValue[1];
-//						substitutionVars[2] = filterValue[2];
-//						
-//						minValues = new String[3];
-//						minValues[0] = filterValue[0];
-//						minValues[1] = filterValue[1];
-//						minValues[2] = filterValue[2];
-//						
-//						maxValues = new String[3];
-//						maxValues[0] = filterValue[0];
-//						maxValues[1] = filterValue[1];
-//						maxValues[2] = filterValue[2];
-//
-//						//Run the Queue Query
-//						//query = vwQueue.createQuery(null, minValues, maxValues, queryFlags, queryFilter, substitutionVars, fetchType);
-//						//query = vwQueue.createQuery("Indx_" + filterName[0], null, null, queryFlags, queryFilter, substitutionVars, fetchType);
-//						//query = vwQueue.createQuery(null, null, null, queryFlags, queryFilter, substitutionVars, fetchType);					
-//					}
-//					else if (filterName.length == 2 && filterValue.length == 2)
-//					{
-//						wiiscLog.log(wiiscLog.INFO, "Filter Name and Value is Length of 2");
-//						wiiscLog.log(wiiscLog.INFO, "filterName[0]: " + filterName[0]);
-//						wiiscLog.log(wiiscLog.INFO, "filterValue[0]: " + filterValue[0]);
-//						wiiscLog.log(wiiscLog.INFO, "filterName[1]: " + filterName[1]);
-//						wiiscLog.log(wiiscLog.INFO, "filterValue[1]: " + filterValue[1]);
-//						//Used for Filtered Query
-//						//32 + 64
-//						//queryFlags = VWQueue.QUERY_MIN_VALUES_INCLUSIVE + VWQueue.QUERY_MAX_VALUES_INCLUSIVE;
-//						//0
-//						queryFlags = VWQueue.QUERY_NO_OPTIONS;
-//						
-//						queryFilter = filterName[0] + "=:A AND " + filterName[1] + "=:B";
-//						substitutionVars = new String[2];
-//						substitutionVars[0] = filterValue[0];
-//						substitutionVars[1] = filterValue[1];
-//												
-//						minValues = new String[2];
-//						minValues[0] = filterValue[0];
-//						minValues[1] = filterValue[1];
-//												
-//						maxValues = new String[2];
-//						maxValues[0] = filterValue[0];
-//						maxValues[1] = filterValue[1];
-//												
-//						//Run the Queue Query
-//						//query = vwQueue.createQuery(null, minValues, maxValues, queryFlags, queryFilter, substitutionVars, fetchType);
-//						//query = vwQueue.createQuery("Indx_" + filterName[0] + "+" + "Indx_" + filterName[1], null, null, queryFlags, queryFilter, substitutionVars, fetchType);
-//						//query = vwQueue.createQuery(null, null, null, queryFlags, queryFilter, substitutionVars, fetchType);
-//					}
-//					else if (filterName.length == 1 && filterValue.length == 1)
-//					{
-//						wiiscLog.log(wiiscLog.INFO, "Filter Name and Value is Length of 1");
-//						wiiscLog.log(wiiscLog.INFO, "filterName[0]: " + filterName[0]);
-//						wiiscLog.log(wiiscLog.INFO, "filterValue[0]: " + filterValue[0]);
-//						//Used for Filtered Query
-//						//32 + 64
-//						//queryFlags = VWQueue.QUERY_MIN_VALUES_INCLUSIVE + VWQueue.QUERY_MAX_VALUES_INCLUSIVE;
-//						//0
-//						queryFlags = VWQueue.QUERY_NO_OPTIONS;
-//						//queryFlags = VWQueue.QUERY_GET_NO_SYSTEM_FIELDS + VWQueue.QUERY_GET_NO_TRANSLATED_SYSTEM_FIELDS;
-//						
-//						queryFilter = filterName[0] + " = :A";
-//						substitutionVars = new String[1];
-//						substitutionVars[0] = filterValue[0];
-//												
-//						minValues = new String[1];
-//						minValues[0] = filterValue[0];
-//												
-//						maxValues = new String[1];
-//						maxValues[0] = filterValue[0];
-//												
-//						//Run the Queue Query
-//						//query = vwQueue.createQuery(null, minValues, maxValues, queryFlags, queryFilter, substitutionVars, fetchType);
-//						//query = vwQueue.createQuery("Indx_" + filterName[0], null, null, queryFlags, queryFilter, substitutionVars, fetchType);
-//						//query = vwQueue.createQuery(null, null, null, queryFlags, queryFilter, substitutionVars, fetchType);
-//					}
-//					else
-//					{
-//						//Do Nothing
-//					}
-//					
-//					//Setup the Query and Check if sortBy is being used
-//					if (sortBy.length() == 0)
-//					{
-//						//sortBy was empty
-//						wiiscLog.log(wiiscLog.INFO, "sortBy: " + sortBy);
-//						query = vwQueue.createQuery(null, null, null, queryFlags, queryFilter, substitutionVars, fetchType);
-//					}
-//					else
-//					{
-//						//sortBy was not empty
-//						wiiscLog.log(wiiscLog.INFO, "sortBy: " + sortBy);
-//						query = vwQueue.createQuery("Indx_" + sortBy, null, null, queryFlags, queryFilter, substitutionVars, fetchType);
-//					}
-//				}
-//				else
-//				{
-//					wiiscLog.log(wiiscLog.INFO, "Filter Name and Value is Length of Null");
-//					
-//					//Used to Return All Workflows with No Filter
-//					//Setup the Query and Check if sortBy is being used
-//					if (sortBy.length() == 0)
-//					{
-//						//sortBy was empty
-//						wiiscLog.log(wiiscLog.INFO, "sortBy: " + sortBy);
-//						query = vwQueue.createQuery(null, null, null, queryFlags, queryFilter, null, fetchType);
-//					}
-//					else
-//					{
-//						//sortBy not was empty
-//						wiiscLog.log(wiiscLog.INFO, "sortBy: " + sortBy);
-//						query = vwQueue.createQuery("Indx_" + sortBy, null, null, queryFlags, queryFilter, null, fetchType);
-//					}
-//				}
-//			}
-//			else
-//			{
-//				wiiscLog.log(wiiscLog.INFO, "Queue has No Records so a query will not be performed");
-//				query = null;
-//			}
-//		}
-//		catch (VWException ex)
-//		{
-//			wiiscLog.log("ERROR", ex.getMessage());
-//			query = null;
-//		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> getQueueQuery()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
-//		return query;
-//	}
-//
-//	private VWQueueQuery getQueueQueryByWobNum(VWQueue vwQueue, String wobNum, WIISCLog wiiscLog)
-//	{
-//		//Create the VWQueueQuery Object
-//		VWQueueQuery query = null;
-//
-//		try
-//		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> getQueueQueryByWobNum()");
+//			log.info("Entered WorkflowManager -> getQueueQueryByWobNum()");
 //			int queryFlags = VWQueue.QUERY_NO_OPTIONS;
 //			String queryFilter="";
 //			//Object[] substitutionVars = null;
@@ -5118,28 +5324,28 @@ public class WorkflowManager {
 //			}
 //			else
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "WobNum was missing from the request");
+//				log.info("WobNum was missing from the request");
 //				query = null;
 //			}
 //		}
 //		catch (VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			query = null;
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> getQueueQueryByWobNum()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> getQueueQueryByWobNum()");
+//		log.info("===========================================================");
 //		return query;
-//	}
-//
-//	private VWRosterQuery getRosterQueryByWobNum(VWRoster vwRoster, String wobNum, WIISCLog wiiscLog)
-//	{
+	}
+
+	private void getRosterQueryByWobNum(VWRoster vwRoster, String wobNum)
+	{
 //		//Create the VWRosterQuery Object
 //		VWRosterQuery query = null;
 //
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> getRosterQueryByWobNum()");
+//			log.info("Entered WorkflowManager -> getRosterQueryByWobNum()");
 //			int queryFlags = VWRoster.QUERY_NO_OPTIONS;
 //			String queryFilter="";
 //			//Object[] substitutionVars = null;
@@ -5157,203 +5363,203 @@ public class WorkflowManager {
 //			}
 //			else
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "WobNum was missing from the request");
+//				log.info("WobNum was missing from the request");
 //				query = null;
 //			}
 //		}
 //		catch (VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			query = null;
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> getRosterQueryByWobNum()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> getRosterQueryByWobNum()");
+//		log.info("===========================================================");
 //		return query;
-//	}
-//
-//	private VWRosterQuery getRosterQuery(VWRoster vwRoster, String[] filterName, String[] filterValue, WIISCLog wiiscLog)
-//	{
-//		//Create the VWRosterQuery Object
-//		VWRosterQuery query = null;
-//
-//		try
-//		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> getRosterQuery()");
-//			//Fetch Count
-//			int fetchCount = 0;
-//			//Query Flags
-//			int queryFlags = VWRoster.QUERY_NO_OPTIONS;
-//			String queryFilter="";
-//			//Object[] substitutionVars = null;
-//			int fetchType = VWFetchType.FETCH_TYPE_ROSTER_ELEMENT;
-//
-//			//Update Roster Buffer Size
-//			fetchCount = vwRoster.fetchCount();
-//			//Make sure fetchCount is > 0, otherwise skip
-//			if (fetchCount > 0)
-//			{
-//				wiiscLog.log(wiiscLog.INFO, "Roster Count was " + fetchCount);
-//				if (fetchCount > 200)
-//				{
-//					vwRoster.setBufferSize(200);
-//				}
-//				else if (fetchCount > 50 && fetchCount < 200)
-//				{
-//					vwRoster.setBufferSize(fetchCount);
-//				}
-//				else
-//				{
-//					vwRoster.setBufferSize(50);
-//				}
-//				
-//				//Check if FilterName and FilterValue are Valid
-//				if (filterName != null && filterValue != null)
-//				{
-//					//Check if Query Filter, Substitution Vars, Min and Max need updated
-//					if (filterName.length == 3 && filterValue.length == 3)
-//					{
-//						wiiscLog.log(wiiscLog.INFO, "Filter Name and Value is Length of 3");
-//						wiiscLog.log(wiiscLog.INFO, "filterName[0]: " + filterName[0]);
-//						wiiscLog.log(wiiscLog.INFO, "filterValue[0]: " + filterValue[0]);
-//						wiiscLog.log(wiiscLog.INFO, "filterName[1]: " + filterName[1]);
-//						wiiscLog.log(wiiscLog.INFO, "filterValue[1]: " + filterValue[1]);
-//						wiiscLog.log(wiiscLog.INFO, "filterName[2]: " + filterName[2]);
-//						wiiscLog.log(wiiscLog.INFO, "filterValue[2]: " + filterValue[2]);
-//						//Used for Filtered Query
-//						//32 + 64
-//						//queryFlags = VWRoster.QUERY_MIN_VALUES_INCLUSIVE + VWRoster.QUERY_MAX_VALUES_INCLUSIVE;
-//						//0
-//						queryFlags = VWRoster.QUERY_NO_OPTIONS;
-//						
-//						queryFilter = filterName[0] + "=:A AND " + filterName[1] + "=:B AND " + filterName[2] + "=:C";
-//						Object[] substitutionVars = {filterValue[0], filterValue[1], filterValue[2]};
-//						Object[] minValues = {filterValue[0], filterValue[1], filterValue[2]};
-//						Object[] maxValues = {filterValue[0], filterValue[1], filterValue[2]};
-//
-//						//Run the Roster Query
-//						//query = vwRoster.createQuery(null, minValues, maxValues, queryFlags, queryFilter, substitutionVars, fetchType);
-//						query = vwRoster.createQuery(null, null, null, queryFlags, queryFilter, substitutionVars, fetchType);
-//					}
-//					else if (filterName.length == 2 && filterValue.length == 2)
-//					{
-//						wiiscLog.log(wiiscLog.INFO, "Filter Name and Value is Length of 2");
-//						wiiscLog.log(wiiscLog.INFO, "filterName[0]: " + filterName[0]);
-//						wiiscLog.log(wiiscLog.INFO, "filterValue[0]: " + filterValue[0]);
-//						wiiscLog.log(wiiscLog.INFO, "filterName[1]: " + filterName[1]);
-//						wiiscLog.log(wiiscLog.INFO, "filterValue[1]: " + filterValue[1]);
-//						//Used for Filtered Query
-//						//32 + 64
-//						//queryFlags = VWRoster.QUERY_MIN_VALUES_INCLUSIVE + VWRoster.QUERY_MAX_VALUES_INCLUSIVE;
-//						//0
-//						queryFlags = VWRoster.QUERY_NO_OPTIONS;
-//						
-//						queryFilter = filterName[0] + "=:A AND " + filterName[1] + "=:B";
-//						Object[] substitutionVars = {filterValue[0], filterValue[1]};
-//						Object[] minValues = {filterValue[0], filterValue[1]};
-//						Object[] maxValues = {filterValue[0], filterValue[1]};
-//
-//						//Run the Roster Query
-//						//query = vwRoster.createQuery(null, minValues, maxValues, queryFlags, queryFilter, substitutionVars, fetchType);
-//						query = vwRoster.createQuery(null, null, null, queryFlags, queryFilter, substitutionVars, fetchType);
-//					}
-//					else if (filterName.length == 1 && filterValue.length == 1)
-//					{
-//						wiiscLog.log(wiiscLog.INFO, "Filter Name and Value is Length of 1");
-//						wiiscLog.log(wiiscLog.INFO, "filterName[0]: " + filterName[0]);
-//						wiiscLog.log(wiiscLog.INFO, "filterValue[0]: " + filterValue[0]);
-//						//Used for Filtered Query
-//						//32 + 64
-//						//queryFlags = VWRoster.QUERY_MIN_VALUES_INCLUSIVE + VWRoster.QUERY_MAX_VALUES_INCLUSIVE;
-//						//0
-//						queryFlags = VWRoster.QUERY_NO_OPTIONS;
-//												
-//						queryFilter = filterName[0] + " = :A";
-//						Object[] substitutionVars = {filterValue[0]};
-//						Object[] minValues = {filterValue[0]};
-//						Object[] maxValues = {filterValue[0]};
-//
-//						//Run the Roster Query
-//						//query = vwRoster.createQuery(null, minValues, maxValues, queryFlags, queryFilter, substitutionVars, fetchType);
-//						query = vwRoster.createQuery(null, null, null, queryFlags, queryFilter, substitutionVars, fetchType);
-//					}
-//					else
-//					{
-//						//Do Nothing
-//					}
-//				}
-//				else
-//				{
-//					wiiscLog.log(wiiscLog.INFO, "Filter Name and Value is Length of Null");
-//					
-//					//Used to Return All Workflows with No Filter
-//					//Run the Roster Query
-//					query = vwRoster.createQuery(null, null, null, queryFlags, queryFilter, null, fetchType);
-//				}
-//			}
-//			else
-//			{
-//				wiiscLog.log(wiiscLog.INFO, "Roster Count was " + fetchCount);
-//				wiiscLog.log(wiiscLog.INFO, "Roster has No Records so a query will not be performed");
-//				query = null;
-//			}
-//		}
-//		catch (VWException ex)
-//		{
-//			wiiscLog.log("ERROR", ex.getMessage());
-//			query = null;
-//		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> getRosterQuery()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
-//		return query;
-//	}
-//
-//	private String[] getQueues(VWSession vwSession, WIISCLog wiiscLog)
-//	{
-//		String[] queueNames = null;
-//		//VWQueue vwQueue = null;
-//		int qFlags = VWSession.QUEUE_PROCESS | VWSession.QUEUE_USER_CENTRIC | VWSession.QUEUE_IGNORE_SECURITY | VWSession.QUEUE_SYSTEM;
-//		int queueTotal = 0;
-//		//int wfCount = 0;
-//
-//		try
-//		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> getQueues()");
-//			//Retrieve List of Available Queues
-//			queueNames = vwSession.fetchQueueNames(qFlags);
-//			//Check the length of the QueueNames
-//			if (queueNames.length == 0)
-//			{
-//				wiiscLog.log(wiiscLog.INFO, "There are NO Queues");
-//			}
-//			else
-//			{
-//				for (int i = 0; i < queueNames.length; i++)
-//				{
-//					//vwQueue = vwSession.getQueue(queueNames[i]);
-//					//wfCount = vwQueue.fetchCount();
-//					//wiiscLog.log(wiiscLog.INFO, "Workflow Queue Count -> " + queueNames[i] + " = " + wfCount);
-//					queueTotal++;
-//				}
-//				wiiscLog.log(wiiscLog.INFO, "There are " + queueTotal + " Queues");
-//			}
-//		}
-//		catch(VWException ex)
-//		{
-//			wiiscLog.log("ERROR", ex.getMessage());
-//			if (vwSession != null)
-//			{
-//				//Set vwSession to null to kill any connections
-//				vwSession = null;
-//			}
-//			queueNames = null;
-//		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> getQueues()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
-//		return queueNames;
-//	}
-//
-//	private String[] getRosters(VWSession vwSession, WIISCLog wiiscLog)
-//	{
+	}
+
+	private VWRosterQuery getRosterQuery(VWRoster vwRoster, String[] filterName, String[] filterValue)
+	{
+		//Create the VWRosterQuery Object
+		VWRosterQuery query = null;
+
+		try
+		{
+			log.info("Entered WorkflowManager -> getRosterQuery()");
+			//Fetch Count
+			int fetchCount = 0;
+			//Query Flags
+			int queryFlags = VWRoster.QUERY_NO_OPTIONS;
+			String queryFilter="";
+			//Object[] substitutionVars = null;
+			int fetchType = VWFetchType.FETCH_TYPE_ROSTER_ELEMENT;
+
+			//Update Roster Buffer Size
+			fetchCount = vwRoster.fetchCount();
+			//Make sure fetchCount is > 0, otherwise skip
+			if (fetchCount > 0)
+			{
+				log.info("Roster Count was " + fetchCount);
+				if (fetchCount > 200)
+				{
+					vwRoster.setBufferSize(200);
+				}
+				else if (fetchCount > 50 && fetchCount < 200)
+				{
+					vwRoster.setBufferSize(fetchCount);
+				}
+				else
+				{
+					vwRoster.setBufferSize(50);
+				}
+				
+				//Check if FilterName and FilterValue are Valid
+				if (filterName != null && filterValue != null)
+				{
+					//Check if Query Filter, Substitution Vars, Min and Max need updated
+					if (filterName.length == 3 && filterValue.length == 3)
+					{
+						log.info("Filter Name and Value is Length of 3");
+						log.info("filterName[0]: " + filterName[0]);
+						log.info("filterValue[0]: " + filterValue[0]);
+						log.info("filterName[1]: " + filterName[1]);
+						log.info("filterValue[1]: " + filterValue[1]);
+						log.info("filterName[2]: " + filterName[2]);
+						log.info("filterValue[2]: " + filterValue[2]);
+						//Used for Filtered Query
+						//32 + 64
+						//queryFlags = VWRoster.QUERY_MIN_VALUES_INCLUSIVE + VWRoster.QUERY_MAX_VALUES_INCLUSIVE;
+						//0
+						queryFlags = VWRoster.QUERY_NO_OPTIONS;
+						
+						queryFilter = filterName[0] + "=:A AND " + filterName[1] + "=:B AND " + filterName[2] + "=:C";
+						Object[] substitutionVars = {filterValue[0], filterValue[1], filterValue[2]};
+						Object[] minValues = {filterValue[0], filterValue[1], filterValue[2]};
+						Object[] maxValues = {filterValue[0], filterValue[1], filterValue[2]};
+
+						//Run the Roster Query
+						//query = vwRoster.createQuery(null, minValues, maxValues, queryFlags, queryFilter, substitutionVars, fetchType);
+						query = vwRoster.createQuery(null, null, null, queryFlags, queryFilter, substitutionVars, fetchType);
+					}
+					else if (filterName.length == 2 && filterValue.length == 2)
+					{
+						log.info("Filter Name and Value is Length of 2");
+						log.info("filterName[0]: " + filterName[0]);
+						log.info("filterValue[0]: " + filterValue[0]);
+						log.info("filterName[1]: " + filterName[1]);
+						log.info("filterValue[1]: " + filterValue[1]);
+						//Used for Filtered Query
+						//32 + 64
+						//queryFlags = VWRoster.QUERY_MIN_VALUES_INCLUSIVE + VWRoster.QUERY_MAX_VALUES_INCLUSIVE;
+						//0
+						queryFlags = VWRoster.QUERY_NO_OPTIONS;
+						
+						queryFilter = filterName[0] + "=:A AND " + filterName[1] + "=:B";
+						Object[] substitutionVars = {filterValue[0], filterValue[1]};
+						Object[] minValues = {filterValue[0], filterValue[1]};
+						Object[] maxValues = {filterValue[0], filterValue[1]};
+
+						//Run the Roster Query
+						//query = vwRoster.createQuery(null, minValues, maxValues, queryFlags, queryFilter, substitutionVars, fetchType);
+						query = vwRoster.createQuery(null, null, null, queryFlags, queryFilter, substitutionVars, fetchType);
+					}
+					else if (filterName.length == 1 && filterValue.length == 1)
+					{
+						log.info("Filter Name and Value is Length of 1");
+						log.info("filterName[0]: " + filterName[0]);
+						log.info("filterValue[0]: " + filterValue[0]);
+						//Used for Filtered Query
+						//32 + 64
+						//queryFlags = VWRoster.QUERY_MIN_VALUES_INCLUSIVE + VWRoster.QUERY_MAX_VALUES_INCLUSIVE;
+						//0
+						queryFlags = VWRoster.QUERY_NO_OPTIONS;
+												
+						queryFilter = filterName[0] + " = :A";
+						Object[] substitutionVars = {filterValue[0]};
+						Object[] minValues = {filterValue[0]};
+						Object[] maxValues = {filterValue[0]};
+
+						//Run the Roster Query
+						//query = vwRoster.createQuery(null, minValues, maxValues, queryFlags, queryFilter, substitutionVars, fetchType);
+						query = vwRoster.createQuery(null, null, null, queryFlags, queryFilter, substitutionVars, fetchType);
+					}
+					else
+					{
+						//Do Nothing
+					}
+				}
+				else
+				{
+					log.info("Filter Name and Value is Length of Null");
+					
+					//Used to Return All Workflows with No Filter
+					//Run the Roster Query
+					query = vwRoster.createQuery(null, null, null, queryFlags, queryFilter, null, fetchType);
+				}
+			}
+			else
+			{
+				log.info("Roster Count was " + fetchCount);
+				log.info("Roster has No Records so a query will not be performed");
+				query = null;
+			}
+		}
+		catch (VWException ex)
+		{
+			log.info("ERROR", ex.getMessage());
+			query = null;
+		}
+		log.info("Leaving WorkflowManager -> getRosterQuery()");
+		log.info("===========================================================");
+		return query;
+	}
+
+	private String[] getQueues(VWSession vwSession)
+	{
+		String[] queueNames = null;
+		//VWQueue vwQueue = null;
+		int qFlags = VWSession.QUEUE_PROCESS | VWSession.QUEUE_USER_CENTRIC | VWSession.QUEUE_IGNORE_SECURITY | VWSession.QUEUE_SYSTEM;
+		int queueTotal = 0;
+		//int wfCount = 0;
+
+		try
+		{
+			log.info("Entered WorkflowManager -> getQueues()");
+			//Retrieve List of Available Queues
+			queueNames = vwSession.fetchQueueNames(qFlags);
+			//Check the length of the QueueNames
+			if (queueNames.length == 0)
+			{
+				log.info("There are NO Queues");
+			}
+			else
+			{
+				for (int i = 0; i < queueNames.length; i++)
+				{
+					//vwQueue = vwSession.getQueue(queueNames[i]);
+					//wfCount = vwQueue.fetchCount();
+					//log.info("Workflow Queue Count -> " + queueNames[i] + " = " + wfCount);
+					queueTotal++;
+				}
+				log.info("There are " + queueTotal + " Queues");
+			}
+		}
+		catch(VWException ex)
+		{
+			log.info("ERROR", ex.getMessage());
+			if (vwSession != null)
+			{
+				//Set vwSession to null to kill any connections
+				vwSession = null;
+			}
+			queueNames = null;
+		}
+		log.info("Leaving WorkflowManager -> getQueues()");
+		log.info("===========================================================");
+		return queueNames;
+	}
+
+	private void getRosters(VWSession vwSession)
+	{
 //		String[] rosterNames = null;
 //		VWRoster vwRoster = null;
 //		int rosterTotal = 0;
@@ -5361,13 +5567,13 @@ public class WorkflowManager {
 //
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> getRosters()");
+//			log.info("Entered WorkflowManager -> getRosters()");
 //			//Retrieve List of Available Rosters
 //			rosterNames = vwSession.fetchRosterNames(true);
 //			//Check the length of the RosterNames
 //			if (rosterNames.length == 0)
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "There are NO Rosters");
+//				log.info("There are NO Rosters");
 //			}
 //			else
 //			{
@@ -5375,15 +5581,15 @@ public class WorkflowManager {
 //				{
 //					vwRoster = vwSession.getRoster(rosterNames[i]);
 //					wfCount = vwRoster.fetchCount();
-//					wiiscLog.log(wiiscLog.INFO, "Workflow Roster Count -> " + rosterNames[i] + " = " + wfCount);
+//					log.info("Workflow Roster Count -> " + rosterNames[i] + " = " + wfCount);
 //					rosterTotal++;
 //				}
-//				wiiscLog.log(wiiscLog.INFO, "There are " + rosterTotal + " Rosters");
+//				log.info("There are " + rosterTotal + " Rosters");
 //			}
 //		}
 //		catch(VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			if (vwSession != null)
 //			{
 //				//Set vwSession to null to kill any connections
@@ -5391,13 +5597,13 @@ public class WorkflowManager {
 //			}
 //			rosterNames = null;
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> getRosters()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> getRosters()");
+//		log.info("===========================================================");
 //		return rosterNames;
-//	}
-//
-//	private VWStepElement getWorkflowStepElement(VWSession vwSession, String process, String step, String user, String propName, String propValue, WIISCLog wiiscLog)
-//	{
+	}
+
+	private void getWorkflowStepElement(VWSession vwSession, String process, String step, String user, String propName, String propValue)
+	{
 //		//StepElement to Return
 //		VWStepElement stepElement = null;
 //		//Get the Filter Name
@@ -5407,7 +5613,7 @@ public class WorkflowManager {
 //
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> getWorkflowStepElement()");
+//			log.info("Entered WorkflowManager -> getWorkflowStepElement()");
 //
 //			//Fix any Null values
 //			if (process == null)
@@ -5432,7 +5638,7 @@ public class WorkflowManager {
 //				//This option allows for Process to have a Value or Not have a Value
 //				//*********************************************************************
 //				//By a Step, Property and Property Value
-//				wiiscLog.log(wiiscLog.INFO, "Get a Workflow by a Step, Property and Property Value");
+//				log.info("Get a Workflow by a Step, Property and Property Value");
 //
 //				//Initialize the Array
 //				filterName = new String[1];
@@ -5455,7 +5661,7 @@ public class WorkflowManager {
 //						//Get the Workflow
 //						//fnWorkflowResult = getFnWorkflowByQueue(vwSession, queueName, filterName, filterValue, wiiscLog);
 //
-//						wiiscLog.log(wiiscLog.INFO, "Queue: " + queueName);
+//						log.info("Queue: " + queueName);
 //						VWQueue vwQueue = getQueue(vwSession, queueName, wiiscLog);
 //						//Verify the Queue was OK
 //						if (vwQueue != null)
@@ -5474,11 +5680,11 @@ public class WorkflowManager {
 //							//Verify the Query was OK
 //							if (query != null && query.hasNext())
 //							{
-//								wiiscLog.log(wiiscLog.INFO, "Query Not Null");
+//								log.info("Query Not Null");
 //								//Process the Results
 //								while(query.hasNext())
 //								{
-//									wiiscLog.log(wiiscLog.INFO, "Query Has Next");
+//									log.info("Query Has Next");
 //									VWQueueElement queueItem = (VWQueueElement) query.next();
 //									stepElement = queueItem.fetchStepElement(false, false);
 //									break;
@@ -5489,7 +5695,7 @@ public class WorkflowManager {
 //				}//End If QueueName
 //				else
 //				{
-//					wiiscLog.log(wiiscLog.INFO, "There was No Queue, so there is No Workflow");
+//					log.info("There was No Queue, so there is No Workflow");
 //					//Update the StepElement value
 //					stepElement = null;
 //				}
@@ -5500,7 +5706,7 @@ public class WorkflowManager {
 //			else if (step.length() == 0 && propName.length() > 0 && propValue.length() > 0)
 //			{
 //				//By Property and Property Value only
-//				wiiscLog.log(wiiscLog.INFO, "Get a Workflow by a Property and Property Value");
+//				log.info("Get a Workflow by a Property and Property Value");
 //
 //				//Initialize the Array
 //				filterName = new String[1];
@@ -5523,7 +5729,7 @@ public class WorkflowManager {
 //								!queueNames[i].equals("WSRequest") &&
 //								!queueNames[i].equals("CE_Operations"))
 //						{
-//							wiiscLog.log(wiiscLog.INFO, "Queue: " + queueNames[i]);
+//							log.info("Queue: " + queueNames[i]);
 //							VWQueue vwQueue = getQueue(vwSession, queueNames[i], wiiscLog);
 //							//Verify the Queue was OK
 //							if (vwQueue != null)
@@ -5542,11 +5748,11 @@ public class WorkflowManager {
 //								//Verify the Query was OK
 //								if (query != null && query.hasNext())
 //								{
-//									wiiscLog.log(wiiscLog.INFO, "Query Not Null");
+//									log.info("Query Not Null");
 //									//Process the Results
 //									while(query.hasNext())
 //									{
-//										wiiscLog.log(wiiscLog.INFO, "Query Has Next");
+//										log.info("Query Has Next");
 //										VWQueueElement queueItem = (VWQueueElement) query.next();
 //										stepElement = queueItem.fetchStepElement(false, false);
 //										break;
@@ -5558,7 +5764,7 @@ public class WorkflowManager {
 //				}//End If Property - Value
 //				else
 //				{
-//					wiiscLog.log(wiiscLog.INFO, "There were No Queues, so there are No Workflows");
+//					log.info("There were No Queues, so there are No Workflows");
 //					//Update the StepElement value
 //					stepElement = null;
 //				}
@@ -5566,30 +5772,30 @@ public class WorkflowManager {
 //			else
 //			{
 //				//Return an Error
-//				wiiscLog.log(wiiscLog.INFO, "The Parameters Step, Property Name and Property Value are required to find the Workflow");
+//				log.info("The Parameters Step, Property Name and Property Value are required to find the Workflow");
 //				//Update the StepElement value
 //				stepElement = null;
 //			}
 //		}
 //		catch(VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			stepElement = null;
 //		}
 //
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> getWorkflowStepElement()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> getWorkflowStepElement()");
+//		log.info("===========================================================");
 //		return stepElement;
-//	}
-//
-//	private FnWorkflow getWorkflowStep(VWSession vwSession, String step, String wobNum, WIISCLog wiiscLog)
-//	{
+	}
+
+	private void getWorkflowStep(VWSession vwSession, String step, String wobNum)
+	{
 //		//Create FnWorkflow
 //		FnWorkflow fnWorkflow = new FnWorkflow();
 //
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> getWorkflow()");
+//			log.info("Entered WorkflowManager -> getWorkflow()");
 //			//Update the Workflow
 //			fnWorkflow.setFnWorkflowStep(step);
 //			fnWorkflow.setFnWorkflowQueue(step);
@@ -5625,7 +5831,7 @@ public class WorkflowManager {
 //						}
 //						else
 //						{
-//							wiiscLog.log(wiiscLog.INFO, "Failed to get a StepElement");
+//							log.info("Failed to get a StepElement");
 //							//Update the FnWorkflow Object
 //							fnWorkflow.setErrorFlag(1);
 //							fnWorkflow.setErrorMessage("Failed to get a StepElement");
@@ -5635,7 +5841,7 @@ public class WorkflowManager {
 //				}
 //				else
 //				{
-//					wiiscLog.log(wiiscLog.INFO, "Failed to get a QueueQuery");
+//					log.info("Failed to get a QueueQuery");
 //					//Update the FnWorkflow Object
 //					fnWorkflow.setErrorFlag(1);
 //					fnWorkflow.setErrorMessage("Failed to get a QueueQuery");
@@ -5644,7 +5850,7 @@ public class WorkflowManager {
 //			}
 //			else
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Failed to get a VWQueue");
+//				log.info("Failed to get a VWQueue");
 //				//Update the FnWorkflow Object
 //				fnWorkflow.setErrorFlag(1);
 //				fnWorkflow.setErrorMessage("Failed to get a VWQueue");
@@ -5653,22 +5859,22 @@ public class WorkflowManager {
 //		}
 //		catch(VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			fnWorkflow = null;
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> getWorkflowStep()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> getWorkflowStep()");
+//		log.info("===========================================================");
 //		return fnWorkflow;
-//	}
-//
-//	private FnWorkflow getWorkflow(VWSession vwSession, String process, String wobNum, WIISCLog wiiscLog)
-//	{
+	}
+
+	private void getWorkflow(VWSession vwSession, String process, String wobNum)
+	{
 //		//Create FnWorkflow
 //		FnWorkflow fnWorkflowResult = new FnWorkflow();
 //
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> getWorkflow()");
+//			log.info("Entered WorkflowManager -> getWorkflow()");
 //			//Update the Workflow
 //			fnWorkflowResult.setFnWorkflowProcess(process);
 //			fnWorkflowResult.setFnWorkflowRoster(process);
@@ -5687,7 +5893,7 @@ public class WorkflowManager {
 //					{
 //						while(query.hasNext())
 //						{
-//							wiiscLog.log(wiiscLog.INFO, "Found Workflow");
+//							log.info("Found Workflow");
 //							VWRosterElement rosterItem = (VWRosterElement) query.next();
 //							VWStepElement stepElement = rosterItem.fetchStepElement(false, false);
 //							if (stepElement != null)
@@ -5708,7 +5914,7 @@ public class WorkflowManager {
 //							}
 //							else
 //							{
-//								wiiscLog.log(wiiscLog.INFO, "Failed to get a StepElement");
+//								log.info("Failed to get a StepElement");
 //								//Update the FnWorkflow Object
 //								fnWorkflowResult.setErrorFlag(1);
 //								fnWorkflowResult.setErrorMessage("Failed to get a StepElement");
@@ -5718,7 +5924,7 @@ public class WorkflowManager {
 //					}
 //					else
 //					{
-//						wiiscLog.log(wiiscLog.INFO, "Workflow has Finished.  No StepElement available.");
+//						log.info("Workflow has Finished.  No StepElement available.");
 //						//Update the FnWorkflow Object
 //						fnWorkflowResult.setErrorFlag(0);
 //						fnWorkflowResult.setErrorMessage("Workflow Finished");
@@ -5727,7 +5933,7 @@ public class WorkflowManager {
 //				}
 //				else
 //				{
-//					wiiscLog.log(wiiscLog.INFO, "Failed to get a RosterQuery");
+//					log.info("Failed to get a RosterQuery");
 //					//Update the FnWorkflow Object
 //					fnWorkflowResult.setErrorFlag(1);
 //					fnWorkflowResult.setErrorMessage("Failed to get a RosterQuery");
@@ -5736,7 +5942,7 @@ public class WorkflowManager {
 //			}
 //			else
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Failed to get a VWRoster");
+//				log.info("Failed to get a VWRoster");
 //				//Update the FnWorkflow Object
 //				fnWorkflowResult.setErrorFlag(1);
 //				fnWorkflowResult.setErrorMessage("Failed to get a VWRoster");
@@ -5745,219 +5951,168 @@ public class WorkflowManager {
 //		}
 //		catch(VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			fnWorkflowResult = null;
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> getWorkflow()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> getWorkflow()");
+//		log.info("===========================================================");
 //		return fnWorkflowResult;
-//	}
-//
-//	private VWQueue getQueue(VWSession vwSession, String queueName, WIISCLog wiiscLog)
-//	{
-//		VWQueue vwQueue = null;
-//		try
-//		{
-//			//wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> getQueue()");
-//			vwQueue = vwSession.getQueue(queueName);
-//		}
-//		catch (VWException ex)
-//		{
-//			wiiscLog.log("ERROR", ex.getMessage());
-//			if (vwSession != null)
-//			{
-//				//Set vwSession to null to kill any connections
-//				vwSession = null;
-//			}
-//			vwQueue = null;
-//		}
-//		//wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> getQueue()");
-//		return vwQueue;
-//	}
-//
-//	private VWRoster getRoster(VWSession vwSession, String rosterName, WIISCLog wiiscLog)
-//	{
-//		VWRoster vwRoster = null;
-//		try
-//		{
-//			//wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> getRoster()");
-//			vwRoster = vwSession.getRoster(rosterName);
-//		}
-//		catch (VWException ex)
-//		{
-//			wiiscLog.log("ERROR", ex.getMessage());
-//			if (vwSession != null)
-//			{
-//				//Set vwSession to null to kill any connections
-//				vwSession = null;
-//			}
-//			vwRoster = null;
-//		}
-//		//wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> getRoster()");
-//		return vwRoster;
-//	}
-//
-//	private FnWorkflowList getFnWorkflowListByRoster(VWSession vwSession, String process, String[] filterName, String[] filterValue, WIISCLog wiiscLog)
-//	{
-//		//Create the FnWorkflowList Object
-//		FnWorkflowList fnWorkflowList = new FnWorkflowList();
-//
-//		try
-//		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> getFnWorkflowListByRoster()");
-//			VWRoster vwRoster = getRoster(vwSession, process, wiiscLog);
-//			//Verify the Roster was OK
-//			if (vwRoster != null)
-//			{
-//				//Get the Roster Count
-//				int rosterCount = vwRoster.fetchCount();
-//				wiiscLog.log(wiiscLog.INFO, "Roster Count: " + rosterCount);
-//				//Update the Workflow List
-//				fnWorkflowList.setCount(rosterCount);
-//				fnWorkflowList.setProcessName(process);
-//				
-//				//Check the Roster Count to make sure it is > 0, otherwise skip.
-//				if (rosterCount > 0)
-//				{
-//					//Get the Roster Elements
-//					VWRosterQuery query = getRosterQuery(vwRoster, filterName, filterValue, wiiscLog);
-//					//Verify the Query was OK
-//					if (query != null && query.hasNext())
-//					{
-//						wiiscLog.log(wiiscLog.INFO, "Query Not Null");
-//						//Process the Results
-//						while(query.hasNext())
-//						{
-//							wiiscLog.log(wiiscLog.INFO, "Query has next");
-//							VWRosterElement rosterItem = (VWRosterElement) query.next();
-//							VWStepElement stepElement = rosterItem.fetchStepElement(false, false);
-//							if (stepElement != null)
-//							{
-//								//Update the FnWorkflow
-//								FnWorkflow fnWorkflow = new FnWorkflow();
-//								fnWorkflow = updateFnWorkflowInfo(stepElement, "Existing", wiiscLog);
-//
-//								//Create the FnWorkflowPropertyList
-//								FnWorkflowPropertyList fnWorkflowPropertyList = new FnWorkflowPropertyList();
-//								fnWorkflowPropertyList = updateFnWorkflowPropertyListInfo(stepElement, wiiscLog);
-//
-//								//Add the FnWorkflowPropertyList to the FnWorkflow
-//								fnWorkflow.setFnWorkflowPropertyList(fnWorkflowPropertyList);
-//								//Update the Workflow List for the Process
-//								fnWorkflowList.setStepName(fnWorkflow.getFnWorkflowProcess());
-//								
-//								//Check if Clarety Workflow Queue Description Actions are used
-//								//ResourceBundle globalConfig = ResourceBundle.getBundle(ConstantsUtil.GLOBAL_CONFIG);
-//								if (globalConfig.containsKey("claretyWorkflowDescriptionActionsEnabled"))
-//								{
-//									//Check if the Property setting is true
-//									if (globalConfig.getString("claretyWorkflowDescriptionActionsEnabled").equals("true"))
-//									{
-//										//Initialize the Queue Name - this is needed since we are doing
-//										// a Roster query
-//										VWQueue vwQueue = null;
-//										String queue = "";
-//										queue = stepElement.getQueueName();
-//										//Initialize the Description
-//										String description = "";
-//										
-//										//Check if we are using the Inbox Queue or Not
-//										if (queue.equals("Inbox(0)"))
-//										{
-//											//Get the Workflow Queue not the Inbox
-//											if (fnWorkflow.getFnWorkflowQueue() != null)
-//											{
-//												vwQueue = getQueue(vwSession, fnWorkflow.getFnWorkflowQueue(), wiiscLog);
-//												//Get the Workflow Queue Description
-//												VWQueueDefinition def = vwQueue.fetchQueueDefinition();
-//												VWOperationDefinition op = def.getOperation(globalConfig.getString("claretyWorkflowDescriptionOperation"));
-//												description = op.getDescription();
-//											}
-//										}
-//										else
-//										{
-//											//Get the Workflow Queue
-//											if (fnWorkflow.getFnWorkflowQueue() != null)
-//											{
-//												vwQueue = getQueue(vwSession, fnWorkflow.getFnWorkflowQueue(), wiiscLog);
-//												//Get the Workflow Queue Description
-//												VWQueueDefinition def = vwQueue.fetchQueueDefinition();
-//												VWOperationDefinition op = def.getOperation(globalConfig.getString("claretyWorkflowDescriptionOperation"));
-//												description = op.getDescription();
-//											}
-//										}
-//										
-//										//Check to make sure the Description is not empty
-//										if (description.length() > 0)
-//										{
-//											wiiscLog.log(wiiscLog.INFO, "Workflow Description: ");
-//											wiiscLog.log(wiiscLog.INFO, description);
-//											fnWorkflow.setFnWorkflowResponse(description);
-//										}
-//									}
-//								}
-//															
-//								//Add the FnWorkflow to the FnWorkflowList
-//								fnWorkflowList.addFnWorkflow(fnWorkflow);
-//							}
-//							else
-//							{
-//								wiiscLog.log(wiiscLog.INFO, "Failed to get a StepElement because the Workflow is no longer available");
-//								//Update the FnWorkflow Object
-//								fnWorkflowList.setErrorFlag(1);
-//								fnWorkflowList.setErrorMessage("Failed to get a StepElement because the Workflow is no longer available");
-//							}
-//						}
-//					}
-//					else
-//					{
-//						wiiscLog.log(wiiscLog.INFO, "Failed to get a RosterQuery because " + process + " has 0 Records");
-//						//Update the FnWorkflowList Object
-//						fnWorkflowList.setErrorFlag(1);
-//						fnWorkflowList.setErrorMessage("Failed to get a RosterQuery because " + process + " has 0 Records");
-//					}
-//				}
-//				else
-//				{
-//					wiiscLog.log(wiiscLog.INFO, "Roster has No Records so a query will not be performed");
-//				}
-//			}
-//			else
-//			{
-//				wiiscLog.log(wiiscLog.INFO, "Failed to get a VWRoster because " + process + " does not exist");
-//				//Update the FnWorkflowList Object
-//				fnWorkflowList.setErrorFlag(1);
-//				fnWorkflowList.setErrorMessage("Failed to get a VWRoster because " + process + " does not exist");
-//			}
-//		}
-//		catch (VWException ex)
-//		{
-//			wiiscLog.log("ERROR", ex.getMessage());
-//			if (vwSession != null)
-//			{
-//				//Set vwSession to null to kill any connections
-//				vwSession = null;
-//			}
-//			//Update the FnWorkflowList Object
-//			fnWorkflowList.setErrorFlag(1);
-//			//Update ErrorMessage
-//			fnWorkflowList.setErrorMessage(ex.getMessage());
-//		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> getFnWorkflowListByRoster()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
-//		return fnWorkflowList;
-//	}
-//
-//	private String getFnWorkflowPropertyValue(FnWorkflow fnWorkflow, String propName, WIISCLog wiiscLog)
-//	{
+	}
+
+	private VWQueue getQueue(VWSession vwSession, String queueName)
+	{
+		VWQueue vwQueue = null;
+		try
+		{
+			log.info("Entered WorkflowManager -> getQueue()");
+			vwQueue = vwSession.getQueue(queueName);
+		}
+		catch (VWException ex)
+		{
+			log.info("ERROR", ex.getMessage());
+			if (vwSession != null)
+			{
+				//Set vwSession to null to kill any connections
+				vwSession = null;
+			}
+			vwQueue = null;
+		}
+		log.info("Leaving WorkflowManager -> getQueue()");
+		return vwQueue;
+	}
+
+	private VWRoster getRoster(VWSession vwSession, String rosterName)
+	{
+		VWRoster vwRoster = null;
+		try
+		{
+			//log.info("Entered WorkflowManager -> getRoster()");
+			vwRoster = vwSession.getRoster(rosterName);
+		}
+		catch (VWException ex)
+		{
+			log.info("ERROR", ex.getMessage());
+			if (vwSession != null)
+			{
+				//Set vwSession to null to kill any connections
+				vwSession = null;
+			}
+			vwRoster = null;
+		}
+		//log.info("Leaving WorkflowManager -> getRoster()");
+		return vwRoster;
+	}
+
+	private FnWorkflowList getFnWorkflowListByRoster(VWSession vwSession, String process, String[] filterName, String[] filterValue)
+	{
+		//Create the FnWorkflowList Object
+		FnWorkflowList fnWorkflowList = new FnWorkflowList();
+
+		try
+		{
+			log.info("Entered WorkflowManager -> getFnWorkflowListByRoster()");
+			VWRoster vwRoster = getRoster(vwSession, process);
+			//Verify the Roster was OK
+			if (vwRoster != null)
+			{
+				//Get the Roster Count
+				int rosterCount = vwRoster.fetchCount();
+				log.info("Roster Count: " + rosterCount);
+				//Update the Workflow List
+				fnWorkflowList.setCount(rosterCount);
+				fnWorkflowList.setProcessName(process);
+				
+				//Check the Roster Count to make sure it is > 0, otherwise skip.
+				if (rosterCount > 0)
+				{
+					//Get the Roster Elements
+					VWRosterQuery query = getRosterQuery(vwRoster, filterName, filterValue);
+					//Verify the Query was OK
+					if (query != null && query.hasNext())
+					{
+						log.info("Query Not Null");
+						//Process the Results
+						while(query.hasNext())
+						{
+							log.info("Query has next");
+							VWRosterElement rosterItem = (VWRosterElement) query.next();
+							VWStepElement stepElement = rosterItem.fetchStepElement(false, false);
+							if (stepElement != null)
+							{
+								//Update the FnWorkflow
+								FnWorkflow fnWorkflow = new FnWorkflow();
+								fnWorkflow = updateFnWorkflowInfo(stepElement, "Existing");
+
+								//Create the FnWorkflowPropertyList
+								FnWorkflowPropertyList fnWorkflowPropertyList = new FnWorkflowPropertyList();
+								fnWorkflowPropertyList = updateFnWorkflowPropertyListInfo(stepElement);
+
+								//Add the FnWorkflowPropertyList to the FnWorkflow
+								fnWorkflow.setFnWorkflowPropertyList(fnWorkflowPropertyList);
+								//Update the Workflow List for the Process
+								fnWorkflowList.setStepName(fnWorkflow.getFnWorkflowProcess());
+												
+								//Add the FnWorkflow to the FnWorkflowList
+								fnWorkflowList.addFnWorkflow(fnWorkflow);
+							}
+							else
+							{
+								log.info("Failed to get a StepElement because the Workflow is no longer available");
+								//Update the FnWorkflow Object
+								fnWorkflowList.setErrorFlag(1);
+								//fnWorkflowList.setErrorMessage("Failed to get a StepElement because the Workflow is no longer available");
+							}
+						}
+					}
+					else
+					{
+						log.info("Failed to get a RosterQuery because " + process + " has 0 Records");
+						//Update the FnWorkflowList Object
+						fnWorkflowList.setErrorFlag(1);
+						//fnWorkflowList.setErrorMessage("Failed to get a RosterQuery because " + process + " has 0 Records");
+					}
+				}
+				else
+				{
+					log.info("Roster has No Records so a query will not be performed");
+				}
+			}
+			else
+			{
+				log.info("Failed to get a VWRoster because " + process + " does not exist");
+				//Update the FnWorkflowList Object
+				fnWorkflowList.setErrorFlag(1);
+				//fnWorkflowList.setErrorMessage("Failed to get a VWRoster because " + process + " does not exist");
+			}
+		}
+		catch (VWException ex)
+		{
+			log.info("ERROR", ex.getMessage());
+			if (vwSession != null)
+			{
+				//Set vwSession to null to kill any connections
+				vwSession = null;
+			}
+			//Update the FnWorkflowList Object
+			fnWorkflowList.setErrorFlag(1);
+			//Update ErrorMessage
+			//fnWorkflowList.setErrorMessage(ex.getMessage());
+		}
+		log.info("Leaving WorkflowManager -> getFnWorkflowListByRoster()");
+		log.info("===========================================================");
+		return fnWorkflowList;
+	}
+
+	private void getFnWorkflowPropertyValue(String fnWorkflow, String propName)
+	{
 //		String propValue = "";
 //		//Create the FnWorkflowPropertyList from the Request
 //		FnWorkflowPropertyList fnWorkflowPropertyList = new FnWorkflowPropertyList();
 //
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> getFnWorkflowPropertyValue()");
-//			wiiscLog.log(wiiscLog.INFO, "Property Name: " + propName);
+//			log.info("Entered WorkflowManager -> getFnWorkflowPropertyValue()");
+//			log.info("Property Name: " + propName);
 //
 //			fnWorkflowPropertyList = fnWorkflow.getFnWorkflowPropertyList();
 //			//Verify there was a Workflow Property
@@ -5973,7 +6128,7 @@ public class WorkflowManager {
 //						if (fnWorkflowProperty.getName().equals(propName))
 //						{
 //							propValue = fnWorkflowProperty.getValue();
-//							wiiscLog.log(wiiscLog.INFO, "Property Value: " + propValue);
+//							log.info("Property Value: " + propValue);
 //							break;
 //						}
 //					}
@@ -5983,102 +6138,102 @@ public class WorkflowManager {
 //		}
 //		catch (Exception ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			propValue = "";
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> getFnWorkflowPropertyValue()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> getFnWorkflowPropertyValue()");
+//		log.info("===========================================================");
 //
 //		return propValue;
-//	}
-//
-//	private FnWorkflow getFnWorkflowByQueue(VWSession vwSession, String queue, String[] filterName, String[] filterValue, WIISCLog wiiscLog)
-//	{
-//		//Create the FnWorkflow Object
-//		FnWorkflow fnWorkflow = new FnWorkflow();
-//
-//		try
-//		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> getFnWorkflowByQueue()");
-//			wiiscLog.log(wiiscLog.INFO, "Queue: " + queue);
-//			VWQueue vwQueue = getQueue(vwSession, queue, wiiscLog);
-//			//Workflow Search Results Limit
-//			String workflowSearchLimit = "";
-//			int workflowSearchMax = -1;
-//			int workflowResultCount = 0;
-//			
-//			//Verify the Queue was OK
-//			if (vwQueue != null)
-//			{
-//				//Get the Workflow Search Limit
-//				workflowSearchLimit = globalConfig.getString("workflowSearchLimit");
-//				if (workflowSearchLimit.length() > 0)
-//				{
-//					workflowSearchMax = Integer.parseInt(workflowSearchLimit);
-//				}
-//				
-//				//Get the Queue Elements
-//				VWQueueQuery query = null;
-//				if (queue.equals("Inbox(0)"))
-//				{
-//					//Different Query to get a User's Inbox Items
-//					query = getQueueQuery(vwQueue, null, null, "", wiiscLog);
-//				}
-//				else
-//				{
-//					query = getQueueQuery(vwQueue, filterName, filterValue, "", wiiscLog);
-//				}
-//				
-//				//Verify the Query was OK
-//				if (query != null && query.hasNext())
-//				{
-//					wiiscLog.log(wiiscLog.INFO, "Query Not Null");
-//					//Process the Results
-//					while(query.hasNext())
-//					{
-//						//Check if the workflowSearchMax limit has been reached
-//						if (workflowResultCount == workflowSearchMax)
-//						{
-//							wiiscLog.log(wiiscLog.INFO, workflowSearchMax + " Query Results reached");
-//							break;
-//						}
-//						wiiscLog.log(wiiscLog.INFO, "Query Has Next");
-//						VWQueueElement queueItem = (VWQueueElement) query.next();
-//						VWStepElement stepElement = queueItem.fetchStepElement(false, false);
-//						if (stepElement != null)
-//						{
-//							//Check for Inbox Queue
-//							if (queue.equals("Inbox(0)"))
-//							{
-//								VWParticipant vwParticipant = stepElement.getParticipantNamePx();
-//								wiiscLog.log(wiiscLog.INFO, "Participant: " + vwParticipant.getParticipantName());
-//								//Compare with the User to see if this is their Workflow
-//								if (filterValue[0].equals(vwParticipant.getParticipantName()))
-//								{
-//									//Update the FnWorkflow
-//									fnWorkflow = updateFnWorkflowInfo(stepElement, "Existing", wiiscLog);
-//
-//									//Create the FnWorkflowPropertyList
-//									FnWorkflowPropertyList fnWorkflowPropertyList = new FnWorkflowPropertyList();
-//									fnWorkflowPropertyList = updateFnWorkflowPropertyListInfo(stepElement, wiiscLog);
-//									//Add the FnWorkflowPropertyList to the FnWorkflow
-//									fnWorkflow.setFnWorkflowPropertyList(fnWorkflowPropertyList);
-//								}
-//							}
-//							else
-//							{
-//								//Update the FnWorkflow
-//								fnWorkflow = updateFnWorkflowInfo(stepElement, "Existing", wiiscLog);
-//
-//								//Create the FnWorkflowPropertyList
-//								FnWorkflowPropertyList fnWorkflowPropertyList = new FnWorkflowPropertyList();
-//								fnWorkflowPropertyList = updateFnWorkflowPropertyListInfo(stepElement, wiiscLog);
-//								//Add the FnWorkflowPropertyList to the FnWorkflow
-//								fnWorkflow.setFnWorkflowPropertyList(fnWorkflowPropertyList);
-//							}
-//
-//							//Check if Clarety Workflow Queue Description Actions are used
-//							//ResourceBundle globalConfig = ResourceBundle.getBundle(ConstantsUtil.GLOBAL_CONFIG);
+	}
+
+	private FnWorkflow getFnWorkflowByQueue(VWSession vwSession, String queue, String[] filterName, String[] filterValue)
+	{
+		//Create the FnWorkflow Object
+		FnWorkflow fnWorkflow = new FnWorkflow();
+		
+		try
+		{
+			log.info("Entered WorkflowManager -> getFnWorkflowByQueue()");
+			log.info("Queue: " + queue);
+			VWQueue vwQueue = getQueue(vwSession, queue);
+			//Workflow Search Results Limit
+			String workflowSearchLimit = "";
+			int workflowSearchMax = -1;
+			int workflowResultCount = 0;
+			
+			//Verify the Queue was OK
+			if (vwQueue != null)
+			{
+				//Get the Workflow Search Limit
+				workflowSearchLimit = appConfig.getWorkflowSearchLimit();
+				if (workflowSearchLimit.length() > 0)
+				{
+					workflowSearchMax = Integer.parseInt(workflowSearchLimit);
+				}
+				
+				//Get the Queue Elements
+				VWQueueQuery query = null;
+				if (queue.equals("Inbox(0)"))
+				{
+					//Different Query to get a User's Inbox Items
+					query = getQueueQuery(vwQueue, null, null, "");
+				}
+				else
+				{
+					query = getQueueQuery(vwQueue, filterName, filterValue, "");
+				}
+				
+				//Verify the Query was OK
+				if (query != null && query.hasNext())
+				{
+					log.info("Query Not Null");
+					//Process the Results
+					while(query.hasNext())
+					{
+						//Check if the workflowSearchMax limit has been reached
+						if (workflowResultCount == workflowSearchMax)
+						{
+							log.info(workflowSearchMax + " Query Results reached");
+							break;
+						}
+						log.info("Query Has Next");
+						VWQueueElement queueItem = (VWQueueElement) query.next();
+						VWStepElement stepElement = queueItem.fetchStepElement(false, false);
+						if (stepElement != null)
+						{
+							//Check for Inbox Queue
+							if (queue.equals("Inbox(0)"))
+							{
+								VWParticipant vwParticipant = stepElement.getParticipantNamePx();
+								log.info("Participant: " + vwParticipant.getParticipantName());
+								//Compare with the User to see if this is their Workflow
+								if (filterValue[0].equals(vwParticipant.getParticipantName()))
+								{
+									//Update the FnWorkflow
+									fnWorkflow = updateFnWorkflowInfo(stepElement, "Existing");
+
+									//Create the FnWorkflowPropertyList
+									FnWorkflowPropertyList fnWorkflowPropertyList = new FnWorkflowPropertyList();
+									fnWorkflowPropertyList = updateFnWorkflowPropertyListInfo(stepElement);
+									//Add the FnWorkflowPropertyList to the FnWorkflow
+									fnWorkflow.setFnWorkflowPropertyList(fnWorkflowPropertyList);
+								}
+							}
+							else
+							{
+								//Update the FnWorkflow
+								fnWorkflow = updateFnWorkflowInfo(stepElement, "Existing");
+
+								//Create the FnWorkflowPropertyList
+								FnWorkflowPropertyList fnWorkflowPropertyList = new FnWorkflowPropertyList();
+								fnWorkflowPropertyList = updateFnWorkflowPropertyListInfo(stepElement);
+								//Add the FnWorkflowPropertyList to the FnWorkflow
+								fnWorkflow.setFnWorkflowPropertyList(fnWorkflowPropertyList);
+							}
+
+							//Check if Clarety Workflow Queue Description Actions are used
+							//ResourceBundle globalConfig = ResourceBundle.getBundle(ConstantsUtil.GLOBAL_CONFIG);
 //							if (globalConfig.containsKey("claretyWorkflowDescriptionActionsEnabled"))
 //							{
 //								//Check if the Property setting is true
@@ -6110,354 +6265,257 @@ public class WorkflowManager {
 //									//Check to make sure the Description is not empty
 //									if (description.length() > 0)
 //									{
-//										wiiscLog.log(wiiscLog.INFO, "Workflow Description: ");
-//										wiiscLog.log(wiiscLog.INFO, description);
+//										log.info("Workflow Description: ");
+//										log.info(description);
 //										fnWorkflow.setFnWorkflowResponse(description);
 //									}
 //								}
 //							}
-//						}
-//						else
-//						{
-//							wiiscLog.log(wiiscLog.INFO, "Failed to get a StepElement");
-//							//Update the FnWorkflow Object
-//							//fnWorkflow.setErrorFlag(1);
-//						}
-//						//Increment the workflowResultCount
-//						workflowResultCount++;
-//					}//End While
-//				}
-//				else
-//				{
-//					wiiscLog.log(wiiscLog.INFO, "Failed to get a QueueQuery");
-//					//Update the FnWorkflow Object
-//					//fnWorkflow.setErrorFlag(1);
-//					fnWorkflow = null;
-//				}
-//			}
-//			else
-//			{
-//				wiiscLog.log(wiiscLog.INFO, "Failed to get a VWQueue");
-//				//Update the FnWorkflow Object
-//				fnWorkflow.setErrorFlag(1);
-//				//Update ErrorMessage
-//				fnWorkflow.setErrorMessage("Failed to get a VWQueue");
-//			}
-//		}
-//		catch (VWException ex)
-//		{
-//			wiiscLog.log("ERROR", ex.getMessage());
-//			//Update the FnWorkflow Object
-//			fnWorkflow.setErrorFlag(1);
-//			//Update ErrorMessage
-//			fnWorkflow.setErrorMessage(ex.getMessage());
-//		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> getFnWorkflowByQueue()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
-//		return fnWorkflow;
-//	}
-//
-//
-//	private FnWorkflowList getFnWorkflowListByQueue(SQLServerConnection con, VWSession vwSession, String queue, String[] filterName, String[] filterValue, String sortBy, WIISCLog wiiscLog)
-//	{
+						}
+						else
+						{
+							log.info("Failed to get a StepElement");
+							//Update the FnWorkflow Object
+							fnWorkflow.setErrorFlag(1);
+						}
+						//Increment the workflowResultCount
+						workflowResultCount++;
+					}//End While
+				}
+				else
+				{
+					log.info("Failed to get a QueueQuery");
+					//Update the FnWorkflow Object
+					fnWorkflow.setErrorFlag(1);
+					fnWorkflow = null;
+				}
+			}
+			else
+			{
+				log.info("Failed to get a VWQueue");
+				//Update the FnWorkflow Object
+				fnWorkflow.setErrorFlag(1);
+				//Update ErrorMessage
+				//fnWorkflow.setErrorMessage("Failed to get a VWQueue");
+			}
+		}
+		catch (VWException ex)
+		{
+			log.info("ERROR", ex.getMessage());
+			//Update the FnWorkflow Object
+			fnWorkflow.setErrorFlag(1);
+			//Update ErrorMessage
+			//fnWorkflow.setErrorMessage(ex.getMessage());
+		}
+		log.info("Leaving WorkflowManager -> getFnWorkflowByQueue()");
+		log.info("===========================================================");
+		return fnWorkflow;
+	}
+
+
+	private FnWorkflowList getFnWorkflowListByQueue(SQLServerConnection con, VWSession vwSession, String queue, String[] filterName, String[] filterValue, String sortBy)
+	{
+		//Create the FnWorkflowList Object
+		FnWorkflowList fnWorkflowList = new FnWorkflowList();
+
+		try
+		{
+			log.info("Entered WorkflowManager -> getFnWorkflowListByQueue()");
+			log.info("Queue: " + queue);
+			VWQueue vwQueue = getQueue(vwSession, queue);
+			//Workflow Search Results Limit
+			String workflowSearchLimit = "";
+			int workflowSearchMax = -1;
+			int workflowResultCount = 0;
+			
+			//Verify the Queue was OK
+			if (vwQueue != null)
+			{
+				//Get the Queue Count
+				int queueCount = vwQueue.fetchCount();
+				log.info("Queue Count: " + queueCount);
+				//Update Queue Name on FnWorkflowList
+				fnWorkflowList.setStepName(queue);
+				//FnWorkflowList from DB Query
+				FnWorkflowList tempFnWorkflowList = new FnWorkflowList();
+				//Get the Workflow Search Limit
+				workflowSearchLimit = appConfig.getWorkflowSearchLimit();
+				if (workflowSearchLimit.length() > 0)
+				{
+					workflowSearchMax = Integer.parseInt(workflowSearchLimit);
+				}
+				
+				//Check the Queue Count to make sure it is > 0, otherwise skip.
+				if (queueCount > 0)
+				{
+					//Get the Queue Elements
+					VWQueueQuery query = null;
+					if (queue.equals("Inbox(0)"))
+					{
+						if (appConfig.getWorkflowDBSearchEnabled().equals("true"))
+						{
+							//DB FileNet Query for Workflows
+							tempFnWorkflowList = getQueueDBQuery(con, vwQueue, queue, filterName, filterValue);
+						}
+						else
+						{
+							//FileNet Query
+							//Different Query to get a User's Inbox Items
+							query = getQueueQuery(vwQueue, null, null, sortBy);
+						}
+					}
+					else
+					{
+						if (appConfig.getWorkflowDBSearchEnabled().equals("true"))
+						{
+							//DB FileNet Query for Workflows
+							tempFnWorkflowList = getQueueDBQuery(con, vwQueue, queue, filterName, filterValue);
+						}
+						else
+						{
+							//FileNet Query
+							query = getQueueQuery(vwQueue, filterName, filterValue, sortBy);
+						}
+					}
+					
+					//Check to see if the Query or the FnWorkflowList was OK
+					if (query != null && query.hasNext())
+					{
+						log.info("Query Not Null");
+						//Process the Results
+						while(query.hasNext())
+						{
+							//Check if the workflowSearchMax limit has been reached
+							if (workflowResultCount == workflowSearchMax)
+							{
+								log.info(workflowSearchMax + " Query Results reached");
+								break;
+							}
+							log.info("Query has next");
+							VWQueueElement queueItem = (VWQueueElement) query.next();
+							VWStepElement stepElement = queueItem.fetchStepElement(false, false);
+							if (stepElement != null)
+							{
+								log.info("Queue Query Total: " + query.fetchCount());
+								//Update Count for the Queue on FnWorkflowList
+								//fnWorkflowList.setCount(query.fetchCount());
+								//Update the FnWorkflow
+								FnWorkflow fnWorkflow = new FnWorkflow();
+								//Check for Inbox Queue
+								if (queue.equals("Inbox(0)"))
+								{
+									VWParticipant vwParticipant = stepElement.getParticipantNamePx();
+									log.info("Participant: " + vwParticipant.getParticipantName());
+									//Compare with the User to see if this is their Workflow
+									if (filterValue[0].equals(vwParticipant.getParticipantName()))
+									{
+										//Update the FnWorkflow
+										//FnWorkflow fnWorkflow = new FnWorkflow();
+										fnWorkflow = updateFnWorkflowInfo(stepElement, "Existing");
+
+										//Create the FnWorkflowPropertyList
+										FnWorkflowPropertyList fnWorkflowPropertyList = new FnWorkflowPropertyList();
+										fnWorkflowPropertyList = updateFnWorkflowPropertyListInfo(stepElement);
+										//Add the FnWorkflowPropertyList to the FnWorkflow
+										fnWorkflow.setFnWorkflowPropertyList(fnWorkflowPropertyList);
+										//Update the Workflow List for the Activity/Step
+										fnWorkflowList.setStepName(fnWorkflow.getFnWorkflowStep());
+										//Add the FnWorkflow to the FnWorkflowList
+										//fnWorkflowList.addFnWorkflow(fnWorkflow);
+									}
+								}
+								else
+								{
+									//Update the FnWorkflow
+									//FnWorkflow fnWorkflow = new FnWorkflow();
+									fnWorkflow = updateFnWorkflowInfo(stepElement, "Existing");
+
+									//Create the FnWorkflowPropertyList
+									FnWorkflowPropertyList fnWorkflowPropertyList = new FnWorkflowPropertyList();
+									fnWorkflowPropertyList = updateFnWorkflowPropertyListInfo(stepElement);
+									//Add the FnWorkflowPropertyList to the FnWorkflow
+									fnWorkflow.setFnWorkflowPropertyList(fnWorkflowPropertyList);
+									//Update the Workflow List for the Activity/Step
+									fnWorkflowList.setStepName(fnWorkflow.getFnWorkflowStep());
+									//Add the FnWorkflow to the FnWorkflowList
+									//fnWorkflowList.addFnWorkflow(fnWorkflow);
+								}
+								
+								//Add the FnWorkflow to the FnWorkflowList
+								fnWorkflowList.addFnWorkflow(fnWorkflow);
+								log.info("Queue Count: " + fnWorkflowList.getCount());
+							}
+							else
+							{
+								log.info("Failed to get a StepElement because the Workflow is no longer available");
+							}
+							//Increment the workflowResultCount
+							workflowResultCount++;
+						}//End While
+					}
+					else if (tempFnWorkflowList.getCount() > 0)
+					{
+						log.info("Queue Query Total: " + tempFnWorkflowList.getCount());
+						//Update Count for the Queue on FnWorkflowList
+						//fnWorkflowList.setCount(tempFnWorkflowList.getCount());
+												
+						//Add the tempFnWorkflowList to the FnWorkflowList
+						fnWorkflowList.addFnWorkflowList(tempFnWorkflowList);
+						log.info("Queue Count: " + fnWorkflowList.getCount());
+					}
+					else
+					{
+						log.info("Failed to get a QueueQuery because " + queue + " has 0 Records");
+					}
+				}
+				else
+				{
+					log.info("Queue has No Records so a query will not be performed");
+				}
+			}
+			else
+			{
+				log.info("Failed to get a VWQueue because " + queue + " does not exist");
+				//Update the FnWorkflowList Object
+				fnWorkflowList.setErrorFlag(1);
+				//Update ErrorMessage
+				//fnWorkflowList.setErrorMessage("Failed to get a VWQueue because " + queue + " does not exist");
+			}
+		}
+		catch (VWException ex)
+		{
+			log.info("ERROR", ex.getMessage());
+			if (vwSession != null)
+			{
+				//Set vwSession to null to kill any connections
+				vwSession = null;
+			}
+			//Update the FnWorkflowList Object
+			fnWorkflowList.setErrorFlag(1);
+			//Update ErrorMessage
+			//fnWorkflowList.setErrorMessage(ex.getMessage());
+		}
+		log.info("Leaving WorkflowManager -> getFnWorkflowListByQueue()");
+		log.info("===========================================================");
+		return fnWorkflowList;
+	}
+
+	private void getFnWorkflowCountsListByQueue(VWSession vwSession, String queue, String[] filterName, String[] filterValue, String sortBy)
+	{
 //		//Create the FnWorkflowList Object
 //		FnWorkflowList fnWorkflowList = new FnWorkflowList();
 //
 //		try
 //		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> getFnWorkflowListByQueue()");
-//			wiiscLog.log(wiiscLog.INFO, "Queue: " + queue);
-//			VWQueue vwQueue = getQueue(vwSession, queue, wiiscLog);
-//			//Workflow Search Results Limit
-//			String workflowSearchLimit = "";
-//			int workflowSearchMax = -1;
-//			int workflowResultCount = 0;
-//			
-//			//Verify the Queue was OK
-//			if (vwQueue != null)
-//			{
-//				//Get the Queue Count
-//				int queueCount = vwQueue.fetchCount();
-//				wiiscLog.log(wiiscLog.INFO, "Queue Count: " + queueCount);
-//				//Update Queue Name on FnWorkflowList
-//				fnWorkflowList.setStepName(queue);
-//				//FnWorkflowList from DB Query
-//				FnWorkflowList tempFnWorkflowList = new FnWorkflowList();
-//				//Get the Workflow Search Limit
-//				workflowSearchLimit = globalConfig.getString("workflowSearchLimit");
-//				if (workflowSearchLimit.length() > 0)
-//				{
-//					workflowSearchMax = Integer.parseInt(workflowSearchLimit);
-//				}
-//				
-//				//Check the Queue Count to make sure it is > 0, otherwise skip.
-//				if (queueCount > 0)
-//				{
-//					//Get the Queue Elements
-//					VWQueueQuery query = null;
-//					if (queue.equals("Inbox(0)"))
-//					{
-//						if (globalConfig.getString("workflowDBSearchEnabled").equals("true"))
-//						{
-//							//DB FileNet Query for Workflows
-//							tempFnWorkflowList = getQueueDBQuery(con, vwQueue, queue, filterName, filterValue, wiiscLog);
-//						}
-//						else
-//						{
-//							//FileNet Query
-//							//Different Query to get a User's Inbox Items
-//							query = getQueueQuery(vwQueue, null, null, sortBy, wiiscLog);
-//						}
-//					}
-//					else
-//					{
-//						if (globalConfig.getString("workflowDBSearchEnabled").equals("true"))
-//						{
-//							//DB FileNet Query for Workflows
-//							tempFnWorkflowList = getQueueDBQuery(con, vwQueue, queue, filterName, filterValue, wiiscLog);
-//						}
-//						else
-//						{
-//							//FileNet Query
-//							query = getQueueQuery(vwQueue, filterName, filterValue, sortBy, wiiscLog);
-//						}
-//					}
-//					
-//					//Check to see if the Query or the FnWorkflowList was OK
-//					if (query != null && query.hasNext())
-//					{
-//						wiiscLog.log(wiiscLog.INFO, "Query Not Null");
-//						//Process the Results
-//						while(query.hasNext())
-//						{
-//							//Check if the workflowSearchMax limit has been reached
-//							if (workflowResultCount == workflowSearchMax)
-//							{
-//								wiiscLog.log(wiiscLog.INFO, workflowSearchMax + " Query Results reached");
-//								break;
-//							}
-//							wiiscLog.log(wiiscLog.INFO, "Query has next");
-//							VWQueueElement queueItem = (VWQueueElement) query.next();
-//							VWStepElement stepElement = queueItem.fetchStepElement(false, false);
-//							if (stepElement != null)
-//							{
-//								wiiscLog.log(wiiscLog.INFO, "Queue Query Total: " + query.fetchCount());
-//								//Update Count for the Queue on FnWorkflowList
-//								//fnWorkflowList.setCount(query.fetchCount());
-//								//Update the FnWorkflow
-//								FnWorkflow fnWorkflow = new FnWorkflow();
-//								//Check for Inbox Queue
-//								if (queue.equals("Inbox(0)"))
-//								{
-//									VWParticipant vwParticipant = stepElement.getParticipantNamePx();
-//									wiiscLog.log(wiiscLog.INFO, "Participant: " + vwParticipant.getParticipantName());
-//									//Compare with the User to see if this is their Workflow
-//									if (filterValue[0].equals(vwParticipant.getParticipantName()))
-//									{
-//										//Update the FnWorkflow
-//										//FnWorkflow fnWorkflow = new FnWorkflow();
-//										fnWorkflow = updateFnWorkflowInfo(stepElement, "Existing", wiiscLog);
-//
-//										//Create the FnWorkflowPropertyList
-//										FnWorkflowPropertyList fnWorkflowPropertyList = new FnWorkflowPropertyList();
-//										fnWorkflowPropertyList = updateFnWorkflowPropertyListInfo(stepElement, wiiscLog);
-//										//Add the FnWorkflowPropertyList to the FnWorkflow
-//										fnWorkflow.setFnWorkflowPropertyList(fnWorkflowPropertyList);
-//										//Update the Workflow List for the Activity/Step
-//										fnWorkflowList.setStepName(fnWorkflow.getFnWorkflowStep());
-//										//Add the FnWorkflow to the FnWorkflowList
-//										//fnWorkflowList.addFnWorkflow(fnWorkflow);
-//									}
-//								}
-//								else
-//								{
-//									//Update the FnWorkflow
-//									//FnWorkflow fnWorkflow = new FnWorkflow();
-//									fnWorkflow = updateFnWorkflowInfo(stepElement, "Existing", wiiscLog);
-//
-//									//Create the FnWorkflowPropertyList
-//									FnWorkflowPropertyList fnWorkflowPropertyList = new FnWorkflowPropertyList();
-//									fnWorkflowPropertyList = updateFnWorkflowPropertyListInfo(stepElement, wiiscLog);
-//									//Add the FnWorkflowPropertyList to the FnWorkflow
-//									fnWorkflow.setFnWorkflowPropertyList(fnWorkflowPropertyList);
-//									//Update the Workflow List for the Activity/Step
-//									fnWorkflowList.setStepName(fnWorkflow.getFnWorkflowStep());
-//									//Add the FnWorkflow to the FnWorkflowList
-//									//fnWorkflowList.addFnWorkflow(fnWorkflow);
-//								}
-//								
-//								//Check if Clarety Workflow Queue Description Actions are used
-//								//ResourceBundle globalConfig = ResourceBundle.getBundle(ConstantsUtil.GLOBAL_CONFIG);
-//								if (globalConfig.containsKey("claretyWorkflowDescriptionActionsEnabled"))
-//								{
-//									//Check if the Property setting is true
-//									if (globalConfig.getString("claretyWorkflowDescriptionActionsEnabled").equals("true"))
-//									{
-//										//Initialize the Description
-//										String description = "";
-//										//Check if we are using the Inbox Queue or Not
-//										if (queue.equals("Inbox(0)"))
-//										{
-//											//Get the Workflow Queue not the Inbox
-//											if (fnWorkflow.getFnWorkflowQueue() != null)
-//											{
-//												vwQueue = getQueue(vwSession, fnWorkflow.getFnWorkflowQueue(), wiiscLog);
-//												//Get the Workflow Queue Description
-//												VWQueueDefinition def = vwQueue.fetchQueueDefinition();
-//												VWOperationDefinition op = def.getOperation(globalConfig.getString("claretyWorkflowDescriptionOperation"));
-//												description = op.getDescription();
-//											}
-//										}
-//										else
-//										{
-//											//Get the Workflow Queue
-//											if (fnWorkflow.getFnWorkflowQueue() != null)
-//											{
-//												vwQueue = getQueue(vwSession, fnWorkflow.getFnWorkflowQueue(), wiiscLog);
-//												//Get the Workflow Queue Description
-//												VWQueueDefinition def = vwQueue.fetchQueueDefinition();
-//												VWOperationDefinition op = def.getOperation(globalConfig.getString("claretyWorkflowDescriptionOperation"));
-//												description = op.getDescription();
-//											}
-//										}
-//										
-//										//Check to make sure the Description is not empty
-//										if (description.length() > 0)
-//										{
-//											wiiscLog.log(wiiscLog.INFO, "Workflow Description: ");
-//											wiiscLog.log(wiiscLog.INFO, description);
-//											fnWorkflow.setFnWorkflowResponse(description);
-//										}
-//									}
-//								}
-//								//Add the FnWorkflow to the FnWorkflowList
-//								fnWorkflowList.addFnWorkflow(fnWorkflow);
-//								wiiscLog.log(wiiscLog.INFO, "Queue Count: " + fnWorkflowList.getCount());
-//							}
-//							else
-//							{
-//								wiiscLog.log(wiiscLog.INFO, "Failed to get a StepElement because the Workflow is no longer available");
-//							}
-//							//Increment the workflowResultCount
-//							workflowResultCount++;
-//						}//End While
-//					}
-//					else if (tempFnWorkflowList.getCount() > 0)
-//					{
-//						wiiscLog.log(wiiscLog.INFO, "Queue Query Total: " + tempFnWorkflowList.getCount());
-//						//Update Count for the Queue on FnWorkflowList
-//						//fnWorkflowList.setCount(tempFnWorkflowList.getCount());
-//						
-//						//Check if Clarety Workflow Queue Description Actions are used
-//						//ResourceBundle globalConfig = ResourceBundle.getBundle(ConstantsUtil.GLOBAL_CONFIG);
-//						if (globalConfig.containsKey("claretyWorkflowDescriptionActionsEnabled"))
-//						{
-//							//Check if the Property setting is true
-//							if (globalConfig.getString("claretyWorkflowDescriptionActionsEnabled").equals("true"))
-//							{
-//								//FnWorkflow List
-//								List<FnWorkflow> tempFnWorkflowListData = tempFnWorkflowList.getFnWorkflowList();
-//								
-//								for (int a = 0; a < tempFnWorkflowListData.size(); a++)
-//								{
-//									//Update FnWorkflow
-//									FnWorkflow fnWorkflow = tempFnWorkflowListData.get(a);
-//									
-//									//Initialize the Description
-//									String description = "";
-//									//Check if we are using the Inbox Queue or Not
-//									if (queue.equals("Inbox(0)"))
-//									{
-//										//Get the Workflow Queue not the Inbox
-//										if (fnWorkflow.getFnWorkflowQueue() != null)
-//										{
-//											vwQueue = getQueue(vwSession, fnWorkflow.getFnWorkflowQueue(), wiiscLog);
-//											//Get the Workflow Queue Description
-//											VWQueueDefinition def = vwQueue.fetchQueueDefinition();
-//											VWOperationDefinition op = def.getOperation(globalConfig.getString("claretyWorkflowDescriptionOperation"));
-//											description = op.getDescription();
-//										}
-//									}
-//									else
-//									{
-//										//Get the Workflow Queue
-//										if (fnWorkflow.getFnWorkflowQueue() != null)
-//										{
-//											vwQueue = getQueue(vwSession, fnWorkflow.getFnWorkflowQueue(), wiiscLog);
-//											//Get the Workflow Queue Description
-//											VWQueueDefinition def = vwQueue.fetchQueueDefinition();
-//											VWOperationDefinition op = def.getOperation(globalConfig.getString("claretyWorkflowDescriptionOperation"));
-//											description = op.getDescription();
-//										}
-//									}
-//									
-//									//Check to make sure the Description is not empty
-//									if (description.length() > 0)
-//									{
-//										wiiscLog.log(wiiscLog.INFO, "Workflow Description: ");
-//										wiiscLog.log(wiiscLog.INFO, description);
-//										fnWorkflow.setFnWorkflowResponse(description);
-//									}
-//								}
-//							}
-//						}
-//						//Add the tempFnWorkflowList to the FnWorkflowList
-//						fnWorkflowList.addFnWorkflowList(tempFnWorkflowList);
-//						wiiscLog.log(wiiscLog.INFO, "Queue Count: " + fnWorkflowList.getCount());
-//					}
-//					else
-//					{
-//						wiiscLog.log(wiiscLog.INFO, "Failed to get a QueueQuery because " + queue + " has 0 Records");
-//					}
-//				}
-//				else
-//				{
-//					wiiscLog.log(wiiscLog.INFO, "Queue has No Records so a query will not be performed");
-//				}
-//			}
-//			else
-//			{
-//				wiiscLog.log(wiiscLog.INFO, "Failed to get a VWQueue because " + queue + " does not exist");
-//				//Update the FnWorkflowList Object
-//				fnWorkflowList.setErrorFlag(1);
-//				//Update ErrorMessage
-//				fnWorkflowList.setErrorMessage("Failed to get a VWQueue because " + queue + " does not exist");
-//			}
-//		}
-//		catch (VWException ex)
-//		{
-//			wiiscLog.log("ERROR", ex.getMessage());
-//			if (vwSession != null)
-//			{
-//				//Set vwSession to null to kill any connections
-//				vwSession = null;
-//			}
-//			//Update the FnWorkflowList Object
-//			fnWorkflowList.setErrorFlag(1);
-//			//Update ErrorMessage
-//			fnWorkflowList.setErrorMessage(ex.getMessage());
-//		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> getFnWorkflowListByQueue()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
-//		return fnWorkflowList;
-//	}
-//
-//	private FnWorkflowList getFnWorkflowCountsListByQueue(VWSession vwSession, String queue, String[] filterName, String[] filterValue, String sortBy, WIISCLog wiiscLog)
-//	{
-//		//Create the FnWorkflowList Object
-//		FnWorkflowList fnWorkflowList = new FnWorkflowList();
-//
-//		try
-//		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> getFnWorkflowCountsListByQueue()");
-//			wiiscLog.log(wiiscLog.INFO, "Queue: " + queue);
+//			log.info("Entered WorkflowManager -> getFnWorkflowCountsListByQueue()");
+//			log.info("Queue: " + queue);
 //			VWQueue vwQueue = getQueue(vwSession, queue, wiiscLog);
 //			//Verify the Queue was OK
 //			if (vwQueue != null)
 //			{
 //				//Get the Queue Count
 //				int queueCount = vwQueue.fetchCount();
-//				wiiscLog.log(wiiscLog.INFO, "Queue Total: " + queueCount);
+//				log.info("Queue Total: " + queueCount);
 //				//Update Queue Name on FnWorkflowList
 //				fnWorkflowList.setStepName(queue);
 //												
@@ -6481,8 +6539,8 @@ public class WorkflowManager {
 //					//Check to see if the Query or the FnWorkflowList was OK
 //					if (query != null)
 //					{
-//						wiiscLog.log(wiiscLog.INFO, "Query Not Null");
-//						wiiscLog.log(wiiscLog.INFO, "Queue Query Total: " + query.fetchCount());
+//						log.info("Query Not Null");
+//						log.info("Queue Query Total: " + query.fetchCount());
 //						//Update Count for the Queue on FnWorkflowList
 //						//fnWorkflowList.setCount(query.fetchCount());
 //						int queryCount = query.fetchCount();
@@ -6495,17 +6553,17 @@ public class WorkflowManager {
 //					}					
 //					else
 //					{
-//						wiiscLog.log(wiiscLog.INFO, "Failed to get a QueueQuery");
+//						log.info("Failed to get a QueueQuery");
 //					}
 //				}
 //				else
 //				{
-//					wiiscLog.log(wiiscLog.INFO, "Queue has No Records so a query will not be performed");
+//					log.info("Queue has No Records so a query will not be performed");
 //				}
 //			}
 //			else
 //			{
-//				wiiscLog.log(wiiscLog.INFO, "Failed to get a VWQueue");
+//				log.info("Failed to get a VWQueue");
 //				//Update the FnWorkflowList Object
 //				fnWorkflowList.setErrorFlag(1);
 //				fnWorkflowList.setErrorMessage("Failed to get a VWQueue");
@@ -6513,7 +6571,7 @@ public class WorkflowManager {
 //		}
 //		catch (VWException ex)
 //		{
-//			wiiscLog.log("ERROR", ex.getMessage());
+//			log.info("ERROR", ex.getMessage());
 //			if (vwSession != null)
 //			{
 //				//Set vwSession to null to kill any connections
@@ -6524,90 +6582,90 @@ public class WorkflowManager {
 //			//Update ErrorMessage
 //			fnWorkflowList.setErrorMessage(ex.getMessage());
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> getFnWorkflowCountsListByQueue()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> getFnWorkflowCountsListByQueue()");
+//		log.info("===========================================================");
 //		return fnWorkflowList;
-//	}
-//	
-//	private SQLServerConnection loginWorkflowDB(WIISCLog wiiscLog)
-//	{
-//		SQLServerConnection con = null;
-//		
-//		try
-//		{
-//			wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> loginWorkflowDB()");
-//			//Workflow DB Server
-//			String workflowDBServerName = "";
-//			//Workflow DB Server Port
-//			String workflowDBServerPort = "";
-//			//Workflow DB Name
-//			String workflowDBName = "";
-//			//Workflow DB User
-//			String workflowDBUser = "";
-//			//Workflow DB User's Password
-//			String workflowDBUserPassword = "";
-//			
-//			//Get all of the Workflow Information
-//			workflowDBServerName = globalConfig.getString("workflowDBServerName");
-//			workflowDBServerPort = globalConfig.getString("workflowDBServerPort");
-//			workflowDBName = globalConfig.getString("workflowDBName");
-//			workflowDBUser = globalConfig.getString("workflowDBUser");
-//			workflowDBUserPassword = globalConfig.getString("workflowDBUserPassword");
-//			
-//			wiiscLog.log(wiiscLog.INFO, "Workflow DB Server: " + workflowDBServerName);
-//			wiiscLog.log(wiiscLog.INFO, "Workflow DB Server Port: " + workflowDBServerPort);
-//			wiiscLog.log(wiiscLog.INFO, "Workflow DB Name: " + workflowDBName);
-//			wiiscLog.log(wiiscLog.INFO, "Workflow DB User: " + workflowDBUser);
-//			
-//			// Establish the connection. 
-//			SQLServerDataSource ds = new SQLServerDataSource();
-//			ds.setUser(workflowDBUser);
-//			ds.setPassword(workflowDBUserPassword);
-//			ds.setServerName(workflowDBServerName);
-//			ds.setPortNumber(Integer.parseInt(workflowDBServerPort)); 
-//			ds.setDatabaseName(workflowDBName);
-//			con = (SQLServerConnection) ds.getConnection();
-//			
-//			//Verify the Connection was successful
-//			if (con != null)
-//			{
-//				wiiscLog.log(wiiscLog.INFO, "Workflow DB Connection was Successful");
-//			}
-//			else
-//			{
-//				wiiscLog.log(wiiscLog.INFO, "Workflow DB Connection Failed");
-//			}
-//			
-//		}
-//		catch (Exception e)
-//		{
-//			wiiscLog.log("ERROR", e.getMessage());
-//		}
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> loginWorkflowDB()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
-//		return con;
-//	}
-//	
+	}
+	
+	private SQLServerConnection loginWorkflowDB()
+	{
+		SQLServerConnection con = null;
+		
+		try
+		{
+			log.info("Entered WorkflowManager -> loginWorkflowDB()");
+			//Workflow DB Server
+			String workflowDBServerName = "";
+			//Workflow DB Server Port
+			String workflowDBServerPort = "";
+			//Workflow DB Name
+			String workflowDBName = "";
+			//Workflow DB User
+			String workflowDBUser = "";
+			//Workflow DB User's Password
+			String workflowDBUserPassword = "";
+			
+			//Get all of the Workflow Information
+			workflowDBServerName = appConfig.getWorkflowDBServerName();
+			workflowDBServerPort = appConfig.getWorkflowDBServerPort();
+			workflowDBName = appConfig.getWorkflowDBName();
+			workflowDBUser = appConfig.getWorkflowDBUser();
+			workflowDBUserPassword = appConfig.getWorkflowDBUserPassword();
+			
+			log.info("Workflow DB Server: " + workflowDBServerName);
+			log.info("Workflow DB Server Port: " + workflowDBServerPort);
+			log.info("Workflow DB Name: " + workflowDBName);
+			log.info("Workflow DB User: " + workflowDBUser);
+			
+			// Establish the connection. 
+			SQLServerDataSource ds = new SQLServerDataSource();
+			ds.setUser(workflowDBUser);
+			ds.setPassword(workflowDBUserPassword);
+			ds.setServerName(workflowDBServerName);
+			ds.setPortNumber(Integer.parseInt(workflowDBServerPort)); 
+			ds.setDatabaseName(workflowDBName);
+			con = (SQLServerConnection) ds.getConnection();
+			
+			//Verify the Connection was successful
+			if (con != null)
+			{
+				log.info("Workflow DB Connection was Successful");
+			}
+			else
+			{
+				log.info("Workflow DB Connection Failed");
+			}
+			
+		}
+		catch (Exception e)
+		{
+			log.info("ERROR", e.getMessage());
+		}
+		log.info("Leaving WorkflowManager -> loginWorkflowDB()");
+		log.info("===========================================================");
+		return con;
+	}
+	
 
-//
-//	//Output the FnWorkflowPropertyList
-//	private void outputFnWorkflowPropertyList(FnWorkflowPropertyList fnWorkflowPropertyList, WIISCLog wiiscLog)
+
+	//Output the FnWorkflowPropertyList
+//	private void outputFnWorkflowPropertyList(String fnWorkflowPropertyList)
 //	{
-//		wiiscLog.log(wiiscLog.INFO, "outputFnWorkflowPropertyList");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("outputFnWorkflowPropertyList");
+//		log.info("===========================================================");
 //		int propSize;
 //		propSize = fnWorkflowPropertyList.getFnWorkflowPropsList().size();
 //		for (int i = 0; i < propSize; i++)
 //		{
 //			FnWorkflowProperty fnWorkflowProperty = fnWorkflowPropertyList.getFnWorkflowPropsList().get(i);
-//			wiiscLog.log(wiiscLog.INFO, "Property: " + fnWorkflowProperty.getName());
-//			wiiscLog.log(wiiscLog.INFO, "Value: " + fnWorkflowProperty.getValue());
+//			log.info("Property: " + fnWorkflowProperty.getName());
+//			log.info("Value: " + fnWorkflowProperty.getValue());
 //		}
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("===========================================================");
 //	}
-//	
-//	public String createCase(String appId, String planId, String caseId, String process, WIISCLog wiiscLog)
-//	{
+	
+	public void createCase(String appId, String planId, String caseId, String process)
+	{
 //		String result = "Fail";
 //		String response = null;
 //		String caseType = "";
@@ -6620,13 +6678,13 @@ public class WorkflowManager {
 //
 //		System.out.println("Entered WorkflowManager -> createCase()");
 //
-//		wiiscLog.log(wiiscLog.INFO, "Entered WorkflowManager -> createCase()");
+//		log.info("Entered WorkflowManager -> createCase()");
 //
 //		/* create case */
 //		String caseURL = "http://" + globalConfig.getString("ceServerName") + ":" + globalConfig.getString("ceApplicationPort") + "/CaseManager/CASEREST/v1/cases"; 
 //		System.out.println("CASE URL: " + caseURL);
 //
-//		wiiscLog.log(wiiscLog.INFO, "caseURL: " + caseURL);
+//		log.info("caseURL: " + caseURL);
 //
 //		JSONObject createCasePayload = new JSONObject();
 //		try
@@ -6721,14 +6779,14 @@ public class WorkflowManager {
 //			try
 //			{
 //				//Output to the Log the Results
-//				wiiscLog.log(wiiscLog.INFO, "==========================================");
-//				wiiscLog.log(wiiscLog.INFO, "appId: " + appId);
-//				wiiscLog.log(wiiscLog.INFO, "planId: " + planId);
-//				wiiscLog.log(wiiscLog.INFO, "caseId: " + caseId);
-//				wiiscLog.log(wiiscLog.INFO, "process: " + process);
-//				wiiscLog.log(wiiscLog.INFO, "==========================================");
-//				wiiscLog.log(wiiscLog.INFO, "==		Case Results -> Success	    ==");
-//				wiiscLog.log(wiiscLog.INFO, "==========================================");
+//				log.info("==========================================");
+//				log.info("appId: " + appId);
+//				log.info("planId: " + planId);
+//				log.info("caseId: " + caseId);
+//				log.info("process: " + process);
+//				log.info("==========================================");
+//				log.info("==		Case Results -> Success	    ==");
+//				log.info("==========================================");
 //
 //
 //				//Get the Results
@@ -6737,10 +6795,10 @@ public class WorkflowManager {
 //				caseIdentifier = (String) contentObj.get("CaseIdentifier");
 //				caseFolderId = (String) contentObj.get("CaseFolderId");
 //
-//				wiiscLog.log(wiiscLog.INFO, "CaseTitle: " + caseTitle);
-//				wiiscLog.log(wiiscLog.INFO, "CaseIdentifier: " + caseIdentifier);
-//				wiiscLog.log(wiiscLog.INFO, "CaseFolderId: " + caseFolderId);
-//				wiiscLog.log(wiiscLog.INFO, "==========================================");
+//				log.info("CaseTitle: " + caseTitle);
+//				log.info("CaseIdentifier: " + caseIdentifier);
+//				log.info("CaseFolderId: " + caseFolderId);
+//				log.info("==========================================");
 //
 //				//Update the Result to Success for creating the Case and Workflow successfully
 //				result = "Success";
@@ -6756,14 +6814,14 @@ public class WorkflowManager {
 //		else
 //		{
 //			//Output to the Log the Results
-//			wiiscLog.log(wiiscLog.INFO, "==========================================");
-//			wiiscLog.log(wiiscLog.INFO, "appId: " + appId);
-//			wiiscLog.log(wiiscLog.INFO, "planId: " + planId);
-//			wiiscLog.log(wiiscLog.INFO, "caseId: " + caseId);
-//			wiiscLog.log(wiiscLog.INFO, "process: " + process);
-//			wiiscLog.log(wiiscLog.INFO, "==========================================");
-//			wiiscLog.log(wiiscLog.INFO, "==		Case Results -> Fail	    ==");
-//			wiiscLog.log(wiiscLog.INFO, "==========================================");
+//			log.info("==========================================");
+//			log.info("appId: " + appId);
+//			log.info("planId: " + planId);
+//			log.info("caseId: " + caseId);
+//			log.info("process: " + process);
+//			log.info("==========================================");
+//			log.info("==		Case Results -> Fail	    ==");
+//			log.info("==========================================");
 //
 //			//Response Content was empty
 //			result = "Fail";
@@ -6840,13 +6898,13 @@ public class WorkflowManager {
 //		executeCaseRESTAPI(getComment, "GET", null);
 //
 //		System.out.println("Leaving WorkflowManager -> createCase()");
-//		wiiscLog.log(wiiscLog.INFO, "Leaving WorkflowManager -> createCase()");
-//		wiiscLog.log(wiiscLog.INFO, "===========================================================");
+//		log.info("Leaving WorkflowManager -> createCase()");
+//		log.info("===========================================================");
 //		return result;
-//	}
-//
-//	private LocalResource getLocalResource(String propsFile)
-//	{
+	}
+
+	private void getLocalResource(String propsFile)
+	{
 //		LocalResource res = null;
 //		String wiiscConfigsPath = "";
 //		wiiscConfigsPath = System.getProperty("wiisc.config.properties.path");
@@ -6863,10 +6921,10 @@ public class WorkflowManager {
 //		}
 //		
 //		return res;
-//	}
-//	
-//	private String getImagingSession(ResourceBundle globalConfig)
-//	{
+	}
+	
+	private void getImagingSession(String globalConfig)
+	{
 //		String sessionId = "";
 //		//ResourceBundle globalConfig = ResourceBundle.getBundle(ConstantsUtil.GLOBAL_CONFIG);
 //		//Create CE User Session Token for viewing documents
@@ -6876,15 +6934,15 @@ public class WorkflowManager {
 //		sessionId = URLEncoder.encode(sessionId);
 //
 //		return sessionId;
-//	}
-//
-//	private String removeGUIDBrackets(String src)
-//	{
+	}
+
+	private void removeGUIDBrackets(String src)
+	{
 //		return src.substring(1, src.length()-1);
-//	}
+	}
 //
-//	private String executeCaseRESTAPI(String resourceURI, String requestMethod, String content)
-//	{
+	private void executeCaseRESTAPI(String resourceURI, String requestMethod, String content)
+	{
 //		HttpURLConnection   httpConn;
 //		URL                 url = null;
 //		OutputStream        out = null;
@@ -6976,28 +7034,36 @@ public class WorkflowManager {
 //		}
 //
 //		return responseContent;
-//	}
-//
-//	private PrintWriter getWriter(String name, WIISCLog wiiscLog)
-//	{
-//		PrintWriter out = null;
-//		try
-//		{
-//			File file = new File(name);
-//			out = new PrintWriter(
-//					new BufferedWriter(
-//							new FileWriter(file,false)));
-//		}
-//		catch (IOException e)
-//		{
-//			wiiscLog.log(wiiscLog.INFO, "I/O Error with the file " + name);
-//		}
-//		
-//		return out;
-//	}
-//	
-//	private String getResponse(InputStream in) 
-//	{
+	}
+
+	private String getDateTime()
+	{
+		DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd-HHmmssSSS");
+	    Date date = new Date();
+	    return dateFormat.format(date);
+	}
+	
+	
+	private PrintWriter getWriter(String name)
+	{
+		PrintWriter out = null;
+		try
+		{
+			File file = new File(name);
+			out = new PrintWriter(
+					new BufferedWriter(
+							new FileWriter(file,false)));
+		}
+		catch (IOException e)
+		{
+			log.info("I/O Error with the file " + name);
+		}
+		
+		return out;
+	}
+	
+	private void getResponse(InputStream in) 
+	{
 //		if (in != null)
 //		{
 //			BufferedReader br = new BufferedReader(new InputStreamReader(in));
@@ -7025,7 +7091,7 @@ public class WorkflowManager {
 //		{
 //			return null;
 //		}
-//	}
+	}
 
 }
 
