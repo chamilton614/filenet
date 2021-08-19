@@ -15,7 +15,7 @@
 	<description>FileNet CPE Tool for Imaging and Workflow</description>
 	<properties>
 		<java.version>1.8</java.version>
-		<basedir>/home/chamilton/development/FileNet-P8-Jars/5.2.1.2</basedir>
+		<filenet.p8.version>5.2.1.2</filenet.p8.version>
 	</properties>
 	<dependencies>
 		<!-- <dependency>
@@ -61,6 +61,84 @@
 			<optional>true</optional>
 		</dependency>
 		
+		<!-- FileNet P8 CE -->
+		<dependency>
+			<groupId>com.filenet.p8.ce</groupId>
+			<artifactId>isannotvalidator</artifactId>
+			<version>${filenet.p8.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.filenet.p8.ce</groupId>
+			<artifactId>Jace</artifactId>
+			<version>${filenet.p8.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.filenet.p8.ce</groupId>
+			<artifactId>javaapi</artifactId>
+			<version>${filenet.p8.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.filenet.p8.ce</groupId>
+			<artifactId>listener</artifactId>
+			<version>${filenet.p8.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.filenet.p8.ce</groupId>
+			<artifactId>log4j-1.2.14</artifactId>
+			<version>${filenet.p8.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.filenet.p8.ce</groupId>
+			<artifactId>p8cel10n</artifactId>
+			<version>${filenet.p8.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.filenet.p8.ce</groupId>
+			<artifactId>p8cjares</artifactId>
+			<version>${filenet.p8.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.filenet.p8.ce</groupId>
+			<artifactId>stax-api</artifactId>
+			<version>${filenet.p8.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.filenet.p8.ce</groupId>
+			<artifactId>xlxpScanner</artifactId>
+			<version>${filenet.p8.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.filenet.p8.ce</groupId>
+			<artifactId>xlxpScannerUtils</artifactId>
+			<version>${filenet.p8.version}</version>
+		</dependency>
+				
+		<!-- FileNet P8 PE -->
+		<dependency>
+			<groupId>com.filenet.p8.pe</groupId>
+			<artifactId>eeapi</artifactId>
+			<version>${filenet.p8.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.filenet.p8.pe</groupId>
+			<artifactId>pe</artifactId>
+			<version>${filenet.p8.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.filenet.p8.pe</groupId>
+			<artifactId>pe3pt</artifactId>
+			<version>${filenet.p8.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.filenet.p8.pe</groupId>
+			<artifactId>peResources</artifactId>
+			<version>${filenet.p8.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.filenet.p8.pe</groupId>
+			<artifactId>peREST</artifactId>
+			<version>${filenet.p8.version}</version>
+		</dependency>
 		
 	</dependencies>
 

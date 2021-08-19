@@ -1,0 +1,56 @@
+<!--
+	$Revision:   1.14  $
+
+	Update the Configuration.java, getDefaultConfiguration method to include any new
+	information.
+-->
+<perest:P8BPMREST xmlns:perest="http://www.ibm.com/p8/bpm/v1/rest/config/schema" 
+		standalone="false"
+		uriform="minimum">
+	<perest:version.path value="/p8/bpm/v1"/>
+	<perest:filenet.pe.bootstrap.ceuri value="iiop://my_server:my_port/FileNet/Engine"/>
+	<perest:connection.point value="RESTCP"/>
+
+	<!-- for tracing purpose? -->
+    <perest:resource.handler path="trace" className="filenet.pe.rest.handlers.Tracer"/> 
+	<perest:resource.handler path="trace/classloader" className="filenet.pe.rest.handlers.TraceClassloader"/>	
+
+	<!-- PE REST API -->
+    <perest:resource.handler path="workclasses" className="filenet.pe.rest.handlers.WorkClasses"/> 
+ 	<perest:resource.handler path="workclasses/{workclassName}" className="filenet.pe.rest.handlers.AWorkClass"/> 
+	<perest:resource.handler path="workclasses/{workclassName}/structure" className="filenet.pe.rest.handlers.WorkClassStructure"/>
+ 	<perest:resource.handler path="rosters/{rosterName}/wc/{workclassName}/wob/{wobID}" className="filenet.pe.rest.handlers.WorkClassLauncher"/> 
+	<perest:resource.handler path="appspacenames" className="filenet.pe.rest.handlers.AppSpaces"/>
+	<perest:resource.handler path="appspacenames/{appspace}/rolenames" className="filenet.pe.rest.handlers.RoleNames"/>
+	<perest:resource.handler path="appspaces/{appspace}/myroles" className="filenet.pe.rest.handlers.Roles"/>
+	<perest:resource.handler path="appspaces/{appspace}/roles/{roleName}" className="filenet.pe.rest.handlers.Role"/>
+	<perest:resource.handler path="appspaces/{appspace}/roles/{roleName}/attributes" className="filenet.pe.rest.handlers.RoleAttributes"/>
+	<perest:resource.handler path="writableappspaces" className="filenet.pe.rest.handlers.WritableAppSpaces"/>
+	<perest:resource.handler path="writableappspaces/{appspace}" className="filenet.pe.rest.handlers.WritableAppSpace"/>
+	<perest:resource.handler path="writableappspaces/{appspace}/roles" className="filenet.pe.rest.handlers.WritableRoles"/>
+	<perest:resource.handler path="writableappspaces/{appspace}/roles/{roleName}" className="filenet.pe.rest.handlers.WritableRole"/>
+	<perest:resource.handler path="writableappspaces/{appspace}/roles/{roleName}/attributes" className="filenet.pe.rest.handlers.RoleAttributes"/>
+	<perest:resource.handler path="writableappspaces/{appspace}/roles/{roleName}/members" className="filenet.pe.rest.handlers.Members"/>	
+	<perest:resource.handler path="queues/{queueName}/workbaskets/{workBasketName}" className="filenet.pe.rest.handlers.WorkBasket"/>
+	<perest:resource.handler path="queues/{queueName}/workbaskets/{workBasketName}/filters" className="filenet.pe.rest.handlers.WorkBasketFilters"/>
+	<perest:resource.handler path="queues/{queueName}/workbaskets/{workBasketName}/filters/{filterName}/attributes" className="filenet.pe.rest.handlers.WorkBasketFilterAttributes"/>
+	<perest:resource.handler path="queues/{queueName}/workbaskets/{workBasketName}/columns" className="filenet.pe.rest.handlers.WorkBasketColumns"/>
+	<perest:resource.handler path="queues/{queueName}/workbaskets/{workBasketName}/columns/{columnName}/attributes" className="filenet.pe.rest.handlers.WorkBasketColumnAttributes"/>
+	<perest:resource.handler path="queues/{queueName}/workbaskets/{workBasketName}/attributes" className="filenet.pe.rest.handlers.WorkBasketAttributes"/>
+	<perest:resource.handler path="queues/{queueName}/workbaskets/{workBasketName}/queueelements" className="filenet.pe.rest.handlers.QueueElements"/>
+	<perest:resource.handler path="queues/{queueName}/workbaskets/{workBasketName}/queueelements/count" className="filenet.pe.rest.handlers.QueueElementsCount"/>
+	<perest:resource.handler path="queues/{queueName}/stepelements/{wobID}" className="filenet.pe.rest.handlers.StepElement"/>
+	<perest:resource.handler path="currentuser" className="filenet.pe.rest.handlers.CurrentUser"/>
+	<perest:resource.handler path="securitydomains" className="filenet.pe.rest.handlers.SecurityDomains"/>
+	<perest:resource.handler path="queues/{queueName}/stepelements/{wobID}/milestones" className="filenet.pe.rest.handlers.Milestones"/>
+	<perest:resource.handler path="users" className="filenet.pe.rest.handlers.Users2"/>
+	<perest:resource.handler path="groups" className="filenet.pe.rest.handlers.Groups2"/>
+	<perest:resource.handler path="rosters/{rosterName}/workflowNumber/{workflowID}/milestones" className="filenet.pe.rest.handlers.WorkflowMilestones"/>
+	<perest:resource.handler path="{federation}/{cp}/systems" className="filenet.pe.rest.handlers.Systems"/>
+	<perest:resource.handler path="{federation}/{cp}/tasks/query/{query}" className="filenet.pe.rest.handlers.TasksQuery"/>
+	<perest:resource.handler path="{federation}/{cp}/tasks/query/{query}/count" className="filenet.pe.rest.handlers.TasksQueryCount"/>
+	<perest:resource.handler path="{federation}/{cp}/tasks/query/{query}/attributes" className="filenet.pe.rest.handlers.QueryAttributes"/>
+	<perest:resource.handler path="{federation}/{cp}/tasks/queries" className="filenet.pe.rest.handlers.TasksQueries"/>
+	<perest:resource.handler path="{federation}/{cp}/task/actions" className="filenet.pe.rest.handlers.TaskActions"/>
+	<perest:resource.handler path="{federation}/{cp}/processApps" className="filenet.pe.rest.handlers.Solutions"/>
+</perest:P8BPMREST>
